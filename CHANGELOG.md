@@ -122,11 +122,46 @@ Cinco problemas encontrados, todos incorporados antes da promoção:
 Estado final na promoção, com os quatro critérios satisfeitos: gate 1 `exit 0`, gate 2
 **133 testes verdes**, gate 3 `exit 0`, auditoria 8.5 — e esta entrada é o critério 4.
 
-**Ressalva honesta:** o relatório de auditoria é de **antes** das correções acima. As cinco
-mudanças foram verificadas por execução e pelos três gates, mas o texto corrigido não passou
-por uma segunda auditoria independente. Quem quiser o selo refletindo o texto atual roda
-`/auditar 07` de novo — o relatório antigo permanece no acervo como registro do que foi
-encontrado, e não foi editado depois das correções.
+### Reauditoria (r2): selo fechado sobre o texto corrigido
+
+`auditorias/VOL-07-auditoria-2026-07-29-r2.md`. **Veredicto Aprovado, média 8.9**, nenhuma
+seção abaixo de 6 (menor nota 8). A ressalva do parágrafo anterior está resolvida: o selo
+agora reflete o texto que está no acervo, não o texto anterior às correções.
+
+O auditor formou as 18 notas **antes** de abrir o relatório anterior, e só depois o usou para
+verificar se os cinco achados haviam sido resolvidos — os cinco confirmados por execução ou
+leitura direta. Reproduziu novamente os blocos de `12-Exemplos.md` contra o código, conferiu as
+sete transições do `stateDiagram-v2`, construiu um template de zero variáveis para checar a
+cardinalidade do ER, e resolveu os sete links de `18-Referencias-Cruzadas`.
+
+A média subiu de 8.5 para 8.9, e as seções que subiram (`05`, `07`, `08`, `13`, `14`, `17`) são
+exatamente as que carregavam os problemas corrigidos — não houve subida por cortesia em seção
+que não mudou.
+
+Um problema novo, corrigido: a abertura de `12-Exemplos.md` dizia "três casos de ouro" quando a
+bateria executada tem quatro — o próprio bloco assevera `total == 4`. Uma palavra.
+
+**Bug de máquina descoberto ao preparar esta reauditoria.** `status.py::nota_da_ultima_auditoria`
+escolhia o relatório por ordem alfabética, e `VOL-07-auditoria-2026-07-29-r2.md` **perde** para
+`VOL-07-auditoria-2026-07-29.md` nessa comparação, porque o hífen (0x2D) ordena antes do ponto
+(0x2E) de `.md`. A plataforma teria lido a nota antiga e reportado como se fosse a nova — em
+silêncio, que é o pior modo de falhar. A escolha passou a ser por `(data, revisão)` extraídas do
+nome, com a revisão comparada como inteiro (`-r10` ganha de `-r2`), e nome fora da gramática
+`VOL-NN-auditoria-AAAA-MM-DD[-rN].md` é ignorado de propósito. Nova função pública
+`relatorio_mais_recente()`. Seis testes novos; suíte em **139**.
+
+### Decisão de escopo: sobreposição de domínios resolvida por fronteira
+
+Registrada em `ROADMAP.md`. Mantidos os 42 volumes; cada volume de grupo sobreposto declara a
+fronteira no seu `03-Escopo`, nomeando o vizinho e o que pertence a ele. Fundir reduziria a
+contagem mas destruiria o índice do autor, e cada rótulo é um lugar onde alguém vai procurar
+informação. Eixos definidos para os quatro grupos: `07`/`28`/`29` pelo que cada um faz com um
+prompt; `11`/`13`/`14`/`15` por fonte, índice, pipeline e janela; `17`/`18` e `31`/`32` por "o
+que precisa ser verdade" contra "como se verifica"; `22`–`25` contra `16` pela fronteira do
+produto.
+
+Os 13 frameworks sem definição **não** foram decididos, e a razão está escrita: atribuir escopo
+a nome sem definição seria invenção. Permanecem no backlog aguardando o autor.
 
 ### Correções de conteúdo aplicadas sobre a especificação original
 

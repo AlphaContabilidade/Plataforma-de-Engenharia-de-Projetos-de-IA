@@ -10,7 +10,7 @@ atualizado_em: 2026-07-29
 # Exemplos
 
 O exemplo desta seção é um caminho ponta a ponta: declarar um prompt de classificação
-contábil, registrá-lo, avaliá-lo contra três casos de ouro, comparar duas versões e promover
+contábil, registrá-lo, avaliá-lo contra quatro casos de ouro, comparar duas versões e promover
 a que mediu melhor. O executor usado é um substituto determinístico, o que faz o exemplo
 inteiro rodar sem rede — a mesma propriedade que permite ao gate de teste rodar em cada
 mudança.
