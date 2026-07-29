@@ -1,0 +1,9 @@
+# O .gitignore da raiz do repositorio ignora `tests/__pycache__/` (linha 24),
+# um padrao ancorado na raiz que nao alcanca esta subarvore. Rodar pytest aqui
+# recria caches em ferramentas/tests/ e exemplos/07-prompt-engine/tests/.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Gerado por /exportar a partir da estrutura real; nao e fonte.
+site/
