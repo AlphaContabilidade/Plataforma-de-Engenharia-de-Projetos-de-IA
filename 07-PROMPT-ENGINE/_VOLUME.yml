@@ -1,0 +1,11 @@
+# Metadados do volume 07. Lido por ferramentas/validar.py e ferramentas/status.py.
+# depende_de esta vazio de proposito: os volumes 01 e 02 ainda nao foram
+# materializados, e apontar para volume inexistente e violacao
+# `depende-de-inexistente` em --cross-refs. A relacao de vizinhanca com
+# 08, 27, 28, 29 e 31 esta descrita em prosa em 18-Referencias-Cruzadas.md.
+volume: "07"
+nome: PROMPT-ENGINE
+tipo: ENGINE
+status: RASCUNHO
+perecivel: false
+depende_de: []
