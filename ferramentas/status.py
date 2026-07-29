@@ -20,6 +20,9 @@ from .validar import volumes_existentes
 
 PENDENTE = "PENDENTE"
 _MEDIA = re.compile(r"^\s*media:\s*([0-9]+(?:[.,][0-9]+)?)\s*$", re.MULTILINE)
+# Gramatica do nome do relatorio de auditoria. A revisao e opcional; ausente
+# equivale a 1. Ver relatorio_mais_recente para o porque de nao usar sorted().
+_NOME_RELATORIO = re.compile(r"^VOL-\d{2}-auditoria-(\d{4}-\d{2}-\d{2})(?:-r(\d+))?\.md$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,15 +37,42 @@ class EstadoVolume:
     nota_auditoria: float | None
 
 
-def nota_da_ultima_auditoria(raiz: Path, vol_id: str) -> float | None:
-    """Media da auditoria mais recente. O nome do arquivo carrega a data ISO."""
+def _ordem_do_relatorio(nome: str) -> tuple[str, int] | None:
+    """Devolve (data ISO, revisao) do nome, ou None se o nome nao e valido."""
+    casado = _NOME_RELATORIO.match(nome)
+    if not casado:
+        return None
+    return casado.group(1), int(casado.group(2) or 1)
+
+
+def relatorio_mais_recente(raiz: Path, vol_id: str) -> Path | None:
+    """O relatorio de auditoria vigente do volume, ou None se nao houver.
+
+    A escolha e por (data, revisao) extraidas do nome, nunca por ordem
+    alfabetica: `-r2` tem hifen (0x2D), que ordena ANTES do ponto (0x2E) de
+    `.md`, entao uma reauditoria no mesmo dia perderia para a auditoria antiga
+    em silencio. E `-r10` perderia para `-r2` por comparacao de texto.
+
+    Relatorio com nome fora da gramatica `VOL-NN-auditoria-AAAA-MM-DD[-rN].md`
+    e ignorado de proposito - o nome e contrato, e nome invalido nao vira nota.
+    """
     pasta = raiz / "auditorias"
     if not pasta.is_dir():
         return None
-    achados = sorted(pasta.glob(f"VOL-{vol_id}-auditoria-*.md"))
-    if not achados:
+    candidatos = []
+    for arq in pasta.glob(f"VOL-{vol_id}-auditoria-*.md"):
+        ordem = _ordem_do_relatorio(arq.name)
+        if ordem is not None:
+            candidatos.append((ordem, arq))
+    return max(candidatos)[1] if candidatos else None
+
+
+def nota_da_ultima_auditoria(raiz: Path, vol_id: str) -> float | None:
+    """Media da auditoria vigente do volume."""
+    arq = relatorio_mais_recente(raiz, vol_id)
+    if arq is None:
         return None
-    casado = _MEDIA.search(achados[-1].read_text(encoding="utf-8"))
+    casado = _MEDIA.search(arq.read_text(encoding="utf-8"))
     return float(casado.group(1).replace(",", ".")) if casado else None
 
 
