@@ -129,12 +129,16 @@ def sem_marcadores(rel: str, linhas: list[str], inicio: int, ct: Contrato) -> li
 
     Mencionar o marcador em fonte de codigo (`TODO`) e permitido de proposito:
     o volume 10-Anti-Patterns precisa poder falar sobre ele.
+
+    A busca exige fronteira de palavra. Sem isso, `PENDENTE` casava dentro de
+    INDEPENDENTE - e "auditoria independente" e vocabulario central da
+    plataforma, entao o falso-positivo apareceria no CLAUDE.md e no volume 07.
     """
     saida: list[Violacao] = []
     for n, linha in _fora_de_codigo(linhas, inicio):
         limpa = _CODE_SPAN.sub("", linha)
         for marcador in ct.marcadores_proibidos:
-            if marcador in limpa:
+            if re.search(rf"(?<!\w){re.escape(marcador)}(?!\w)", limpa):
                 saida.append(
                     Violacao(rel, n, "marcador-proibido", f"marcador {marcador!r} no conteudo")
                 )

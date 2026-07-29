@@ -132,3 +132,48 @@ def test_marcador_em_code_span_e_permitido(volume_engine):
     )
     linhas, inicio = R.corpo_de(arq)
     assert R.sem_marcadores("10-Anti-Patterns.md", linhas, inicio, ct) == []
+
+
+def _com_prosa(pasta, nome, secao, miolo):
+    cabeca = FRONT_OK.format(vol="07", nome="PROMPT-ENGINE", tipo="ENGINE", secao=secao)
+    arq = pasta / nome
+    arq.write_text(cabeca + f"\n# {secao}\n\n{miolo}\n\n" + PROSA + "\n", encoding="utf-8")
+    return arq
+
+
+def test_independente_nao_dispara_o_marcador_pendente(volume_engine):
+    """PENDENTE dentro de INDEPENDENTE nao e marcador.
+
+    Regressao: a busca era por substring, entao "AUDITORIA INDEPENDENTE" - que e
+    vocabulario central da plataforma - reprovava o volume.
+    """
+    raiz, pasta = volume_engine
+    ct = C.carregar(raiz)
+    arq = _com_prosa(pasta, "04-Arquitetura.md", "04-Arquitetura",
+                     "A AUDITORIA INDEPENDENTE julga o volume ja verde no gate estrutural.")
+    linhas, inicio = R.corpo_de(arq)
+    assert R.sem_marcadores("04-Arquitetura.md", linhas, inicio, ct) == []
+
+
+def test_pendente_como_palavra_inteira_ainda_dispara(volume_engine):
+    """A fronteira de palavra nao pode ter desarmado a regra."""
+    raiz, pasta = volume_engine
+    ct = C.carregar(raiz)
+    arq = _com_prosa(pasta, "04-Arquitetura.md", "04-Arquitetura",
+                     "Esta secao esta PENDENTE de revisao.")
+    linhas, inicio = R.corpo_de(arq)
+    assert "marcador-proibido" in _regras(
+        R.sem_marcadores("04-Arquitetura.md", linhas, inicio, ct)
+    )
+
+
+def test_marcador_multipalavra_ainda_dispara(volume_engine):
+    """`preencher aqui` tem espaco no meio; a fronteira nao pode quebrar isso."""
+    raiz, pasta = volume_engine
+    ct = C.carregar(raiz)
+    arq = _com_prosa(pasta, "04-Arquitetura.md", "04-Arquitetura",
+                     "Diagrama: preencher aqui depois.")
+    linhas, inicio = R.corpo_de(arq)
+    assert "marcador-proibido" in _regras(
+        R.sem_marcadores("04-Arquitetura.md", linhas, inicio, ct)
+    )
