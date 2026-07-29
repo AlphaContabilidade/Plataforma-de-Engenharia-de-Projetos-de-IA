@@ -1,0 +1,97 @@
+{
+  "versao": "1.0.0",
+  "atualizado_em": "2026-07-29",
+  "min_palavras": 200,
+  "min_palavras_por_secao": {
+    "15-Checklist": 120,
+    "16-Roadmap": 120,
+    "17-Conclusao": 150,
+    "18-Referencias-Cruzadas": 80
+  },
+  "status_validos": ["RASCUNHO", "REQUER_REVISAO", "PRONTO"],
+  "campos_frontmatter": ["volume", "volume_nome", "tipo", "secao", "status", "atualizado_em"],
+  "marcadores_proibidos": ["TBD", "TODO", "PENDENTE", "FIXME", "XXX", "preencher aqui"],
+  "secoes_base": [
+    "01-Introducao", "02-Objetivos", "03-Escopo", "04-Arquitetura",
+    "05-Diagramas", "06-Fluxogramas", "07-Regras", "08-Modelos",
+    "09-Boas-Praticas", "10-Anti-Patterns", "11-Implementacao", "12-Exemplos",
+    "13-Testes", "14-Metricas", "15-Checklist", "16-Roadmap",
+    "17-Conclusao", "18-Referencias-Cruzadas"
+  ],
+  "tipos": {
+    "ENGINE": {
+      "descricao": "Motor com contratos, estado e codigo executavel.",
+      "opcionais": [],
+      "extras": [],
+      "diagramas_obrigatorios": ["C4Context", "sequenceDiagram", "stateDiagram-v2"]
+    },
+    "ARQUITETURA": {
+      "descricao": "Camada arquitetural; nem sempre tem ciclo de vida proprio.",
+      "opcionais": [],
+      "extras": [],
+      "diagramas_obrigatorios": ["C4Context", "sequenceDiagram"]
+    },
+    "PROCESSO": {
+      "descricao": "Processo de trabalho; o fluxo importa mais que o modelo de dados.",
+      "opcionais": ["08-Modelos"],
+      "extras": [],
+      "diagramas_obrigatorios": ["flowchart"]
+    },
+    "BIBLIOTECA": {
+      "descricao": "Acervo catalogado; nao tem arquitetura propria.",
+      "opcionais": ["04-Arquitetura", "05-Diagramas"],
+      "extras": ["04-Catalogo"],
+      "diagramas_obrigatorios": []
+    },
+    "GOVERNANCA": {
+      "descricao": "Politica e controle; exige matriz de controles.",
+      "opcionais": [],
+      "extras": [],
+      "diagramas_obrigatorios": ["flowchart"]
+    }
+  },
+  "volumes": {
+    "01": {"nome": "FUNDACAO", "tipo": "GOVERNANCA", "perecivel": false},
+    "02": {"nome": "CORE", "tipo": "ARQUITETURA", "perecivel": false},
+    "03": {"nome": "DISCOVERY", "tipo": "PROCESSO", "perecivel": false},
+    "04": {"nome": "REQUIREMENTS", "tipo": "PROCESSO", "perecivel": false},
+    "05": {"nome": "BUSINESS", "tipo": "PROCESSO", "perecivel": false},
+    "06": {"nome": "ENTERPRISE-ARCHITECTURE", "tipo": "ARQUITETURA", "perecivel": false},
+    "07": {"nome": "PROMPT-ENGINE", "tipo": "ENGINE", "perecivel": false},
+    "08": {"nome": "AGENT-ENGINE", "tipo": "ENGINE", "perecivel": false},
+    "09": {"nome": "ORCHESTRATOR", "tipo": "ENGINE", "perecivel": false},
+    "10": {"nome": "WORKFLOW", "tipo": "ENGINE", "perecivel": false},
+    "11": {"nome": "KNOWLEDGE", "tipo": "ENGINE", "perecivel": false},
+    "12": {"nome": "MEMORY", "tipo": "ENGINE", "perecivel": false},
+    "13": {"nome": "RAG", "tipo": "ENGINE", "perecivel": false},
+    "14": {"nome": "VECTOR", "tipo": "ENGINE", "perecivel": false},
+    "15": {"nome": "CONTEXT", "tipo": "ENGINE", "perecivel": false},
+    "16": {"nome": "INTEGRATION", "tipo": "ARQUITETURA", "perecivel": false},
+    "17": {"nome": "SECURITY", "tipo": "GOVERNANCA", "perecivel": false},
+    "18": {"nome": "DEVSECOPS", "tipo": "PROCESSO", "perecivel": false},
+    "19": {"nome": "DEVOPS", "tipo": "ARQUITETURA", "perecivel": false},
+    "20": {"nome": "CLOUD", "tipo": "ARQUITETURA", "perecivel": false},
+    "21": {"nome": "OBSERVABILITY", "tipo": "GOVERNANCA", "perecivel": false},
+    "22": {"nome": "FRONTEND-ARCHITECT", "tipo": "ARQUITETURA", "perecivel": false},
+    "23": {"nome": "BACKEND-ARCHITECT", "tipo": "ARQUITETURA", "perecivel": false},
+    "24": {"nome": "DATABASE-ARCHITECT", "tipo": "ARQUITETURA", "perecivel": false},
+    "25": {"nome": "API-ARCHITECT", "tipo": "ARQUITETURA", "perecivel": false},
+    "26": {"nome": "AI-MODELS", "tipo": "ENGINE", "perecivel": true},
+    "27": {"nome": "LLM-ROUTER", "tipo": "ENGINE", "perecivel": true},
+    "28": {"nome": "PROMPT-COMPILER", "tipo": "ENGINE", "perecivel": false},
+    "29": {"nome": "PROMPT-OPTIMIZER", "tipo": "ENGINE", "perecivel": false},
+    "30": {"nome": "AI-GOVERNANCE", "tipo": "GOVERNANCA", "perecivel": false},
+    "31": {"nome": "TESTING", "tipo": "PROCESSO", "perecivel": false},
+    "32": {"nome": "QUALITY", "tipo": "PROCESSO", "perecivel": false},
+    "33": {"nome": "PERFORMANCE", "tipo": "PROCESSO", "perecivel": false},
+    "34": {"nome": "COST-OPTIMIZATION", "tipo": "PROCESSO", "perecivel": true},
+    "35": {"nome": "DOCUMENTATION", "tipo": "GOVERNANCA", "perecivel": false},
+    "36": {"nome": "DIAGRAMS", "tipo": "BIBLIOTECA", "perecivel": false},
+    "37": {"nome": "CODE-GENERATION", "tipo": "ENGINE", "perecivel": false},
+    "38": {"nome": "PROJECT-PLANNER", "tipo": "PROCESSO", "perecivel": false},
+    "39": {"nome": "ROADMAP", "tipo": "PROCESSO", "perecivel": false},
+    "40": {"nome": "TEMPLATES", "tipo": "BIBLIOTECA", "perecivel": false},
+    "41": {"nome": "SDK", "tipo": "ENGINE", "perecivel": false},
+    "42": {"nome": "PLUGINS", "tipo": "ENGINE", "perecivel": false}
+  }
+}
