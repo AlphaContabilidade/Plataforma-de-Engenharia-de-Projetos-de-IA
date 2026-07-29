@@ -1,0 +1,7 @@
+volume: "20"
+nome: CLOUD
+tipo: ARQUITETURA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

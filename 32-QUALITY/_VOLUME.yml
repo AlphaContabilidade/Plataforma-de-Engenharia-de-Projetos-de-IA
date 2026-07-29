@@ -1,0 +1,7 @@
+volume: "32"
+nome: QUALITY
+tipo: PROCESSO
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

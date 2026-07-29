@@ -1,0 +1,7 @@
+volume: "19"
+nome: DEVOPS
+tipo: ARQUITETURA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

@@ -1,0 +1,7 @@
+volume: "26"
+nome: AI-MODELS
+tipo: ENGINE
+status: RASCUNHO
+perecivel: true
+depende_de: []
+escopo:

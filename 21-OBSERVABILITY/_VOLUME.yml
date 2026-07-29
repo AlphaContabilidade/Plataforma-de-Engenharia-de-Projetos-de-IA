@@ -1,0 +1,7 @@
+volume: "21"
+nome: OBSERVABILITY
+tipo: GOVERNANCA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

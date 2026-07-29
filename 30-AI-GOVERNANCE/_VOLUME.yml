@@ -1,0 +1,7 @@
+volume: "30"
+nome: AI-GOVERNANCE
+tipo: GOVERNANCA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

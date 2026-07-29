@@ -1,0 +1,7 @@
+volume: "25"
+nome: API-ARCHITECT
+tipo: ARQUITETURA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

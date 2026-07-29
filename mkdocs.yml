@@ -1,0 +1,41 @@
+# Gerado por ferramentas/exportar.py - nao edite a mao.
+site_name: AI-ENGINEERING-OS
+theme:
+  name: material
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - 00-INTRODUCAO:
+      - Arquitetura-Geral: 00-INTRODUCAO/Arquitetura-Geral.md
+      - Como-Utilizar: 00-INTRODUCAO/Como-Utilizar.md
+      - Convencoes: 00-INTRODUCAO/Convencoes.md
+      - Glossario: 00-INTRODUCAO/Glossario.md
+      - Prefacio: 00-INTRODUCAO/Prefacio.md
+  - 07-PROMPT-ENGINE:
+      - 01-Introducao: 07-PROMPT-ENGINE/01-Introducao.md
+      - 02-Objetivos: 07-PROMPT-ENGINE/02-Objetivos.md
+      - 03-Escopo: 07-PROMPT-ENGINE/03-Escopo.md
+      - 04-Arquitetura: 07-PROMPT-ENGINE/04-Arquitetura.md
+      - 05-Diagramas: 07-PROMPT-ENGINE/05-Diagramas.md
+      - 06-Fluxogramas: 07-PROMPT-ENGINE/06-Fluxogramas.md
+      - 07-Regras: 07-PROMPT-ENGINE/07-Regras.md
+      - 08-Modelos: 07-PROMPT-ENGINE/08-Modelos.md
+      - 09-Boas-Praticas: 07-PROMPT-ENGINE/09-Boas-Praticas.md
+      - 10-Anti-Patterns: 07-PROMPT-ENGINE/10-Anti-Patterns.md
+      - 11-Implementacao: 07-PROMPT-ENGINE/11-Implementacao.md
+      - 12-Exemplos: 07-PROMPT-ENGINE/12-Exemplos.md
+      - 13-Testes: 07-PROMPT-ENGINE/13-Testes.md
+      - 14-Metricas: 07-PROMPT-ENGINE/14-Metricas.md
+      - 15-Checklist: 07-PROMPT-ENGINE/15-Checklist.md
+      - 16-Roadmap: 07-PROMPT-ENGINE/16-Roadmap.md
+      - 17-Conclusao: 07-PROMPT-ENGINE/17-Conclusao.md
+      - 18-Referencias-Cruzadas: 07-PROMPT-ENGINE/18-Referencias-Cruzadas.md

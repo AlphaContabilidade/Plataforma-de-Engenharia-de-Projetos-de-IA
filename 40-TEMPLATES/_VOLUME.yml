@@ -1,0 +1,7 @@
+volume: "40"
+nome: TEMPLATES
+tipo: BIBLIOTECA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

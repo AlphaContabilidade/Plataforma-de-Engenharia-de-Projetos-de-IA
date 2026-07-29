@@ -1,0 +1,7 @@
+volume: "22"
+nome: FRONTEND-ARCHITECT
+tipo: ARQUITETURA
+status: RASCUNHO
+perecivel: false
+depende_de: []
+escopo:

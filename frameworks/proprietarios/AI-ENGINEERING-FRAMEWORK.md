@@ -121,7 +121,7 @@ flowchart TD
     NV["2. GERACAO<br/>/novo-volume N nome"]
     G1{"3. GATE ESTRUTURAL<br/>validar.py"}
     G2{"4. TESTE DOS EXEMPLOS<br/>pytest exemplos/NN/"}
-    AU["5. AUDITORIA INDEPENDENTE<br/>/auditar N -> auditor-fable<br/>nota 0-10 por secao"]
+    AU["5. AUDITORIA EXTERNA<br/>/auditar N -> auditor-fable<br/>nota 0-10 por secao"]
     IN["INCORPORACAO<br/>gerador corrige"]
     G3{"CHECAGEM CRUZADA<br/>/cross-reference"}
     PR["6. PROMOCAO<br/>status: PRONTO + CHANGELOG datado"]
