@@ -53,6 +53,14 @@ Sete passos, na ordem. Pular passo é como o acervo passa a mentir sobre o próp
 Nada depende de skill. Os mesmos gates são módulos Python invocáveis diretamente, e é assim
 que se confere um resultado sem confiar no relato de ninguém.
 
+E é também o caminho **verificado**. As cinco skills de `.claude/skills/` são escopadas a
+este diretório: para aparecerem como `/novo-volume`, `/auditar` e afins, a sessão precisa ter
+sido iniciada com o diretório de trabalho dentro de `AI-ENGINEERING-OS/`. Isso não foi
+confirmado na sessão em que elas foram escritas — a sessão rodava a partir da raiz do
+repositório, que é outro projeto. Se o comando de barra não existir na sua sessão, não é
+defeito das skills nem motivo para dúvida sobre a máquina: use a invocação direta abaixo, que
+faz exatamente a mesma coisa e é o que os relatórios desta plataforma citam como evidência.
+
 ```bash
 # Gate 1 — estrutural, um volume
 python -m ferramentas.validar 07

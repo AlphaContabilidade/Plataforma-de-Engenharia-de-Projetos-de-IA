@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 16-Roadmap
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
@@ -19,6 +19,7 @@ de não ter entrado agora — item de roadmap sem essa razão é apenas uma list
 | Metadados de avaliação no registro | Guardar taxa de acerto e data ao lado da versão, em vez de manter o resultado fora | Aproximaria registro e avaliador, e a separação entre os dois é uma decisão de arquitetura registrada em [`04-Arquitetura.md`](04-Arquitetura.md) |
 | Limiar de promoção declarado | Expressar o limiar como dado em lugar de convenção do operador | O limiar depende do domínio de cada prompt; declará-lo cedo produziria um número arbitrário aplicado a todos |
 | Envelope de instrumentação do executor | Medir custo e latência sem que quem opera precise escrever o envelope | É código de dez linhas com dependência zero, mas altera o contrato do executor e merece decisão explícita |
+| Campo enumerado de tipo em `Falha` | Permitir agrupar falhas por categoria estável, sem depender do prefixo do texto de `motivo` | Hoje `avaliar` tem exatamente dois pontos de saída por falha, e o prefixo já os separa; um enumerado criado agora fixaria uma taxonomia antes de existir a terceira origem que a justificaria |
 
 ## Ligação com os volumes 28 e 29
 

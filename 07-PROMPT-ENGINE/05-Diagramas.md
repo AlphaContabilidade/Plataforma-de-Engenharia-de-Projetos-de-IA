@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 05-Diagramas
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
@@ -86,7 +86,7 @@ erDiagram
     VERSAO ||--|| CONTRATO : "congela"
     VERSAO ||--o{ AVALIACAO : "acumula"
     AVALIACAO ||--o{ FALHA : "detalha"
-    CONTRATO ||--|{ VARIAVEL : "declara"
+    CONTRATO ||--o{ VARIAVEL : "declara"
     PROMPT {
         string nome PK
     }
@@ -119,9 +119,13 @@ O modelo mostra que a chave de identidade não é o nome do prompt, e sim o par 
 versão, e que o hash é atributo da versão porque é dele que a versão nasce. A relação
 entre versão e avaliação é de zero ou muitas: uma versão pode nunca ter sido avaliada, e
 é exatamente esse caso que a máquina de estados impede de chegar à produção. A relação
-entre contrato e variável é de uma ou muitas, o que registra uma restrição real do
-código: um corpo sem placeholder algum e com variáveis declaradas é reprovado na
-construção.
+entre contrato e variável é de zero ou muitas, e isso não é frouxidão do diagrama: um
+prompt inteiramente estático — corpo sem placeholder algum e tupla de variáveis vazia — é
+válido e constrói sem erro. A restrição que o código impõe não é um mínimo de variáveis, e
+sim concordância nas duas direções: placeholder sem declaração e variável declarada sem
+placeholder correspondente reprovam na construção, cada um pelo seu lado. O atributo
+`obrigatoria` de `VARIAVEL` aparece no diagrama porque entra na assinatura e, por
+consequência, na identidade da versão — a regra R2 de [`07-Regras.md`](07-Regras.md).
 
 ## Domínio do volume em um olhar
 

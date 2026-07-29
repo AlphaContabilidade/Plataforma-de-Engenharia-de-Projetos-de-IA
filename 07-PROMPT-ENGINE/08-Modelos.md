@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 08-Modelos
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
@@ -46,10 +46,20 @@ guardar em tupla. O campo `tipo` recebe uma classe, não um texto de anotação,
 `render` valida com `isinstance` — validação que roda em vez de documentação que
 envelhece. `render` aceita apenas variáveis declaradas e levanta `ContratoViolado` em três
 situações: chave extra, obrigatória ausente e tipo incompatível; opcional ausente é
-substituída por texto vazio. `assinatura` devolve a forma `nome(v1:int, v2:str)` com as
+substituída por texto vazio. `assinatura` devolve a forma `nome(v1:int, v2?:str)` com as
 variáveis em ordem alfabética, e a ordem é alfabética justamente para que reordenar a tupla
-não mude a identidade. `hash` devolve os doze primeiros hexdígitos do `sha256` sobre o
+não mude a identidade; a interrogação antes dos dois-pontos marca a variável opcional, de
+modo que a assinatura carrega os três campos que mudam o comportamento de `render` — nome,
+tipo e obrigatoriedade. `hash` devolve os doze primeiros hexdígitos do `sha256` sobre o
 corpo, um byte nulo e a assinatura.
+
+O limite desse alcance é declarado em vez de deixado por descobrir: `descricao` não entra na
+assinatura e portanto não entra no hash. Editar apenas a descrição de uma variável faz
+`registrar` devolver a versão existente, e isso é intencional, porque descrição nenhuma
+altera o texto que o modelo recebe. Qualquer outra edição do contrato — corpo, nome de
+variável, tipo ou obrigatoriedade — produz hash diferente e, por consequência, versão nova.
+A distinção entre os dois casos está coberta por dois testes de `tests/test_prompt_template.py`
+e por um de `tests/test_prompt_registry.py`, citados em [`13-Testes.md`](13-Testes.md).
 
 ## Registro e ciclo de vida
 

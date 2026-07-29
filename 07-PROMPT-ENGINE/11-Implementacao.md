@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 11-Implementacao
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 

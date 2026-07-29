@@ -6,9 +6,11 @@ identidade estavel para versionar ou avaliar. Este modulo troca isso por um
 contrato: o corpo e as variaveis declaradas tem de concordar, e a concordancia
 e verificada na construcao -- falha cedo, no import, nao em producao.
 
-O hash cobre corpo E assinatura de proposito. Duas versoes com o mesmo texto e
-tipos diferentes sao contratos diferentes; se o hash ignorasse a assinatura, o
-registry trataria a segunda como identica a primeira e nunca criaria a versao.
+O hash cobre corpo E assinatura de proposito, e a assinatura carrega nome, tipo e
+obrigatoriedade de cada variavel -- os tres campos que mudam o que `render` faz.
+Duas versoes com o mesmo texto e tipos diferentes sao contratos diferentes; se o
+hash ignorasse a assinatura, o registry trataria a segunda como identica a
+primeira e nunca criaria a versao. `descricao` nao entra, porque nao altera saida.
 """
 
 from __future__ import annotations
@@ -99,13 +101,23 @@ class PromptTemplate:
 
     @property
     def assinatura(self) -> str:
-        """`"nome(v1:int, v2:str)"`, em ordem alfabetica.
+        """`"nome(v1:int, v2?:str)"`, em ordem alfabetica; `?` marca opcional.
 
         A ordem e alfabetica, e nao a de declaracao, para que reordenar a tupla
         de variaveis nao mude o hash: reordenar nao muda o contrato.
+
+        A marca `?` existe porque obrigatoriedade muda o comportamento de
+        `render` -- ausencia de opcional vira `""`, ausencia de obrigatoria
+        levanta. Se a assinatura ignorasse esse campo, o hash ignoraria junto e o
+        registry devolveria a versao antiga para um contrato que mudou. Nome nao
+        pode conter `?` (a gramatica de placeholder aceita so identificadores),
+        entao a marca nunca e ambigua. `descricao` fica de fora de proposito: e
+        documentacao da variavel e nao altera saida alguma de `render`.
         """
         ordenadas = sorted(self.variaveis, key=lambda v: v.nome)
-        campos = ", ".join(f"{v.nome}:{v.tipo.__name__}" for v in ordenadas)
+        campos = ", ".join(
+            f"{v.nome}{'' if v.obrigatoria else '?'}:{v.tipo.__name__}" for v in ordenadas
+        )
         return f"{self.nome}({campos})"
 
     @property
@@ -113,7 +125,9 @@ class PromptTemplate:
         """Identidade do conteudo: 12 hexdigitos de sha256 sobre corpo + assinatura.
 
         O `\\x00` separa os dois campos para que nenhuma concatenacao de corpo e
-        assinatura possa colidir com outra combinacao.
+        assinatura possa colidir com outra combinacao. Como a assinatura traz
+        nome, tipo e obrigatoriedade, o hash muda com qualquer mudanca que
+        altere `render`; `descricao` e o unico campo do contrato fora dele.
         """
         semente = f"{self.corpo}\x00{self.assinatura}".encode("utf-8")
         return hashlib.sha256(semente).hexdigest()[:12]

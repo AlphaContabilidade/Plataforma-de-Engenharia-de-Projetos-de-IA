@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 07-Regras
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
@@ -18,7 +18,7 @@ violar por descuido.
 | Id | Regra | Onde vive |
 |---|---|---|
 | R1 | Prompt sem caso de ouro não é promovido | Ausência da aresta `VERSIONADO` para `PROMOVIDO` em `TRANSICOES`, somada a `taxa_acerto` devolver `0.0` para bateria vazia |
-| R2 | O hash cobre o corpo **e** a assinatura | `hash` calcula `sha256` sobre `corpo + "\x00" + assinatura` |
+| R2 | O hash cobre o corpo **e** a assinatura, e a assinatura carrega nome, tipo e obrigatoriedade | `hash` calcula `sha256` sobre `corpo + "\x00" + assinatura`; `assinatura` escreve a variável opcional como `tom?:str` |
 | R3 | No máximo uma versão `PROMOVIDO` por nome | `transicionar` rebaixa a promovida anterior para `DEPRECIADO` no mesmo passo |
 | R4 | Corpo e contrato concordam nas duas direções | `__post_init__` levanta `ContratoViolado` para placeholder sem declaração e para variável declarada e não usada |
 | R5 | Registrar o mesmo conteúdo é idempotente | `registrar` compara o hash contra as entradas existentes antes de criar versão |
@@ -50,6 +50,18 @@ tipo de uma variável de texto para número altera o que o modelo recebe, altera
 validação aceita e portanto é uma versão nova. O separador nulo entre os dois campos existe
 para que nenhuma concatenação de corpo e assinatura possa colidir com outra combinação dos
 mesmos caracteres.
+
+O critério que define o alcance de R2 é comportamental: entra na assinatura o campo que muda
+o que `render` produz. São três — nome, tipo e obrigatoriedade. A obrigatoriedade entra
+porque, para a mesma chamada com o mesmo corpo, a variável opcional ausente vira texto vazio
+enquanto a obrigatória ausente levanta `ContratoViolado`; são saídas diferentes, logo
+contratos diferentes, logo versões diferentes. É por isso que a assinatura escreve a
+opcional com uma interrogação antes dos dois-pontos, e o caractere é seguro porque nome de
+variável é identificador e nunca contém interrogação. Fica registrado o limite honesto do
+alcance: `descricao` é o único campo do contrato que o hash ignora, e ignora de propósito,
+porque nenhuma descrição altera a saída. A consequência operacional é que corrigir apenas
+uma descrição devolve a versão existente em vez de criar uma nova — o que é o comportamento
+desejado, e não uma lacuna: descrição não é contrato, é documentação da variável.
 
 ## Regras de operação derivadas
 

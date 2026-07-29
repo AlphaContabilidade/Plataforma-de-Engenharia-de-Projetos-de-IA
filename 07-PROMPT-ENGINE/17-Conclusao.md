@@ -3,14 +3,15 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 17-Conclusao
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
 # Conclusão
 
 Este volume entregou um motor de prompts com três módulos, dez regras invioláveis e trinta e
-quatro testes que rodam sem rede. O que ele torna possível é uma frase que não era pronunciável
+nove casos de teste que rodam sem rede — o número que `python -m pytest exemplos -q` imprime,
+distribuído em trinta e sete funções conforme [`13-Testes.md`](13-Testes.md). O que ele torna possível é uma frase que não era pronunciável
 antes: a versão `v2` do prompt `classificar-lancamento` está em produção desde a data tal, acertou
 uma fração medida da bateria de casos de ouro, e a versão anterior está preservada com o estado que
 recebeu. Nenhuma parte dessa frase depende da memória de quem escreveu o prompt.
@@ -19,8 +20,13 @@ As três decisões que sustentam o resultado merecem ser repetidas no fechamento
 um leitor levará para outro contexto. A primeira é validar o contrato na construção: o erro aparece
 no carregamento do módulo, antes de qualquer chamada paga, e o custo é apenas construir prompt
 dinâmico dentro de tratamento de exceção. A segunda é derivar a versão do hash do conteúdo,
-cobrindo corpo e assinatura, o que torna o registro idempotente sem penalidade e faz de qualquer
-mudança de contrato uma versão nova mesmo quando o texto não muda. A terceira é injetar o executor,
+cobrindo corpo e assinatura — e a assinatura cobre nome, tipo e obrigatoriedade das variáveis,
+os três campos que mudam o comportamento de `render` —, o que torna o registro idempotente sem
+penalidade e faz de qualquer mudança de contrato uma versão nova mesmo quando o texto não muda.
+Essa decisão custou uma correção: a primeira implementação deixava a obrigatoriedade fora da
+assinatura, e a auditoria independente demonstrou, executando, que dois contratos de
+comportamento diferente compartilhavam hash e versão. O reparo foi no código, não na prosa,
+porque a invariante pretendida estava certa e era a implementação que não a cumpria. A terceira é injetar o executor,
 o que mantém o motor sem conhecimento de provedor e permite que a bateria de teste rode em cada
 mudança — a propriedade que decide se o gate de evidência será mantido ligado ou desligado no
 primeiro dia em que atrasar uma entrega.

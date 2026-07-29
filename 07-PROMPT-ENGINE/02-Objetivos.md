@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 02-Objetivos
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
@@ -17,7 +17,7 @@ sustenta gate.
 | Objetivo | Critério verificável | Onde se confere |
 |---|---|---|
 | Prompt tem contrato explícito | O construtor levanta `ContratoViolado` quando o corpo e as variáveis declaradas divergem em qualquer direção | `tests/test_prompt_template.py` |
-| Prompt tem identidade estável | O mesmo corpo e a mesma assinatura produzem o mesmo hash de 12 hexdígitos; mudar o tipo de uma variável muda o hash | `tests/test_prompt_template.py` |
+| Prompt tem identidade estável | O mesmo corpo e a mesma assinatura produzem o mesmo hash de 12 hexdígitos; mudar o tipo ou a obrigatoriedade de uma variável muda o hash | `tests/test_prompt_template.py` |
 | Prompt é versionado sem intervenção manual | `registrar` deriva a versão do hash e é idempotente por conteúdo | `tests/test_prompt_registry.py` |
 | Prompt é avaliável offline | O avaliador recebe o executor por injeção e roda com um substituto determinístico | `tests/test_prompt_evaluator.py` |
 | Promoção exige evidência | Nenhuma transição leva de `VERSIONADO` direto a `PROMOVIDO` | `TRANSICOES` em `prompt_registry.py` |

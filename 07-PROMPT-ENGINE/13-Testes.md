@@ -3,24 +3,28 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 13-Testes
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
 # Testes
 
-O motor tem trinta e quatro testes distribuídos em três arquivos: onze para o contrato, doze
-para o registro e onze para o avaliador. Eles rodam com `python -m pytest exemplos -q` a
-partir da raiz da plataforma, sem rede, sem credencial e sem estado em disco. Essa
-propriedade não é conveniência: é o que faz do segundo gate da plataforma um gate que ninguém
-tem motivo para desligar.
+O motor tem trinta e sete funções de teste distribuídas em três arquivos — treze para o
+contrato, treze para o registro e onze para o avaliador — que o pytest coleta como **trinta e
+nove casos**, porque o teste de valores de fronteira da taxa de acerto é parametrizado em
+três. Trinta e nove é o número que `python -m pytest exemplos -q` imprime, e é ele que vale:
+contagem de funções e contagem de casos divergem sempre que há parametrização, e citar a
+primeira como se fosse a segunda faz o leitor que roda o comando duvidar do resto da seção.
+A suíte roda a partir da raiz da plataforma, sem rede, sem credencial e sem estado em disco.
+Essa propriedade não é conveniência: é o que faz do segundo gate da plataforma um gate que
+ninguém tem motivo para desligar.
 
 ## O que cada arquivo cobre
 
 | Arquivo de teste | Alvo | Casos que só existem por causa de um risco concreto |
 |---|---|---|
-| `tests/test_prompt_template.py` | Construção, renderização, assinatura e hash | Hash muda quando o tipo de uma variável muda; variável declarada e não usada reprova no construtor |
-| `tests/test_prompt_registry.py` | Versionamento, máquina de estados e histórico | Idempotência por hash; promover a segunda versão deprecia a anterior; o enumerado tem exatamente os cinco nomes do diagrama |
+| `tests/test_prompt_template.py` | Construção, renderização, assinatura e hash | Hash muda quando o tipo de uma variável muda; hash muda quando a obrigatoriedade muda; hash ignora `descricao`; variável declarada e não usada reprova no construtor |
+| `tests/test_prompt_registry.py` | Versionamento, máquina de estados e histórico | Idempotência por hash; mudança só de obrigatoriedade gera `v2`; promover a segunda versão deprecia a anterior; o enumerado tem exatamente os cinco nomes do diagrama |
 | `tests/test_prompt_evaluator.py` | Taxa de acerto, deriva e injeção do executor | Bateria vazia não divide por zero; erro de renderização conta como falha e não sobe; o executor é chamado uma vez por caso |
 
 ## Os três testes que carregam o volume
@@ -28,7 +32,14 @@ tem motivo para desligar.
 O primeiro é `test_hash_muda_quando_o_tipo_de_uma_variavel_muda`. Ele é o guardião da regra R2:
 se alguém simplificar o cálculo do hash para cobrir apenas o corpo, esse teste falha, e sem ele
 a simplificação passaria como refatoração inofensiva enquanto tornaria invisível toda mudança de
-contrato que não mexesse no texto.
+contrato que não mexesse no texto. Ele tem um irmão que existe por um defeito real, encontrado
+por auditoria e não por intuição: `test_hash_muda_quando_a_obrigatoriedade_de_uma_variavel_muda`.
+A primeira versão do motor deixava `obrigatoria` fora da assinatura, e dois contratos que
+diferiam só nesse campo colidiam no hash — `registrar` devolvia `v1` para o segundo e o
+histórico não guardava a mudança, embora ela alterasse o que `render` faz. O par de testes
+cobre agora os dois campos da assinatura que decidem comportamento, e um terceiro,
+`test_hash_ignora_descricao`, fixa o limite do outro lado, para que a cobertura do hash seja
+uma escolha verificada e não um acidente da implementação.
 
 O segundo é `test_mesmo_conteudo_e_idempotente`. Ele afirma que registrar duas vezes devolve `v1`
 e que o histórico tem uma única entrada. Sem essa garantia, cada implantação que reimporta o

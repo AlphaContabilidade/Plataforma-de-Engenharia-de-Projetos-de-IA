@@ -3,7 +3,7 @@ volume: "07"
 volume_nome: PROMPT-ENGINE
 tipo: ENGINE
 secao: 06-Fluxogramas
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-29
 ---
 
@@ -35,7 +35,7 @@ flowchart TD
     L --> M{taxa_acerto atinge o limiar acordado?}
     M -- nao --> N[transicionar de volta para VERSIONADO]
     N --> B
-    M -- sim --> O{comparar contra a versao promovida da deriva positiva?}
+    M -- sim --> O{a comparacao contra a versao promovida mostra deriva positiva?}
     O -- nao --> P[transicionar para DEPRECIADO e registrar o motivo]
     O -- sim --> Q[transicionar para PROMOVIDO]
     Q --> R[A versao promovida anterior cai para DEPRECIADO no mesmo passo]

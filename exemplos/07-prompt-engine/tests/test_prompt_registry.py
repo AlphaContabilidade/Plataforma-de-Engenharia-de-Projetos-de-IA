@@ -43,6 +43,25 @@ def test_corpo_diferente_gera_v2():
     assert reg.registrar(_tpl(corpo="Resuma {texto} em tres linhas")) == "v2"
 
 
+def test_mudanca_so_de_obrigatoriedade_gera_v2():
+    """Mesmo corpo, mesmo tipo, so a obrigatoriedade muda -- e isso e versao nova.
+
+    O caso e o do problema 2 da auditoria: antes de a assinatura marcar
+    obrigatoriedade, os dois templates tinham o mesmo hash e `registrar` devolvia
+    `v1` para o segundo, escondendo no historico uma mudanca que altera `render`.
+    """
+    reg = PromptRegistry()
+    assert reg.registrar(_tpl()) == "v1"
+    opcional = PromptTemplate(
+        nome="resumo",
+        corpo="Resuma {texto}",
+        variaveis=(Variavel("texto", str, obrigatoria=False),),
+    )
+    assert opcional.corpo == _tpl().corpo
+    assert reg.registrar(opcional) == "v2"
+    assert len({h for _, h, _ in reg.historico("resumo")}) == 2
+
+
 def test_mesmo_conteudo_e_idempotente():
     reg = PromptRegistry()
     reg.registrar(_tpl())

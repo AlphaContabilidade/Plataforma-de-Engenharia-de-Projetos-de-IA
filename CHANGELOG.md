@@ -60,6 +60,74 @@ Tipo `ENGINE`, 18 seções, com exemplos executáveis em `exemplos/07-prompt-eng
 ao lado. Serve como padrão-ouro e como teste de estresse das próprias convenções: foi
 escrevendo o piloto que se verificou que o contrato é satisfazível com conteúdo substantivo.
 
+### Comandos e subagente auditor
+
+Criados `.claude/agents/auditor-fable.md` (`model: fable`, com ferramentas de leitura mais
+`Bash`, porque o auditor precisa **rodar** os gates e os testes em vez de acreditar no que o
+volume afirma) e as cinco skills em `.claude/skills/`: `novo-volume`, `auditar`, `status`,
+`cross-reference` e `exportar`.
+
+Dois contratos ocultos foram descobertos e documentados ao escrevê-los:
+
+- A linha `media: N.N` do relatório de auditoria é **contrato de máquina**:
+  `status.py::nota_da_ultima_auditoria` a lê com regex ancorado. Negrito, maiúscula, dentro
+  de tabela ou seguida de `/10` não casam, e a nota some do `/status` em silêncio. As quatro
+  formas inválidas estão listadas como proibidas no arquivo do agente.
+- O nome `VOL-NN-auditoria-<data>.md` só ordena corretamente porque a data é ISO — a função
+  pega o último alfabético. Data em outro formato quebraria a escolha do relatório mais
+  recente sem erro nenhum.
+
+`/novo-volume` **nunca** grava `PRONTO`, nem com os gates 1 e 2 verdes: o critério 3 da
+Definição de PRONTO ainda não foi avaliado naquele ponto. `PRONTO` só pode sair de
+`/auditar`.
+
+**Limitação registrada:** não foi possível confirmar nesta sessão que as skills aparecem
+como `/novo-volume` e afins, porque skills escopadas por diretório exigem uma sessão
+iniciada com o diretório de trabalho dentro de `AI-ENGINEERING-OS/`. O caminho verificado com
+saída real é a invocação direta por `python -m ferramentas.*`.
+
+### Volume `07-PROMPT-ENGINE` auditado e promovido a `PRONTO`
+
+Auditoria independente em Fable 5: `auditorias/VOL-07-auditoria-2026-07-29.md`.
+**Veredicto Aprovado, média 8.5, nenhuma seção abaixo de 6** (menor nota 7, em
+`05-Diagramas` e `13-Testes`).
+
+O auditor verificou executando: rodou os gates, rodou o pytest, e reproduziu os cinco blocos
+de `12-Exemplos.md` em script para conferir se as afirmações de prosa se sustentam. Nos eixos
+"contradições internas" e "funcionalidade dos exemplos" declarou explicitamente que **não**
+encontrou problema, tendo conferido o `stateDiagram-v2` contra `TRANSICOES` transição por
+transição.
+
+Cinco problemas encontrados, todos incorporados antes da promoção:
+
+1. **Bug de código, o mais grave.** O `hash` de `PromptTemplate` não cobria o campo
+   `obrigatoria`: dois templates que se comportam de forma diferente no `render` produziam o
+   mesmo hash, e `PromptRegistry.registrar` os tratava como a mesma versão — invalidando a
+   regra R2 do próprio volume. Corrigido no **código**, não na prosa, porque a invariante
+   pretendida estava certa: a obrigatoriedade entrou na `assinatura`, que passou de
+   `nome(v:str)` para `nome(v?:str)` quando a variável é opcional. Dois testes novos travam a
+   distinção, e um terceiro trava o limite do outro lado — `descricao` **não** entra no hash,
+   de propósito, porque não altera o que `render` produz. Critério agora escrito em
+   `07-Regras.md`: entra na assinatura o campo que muda a saída.
+2. `05-Diagramas.md` declarava `CONTRATO ||--|{ VARIAVEL`, mas template com zero variáveis
+   constrói sem erro (prompt estático). Corrigido para `||--o{`.
+3. `13-Testes.md` e `17-Conclusao.md` diziam "34 testes"; o comando que a própria seção manda
+   rodar imprime outro número, porque um teste é parametrizado em três casos. Corrigido para
+   37 funções coletadas como 39 casos.
+4. Rótulo agramatical num nó de decisão de `06-Fluxogramas.md`.
+5. `14-Metricas.md` trazia métrica que agrupava por campo de texto livre — na prática daria um
+   grupo por expressão regular, não por categoria. Redefinida sobre prefixo estável, com a
+   versão enumerada movida para `16-Roadmap.md`.
+
+Estado final na promoção, com os quatro critérios satisfeitos: gate 1 `exit 0`, gate 2
+**133 testes verdes**, gate 3 `exit 0`, auditoria 8.5 — e esta entrada é o critério 4.
+
+**Ressalva honesta:** o relatório de auditoria é de **antes** das correções acima. As cinco
+mudanças foram verificadas por execução e pelos três gates, mas o texto corrigido não passou
+por uma segunda auditoria independente. Quem quiser o selo refletindo o texto atual roda
+`/auditar 07` de novo — o relatório antigo permanece no acervo como registro do que foi
+encontrado, e não foi editado depois das correções.
+
 ### Correções de conteúdo aplicadas sobre a especificação original
 
 - **Frameworks.** RTF, CARE, RISE, TAG, BAB e RAPPEL documentados como **técnicas públicas de

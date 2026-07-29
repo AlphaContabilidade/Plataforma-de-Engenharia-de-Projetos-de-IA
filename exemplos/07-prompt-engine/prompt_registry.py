@@ -72,8 +72,11 @@ class PromptRegistry:
         """Registra o template e devolve a versao (`"v1"`, `"v2"`, ...).
 
         Idempotente por hash: conteudo identico devolve a versao existente. E a
-        identidade do conteudo que define a versao, e o hash cobre o contrato
-        inteiro -- mudar so o tipo de uma variavel ja gera versao nova.
+        identidade do conteudo que define a versao, e o hash cobre corpo, nome,
+        tipo e obrigatoriedade das variaveis -- mudar so o tipo, ou so a
+        obrigatoriedade, ja gera versao nova. O unico campo do contrato fora do
+        hash e `descricao`, que nao altera o que `render` produz: editar so a
+        descricao devolve a versao existente, de proposito.
         """
         entradas = self._por_nome.setdefault(template.nome, [])
         for entrada in entradas:
