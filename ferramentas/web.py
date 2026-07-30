@@ -1051,6 +1051,7 @@ footer.pe { margin-top: 30px; color: var(--texto-fraco); font-size: 0.78rem; fon
             <div class="opcao"><input id="tipo-automacao" type="radio" name="tipo" value="automacao"><label for="tipo-automacao">Automacao de processo</label></div>
             <div class="opcao"><input id="tipo-api" type="radio" name="tipo" value="api"><label for="tipo-api">API ou integracao</label></div>
             <div class="opcao"><input id="tipo-desktop" type="radio" name="tipo" value="desktop"><label for="tipo-desktop">Programa desktop</label></div>
+            <div class="opcao"><input id="tipo-extensao" type="radio" name="tipo" value="extensao"><label for="tipo-extensao">Suplemento ou extensao</label></div>
           </div>
         </div>
         <div class="campos" style="margin-top:14px">
@@ -1103,9 +1104,9 @@ footer.pe { margin-top: 30px; color: var(--texto-fraco); font-size: 0.78rem; fon
           </div>
           <div class="campo campo--largo anexos">
             <label for="projeto-documentos">Documentos de referencia <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
-            <small>Anexe requisitos, propostas, fluxos ou planilhas existentes. Ate 10 arquivos, com 5 MB cada.</small>
+            <small>Anexe requisitos, propostas, planilhas e arquivos de codigo. Ate 30 arquivos, com 5 MB cada.</small>
             <input id="projeto-documentos" type="file" multiple
-              accept=".txt,.md,.csv,.json,.yaml,.yml,.pdf,.doc,.docx,.xls,.xlsx">
+              accept=".txt,.md,.csv,.json,.yaml,.yml,.sql,.py,.js,.ts,.tsx,.jsx,.html,.css,.java,.cs,.php,.go,.rs,.xml,.env,.pdf,.doc,.docx,.xls,.xlsx,.pbix,.zip">
             <div class="lista-anexos" id="lista-documentos" aria-live="polite"></div>
             <small>Arquivos de texto entram no plano; documentos binarios ficam registrados para aprofundamento no chat.</small>
           </div>
@@ -1226,7 +1227,10 @@ var etapaProjeto = 1;
 var TOTAL_ETAPAS = 4;
 var CHAVE_RASCUNHO = "ai-engineering-os:rascunho-projeto:v1";
 var documentosProjeto = [];
-var EXTENSOES_TEXTO = ["txt", "md", "csv", "json", "yaml", "yml"];
+var EXTENSOES_TEXTO = [
+  "txt", "md", "csv", "json", "yaml", "yml", "sql", "py", "js", "ts",
+  "tsx", "jsx", "html", "css", "java", "cs", "php", "go", "rs", "xml", "env"
+];
 
 function camposDaEtapa(numero) {
   return q('.etapa[data-etapa="' + numero + '"]').querySelectorAll("input, textarea, select");
@@ -1304,7 +1308,7 @@ q("#projeto-documentos").addEventListener("change", function (evento) {
     evento.target.value = "";
     return;
   }
-  documentosProjeto = documentosProjeto.concat(novos).slice(0, 10);
+  documentosProjeto = documentosProjeto.concat(novos).slice(0, 30);
   evento.target.value = "";
   q("#erro-projeto").hidden = true;
   desenharDocumentos();

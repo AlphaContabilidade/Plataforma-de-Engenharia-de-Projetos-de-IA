@@ -24,6 +24,8 @@ MOTOR_ELABORACAO = "Planejador determinístico AI-ENGINEERING-OS v1"
 class Blueprint:
     nome: str
     motor_elaboracao: str
+    modo_projeto: str
+    objetivo_transformacao: str
     resumo: str
     mvp: tuple[str, ...]
     arquitetura: tuple[str, ...]
@@ -32,6 +34,7 @@ class Blueprint:
     perguntas_pendentes: tuple[str, ...]
     documentos_referencia: tuple[dict[str, object], ...]
     decisoes_descoberta: dict[str, str]
+    caminhos_evolucao: tuple[str, ...]
     volumes_recomendados: tuple[dict[str, str], ...]
     markdown: str
 
@@ -39,6 +42,8 @@ class Blueprint:
         return {
             "nome": self.nome,
             "motor_elaboracao": self.motor_elaboracao,
+            "modo_projeto": self.modo_projeto,
+            "objetivo_transformacao": self.objetivo_transformacao,
             "resumo": self.resumo,
             "mvp": list(self.mvp),
             "arquitetura": list(self.arquitetura),
@@ -49,6 +54,7 @@ class Blueprint:
                 dict(documento) for documento in self.documentos_referencia
             ],
             "decisoes_descoberta": dict(self.decisoes_descoberta),
+            "caminhos_evolucao": list(self.caminhos_evolucao),
             "volumes_recomendados": [
                 dict(volume) for volume in self.volumes_recomendados
             ],
@@ -57,28 +63,33 @@ class Blueprint:
 
 
 _TIPOS = {
-    "web": "aplicacao web responsiva",
-    "mobile": "aplicativo movel",
-    "automacao": "automacao de processo",
-    "api": "API ou servico de integracao",
-    "desktop": "aplicacao desktop",
+    "web": "aplicação web responsiva",
+    "mobile": "aplicativo móvel",
+    "automacao": "automação de processo",
+    "api": "API ou serviço de integração",
+    "desktop": "aplicação desktop",
+    "extensao": "extensão ou suplemento integrado a outro aplicativo",
 }
 _PRIORIDADES = {
-    "velocidade": "colocar uma primeira versao utilizavel no ar rapidamente",
+    "velocidade": "colocar uma primeira versão utilizável no ar rapidamente",
     "qualidade": "reduzir retrabalho e privilegiar qualidade desde a primeira entrega",
-    "custo": "manter infraestrutura e operacao enxutas",
-    "escala": "preparar crescimento de usuarios e volume de dados",
+    "custo": "manter infraestrutura e operação enxutas",
+    "escala": "preparar crescimento de usuários e volume de dados",
 }
 
 
-def gerar_perguntas_personalizadas(ideia: str, tipo: str = "auto") -> dict[str, object]:
+def gerar_perguntas_personalizadas(
+    ideia: str, tipo: str = "auto", modo: str = "novo"
+) -> dict[str, object]:
     """Cria uma trilha curta de descoberta adaptada à ideia e à plataforma."""
     texto = str(ideia or "").strip()
     if len(texto) < 20:
         raise ProjetoInvalido("descreva a ideia com pelo menos 20 caracteres")
     normalizado = texto.casefold()
     if tipo == "auto":
-        if any(p in normalizado for p in ("celular", "android", "iphone", "mobile", "aplicativo")):
+        if any(p in normalizado for p in ("excel", "office", "suplemento", "add-in", "extensão", "extensao")):
+            tipo = "extensao"
+        elif any(p in normalizado for p in ("celular", "android", "iphone", "mobile", "aplicativo")):
             tipo = "mobile"
         elif any(p in normalizado for p in ("windows", "desktop", "computador", "pc", "offline")):
             tipo = "desktop"
@@ -88,6 +99,80 @@ def gerar_perguntas_personalizadas(ideia: str, tipo: str = "auto") -> dict[str, 
             tipo = "web"
     if tipo not in _TIPOS:
         raise ProjetoInvalido(f"tipo desconhecido: {tipo}")
+    if modo not in {"novo", "existente"}:
+        raise ProjetoInvalido("modo deve ser novo ou existente")
+
+    if modo == "existente":
+        return {
+            "tipo_inferido": tipo,
+            "categoria": "projeto_existente",
+            "modo_projeto": modo,
+            "perguntas": [
+                {
+                    "id": "estado_atual",
+                    "titulo": "O que já funciona no projeto atual?",
+                    "ajuda": "Liste as partes usadas hoje, mesmo que ainda sejam planilhas, páginas ou processos manuais.",
+                    "tipo": "texto",
+                    "obrigatoria": True,
+                },
+                {
+                    "id": "publico",
+                    "titulo": "Quem utiliza ou depende deste projeto?",
+                    "ajuda": "Inclua usuários diretos e pessoas que recebem relatórios ou resultados.",
+                    "tipo": "texto",
+                    "obrigatoria": True,
+                },
+                {
+                    "id": "problema",
+                    "titulo": "Qual é a principal limitação atual?",
+                    "ajuda": "Ex.: retrabalho, dados divergentes, lentidão, aparência antiga ou falta de integração.",
+                    "tipo": "texto",
+                    "obrigatoria": True,
+                },
+                {
+                    "id": "objetivo_transformacao",
+                    "titulo": "Qual transformação você deseja primeiro?",
+                    "ajuda": "A análise pode recomendar mais de um caminho, mas precisamos definir uma prioridade.",
+                    "tipo": "opcao",
+                    "obrigatoria": True,
+                    "opcoes": [
+                        "Melhorar o sistema atual",
+                        "Transformar dados em BI ou dashboard",
+                        "Criar páginas, portal ou área do cliente",
+                        "Adicionar integrações e automações",
+                        "Modernizar ou migrar a tecnologia",
+                        "Auditar segurança, desempenho e qualidade",
+                    ],
+                },
+                {
+                    "id": "tecnologia_atual",
+                    "titulo": "Você sabe quais tecnologias são usadas hoje?",
+                    "ajuda": "Pode informar linguagem, banco de dados, planilhas, Power BI, ERP ou responder “não sei”.",
+                    "tipo": "texto",
+                    "obrigatoria": False,
+                },
+                {
+                    "id": "fontes_dados",
+                    "titulo": "Onde estão os dados importantes?",
+                    "ajuda": "Ex.: Excel, banco SQL, ERP, API, arquivos locais ou sistemas de terceiros.",
+                    "tipo": "texto",
+                    "obrigatoria": False,
+                },
+                {
+                    "id": "prioridade",
+                    "titulo": "O que mais importa nessa evolução?",
+                    "ajuda": "A resposta orienta a ordem das recomendações.",
+                    "tipo": "opcao",
+                    "obrigatoria": True,
+                    "opcoes": [
+                        "Qualidade e menos retrabalho",
+                        "Primeira versão rapidamente",
+                        "Custo inicial baixo",
+                        "Preparar grande crescimento",
+                    ],
+                },
+            ],
+        }
 
     comercio = any(
         palavra in normalizado
@@ -118,7 +203,40 @@ def gerar_perguntas_personalizadas(ideia: str, tipo: str = "auto") -> dict[str, 
             "obrigatoria": True,
         },
     ]
-    if tipo == "mobile":
+    if tipo == "extensao":
+        perguntas.extend(
+            [
+                {
+                    "id": "recurso_plataforma",
+                    "titulo": "Em qual aplicativo a solução deverá funcionar?",
+                    "ajuda": "O aplicativo hospedeiro define manifesto, permissões e interface disponíveis.",
+                    "tipo": "opcao",
+                    "obrigatoria": True,
+                    "opcoes": [
+                        "Microsoft Excel",
+                        "Microsoft Word",
+                        "Microsoft Outlook",
+                        "Navegador como extensão",
+                        "ERP ou sistema de terceiros",
+                    ],
+                },
+                {
+                    "id": "decisao_especifica",
+                    "titulo": "Que nível de acesso a extensão precisa?",
+                    "ajuda": "Solicite somente o necessário para reduzir risco e facilitar aprovação.",
+                    "tipo": "opcao",
+                    "obrigatoria": True,
+                    "opcoes": [
+                        "Somente ler contexto",
+                        "Ler e inserir conteúdo",
+                        "Alterar o documento completo",
+                        "Executar ações após confirmação",
+                        "Ainda precisa ser definido",
+                    ],
+                },
+            ]
+        )
+    elif tipo == "mobile":
         perguntas.append(
             {
                 "id": "recurso_plataforma",
@@ -251,6 +369,7 @@ def gerar_perguntas_personalizadas(ideia: str, tipo: str = "auto") -> dict[str, 
     return {
         "tipo_inferido": tipo,
         "categoria": "comercio" if comercio else "saude" if saude else "financeiro" if financeiro else "geral",
+        "modo_projeto": modo,
         "perguntas": perguntas,
     }
 
@@ -264,7 +383,7 @@ def _texto(dados: dict[str, Any], campo: str, *, obrigatorio: bool = False) -> s
 
 
 def _lista(dados: dict[str, Any], campo: str) -> tuple[str, ...]:
-    valor = dados.get(campo, ())
+    valor = dados.get(campo, [])
     if isinstance(valor, str):
         itens = valor.split(",")
     elif isinstance(valor, list):
@@ -291,8 +410,8 @@ def _documentos(dados: dict[str, Any]) -> tuple[dict[str, object], ...]:
         return ()
     if not isinstance(valor, list):
         raise ProjetoInvalido("documentos deve ser uma lista")
-    if len(valor) > 10:
-        raise ProjetoInvalido("anexe no maximo 10 documentos")
+    if len(valor) > 30:
+        raise ProjetoInvalido("anexe no maximo 30 arquivos")
 
     resultado: list[dict[str, object]] = []
     total_texto = 0
@@ -313,8 +432,8 @@ def _documentos(dados: dict[str, Any]) -> tuple[dict[str, object], ...]:
         if len(conteudo) > 20_000:
             conteudo = conteudo[:20_000]
         total_texto += len(conteudo)
-        if total_texto > 60_000:
-            raise ProjetoInvalido("o texto total dos documentos excede 60.000 caracteres")
+        if total_texto > 120_000:
+            raise ProjetoInvalido("o texto total dos arquivos excede 120.000 caracteres")
         resultado.append(
             {
                 "nome": nome,
@@ -377,6 +496,14 @@ def _volumes(
                 ("16", "INTEGRATION", "tratar falhas e idempotencia"),
             ]
         )
+    elif tipo == "extensao":
+        escolhidos.extend(
+            [
+                ("16", "INTEGRATION", "modelar o contrato com o aplicativo hospedeiro"),
+                ("22", "FRONTEND-ARCHITECT", "desenhar o painel incorporado e seus estados"),
+                ("17", "SECURITY", "limitar permissões e proteger dados do documento"),
+            ]
+        )
     else:
         escolhidos.append(
             ("23", "BACKEND-ARCHITECT", "separar interface, dominio e persistencia")
@@ -424,6 +551,14 @@ def gerar_blueprint(dados: dict[str, Any]) -> Blueprint:
     dados_sensiveis = _sim_nao(dados, "dados_sensiveis")
     documentos = _documentos(dados)
     decisoes = _decisoes(dados)
+    modo_projeto = _texto(dados, "modo_projeto") or (
+        "existente" if decisoes.get("estado_atual") else "novo"
+    )
+    if modo_projeto not in {"novo", "existente"}:
+        raise ProjetoInvalido("modo_projeto deve ser novo ou existente")
+    if modo_projeto == "existente" and nome == "Novo produto":
+        nome = "Projeto existente"
+    objetivo_transformacao = decisoes.get("objetivo_transformacao", "")
 
     if tipo not in _TIPOS:
         raise ProjetoInvalido(
@@ -434,11 +569,20 @@ def gerar_blueprint(dados: dict[str, Any]) -> Blueprint:
             "prioridade desconhecida. Use: " + ", ".join(sorted(_PRIORIDADES))
         )
 
-    resumo = (
-        f"{nome} sera uma {_TIPOS[tipo]} para {publico}. "
-        f"O produto atacara o problema: {problema}. "
-        f"A direcao de entrega e {_PRIORIDADES[prioridade]}."
-    )
+    publico_resumo = publico.rstrip(" .;:!?")
+    problema_resumo = problema.rstrip(" .;:!?")
+    if modo_projeto == "existente":
+        resumo = (
+            f"{nome} é um projeto existente que será analisado e evoluído como {_TIPOS[tipo]} "
+            f"para {publico_resumo}. A principal limitação informada é: {problema_resumo}. "
+            f"A direção de evolução é {_PRIORIDADES[prioridade]}."
+        )
+    else:
+        resumo = (
+            f"{nome} será uma {_TIPOS[tipo]} para {publico_resumo}. "
+            f"O produto atacará o problema: {problema_resumo}. "
+            f"A direção de entrega é {_PRIORIDADES[prioridade]}."
+        )
 
     mvp = [
         "Entrada guiada com linguagem simples e exemplos",
@@ -457,6 +601,53 @@ def gerar_blueprint(dados: dict[str, Any]) -> Blueprint:
         mvp.append("Suporte inicial à decisão de plataforma: " + decisoes["recurso_plataforma"])
     if decisoes.get("decisao_especifica"):
         mvp.append("Regra específica validada: " + decisoes["decisao_especifica"])
+
+    caminhos_evolucao: list[str] = []
+    if modo_projeto == "existente":
+        objetivo_normalizado = objetivo_transformacao.casefold()
+        if "bi" in objetivo_normalizado or "dashboard" in objetivo_normalizado:
+            caminhos_evolucao = [
+                "Inventariar fontes, responsáveis, frequência de atualização e qualidade dos dados.",
+                "Definir indicadores com fórmula, granularidade, filtros e regra de reconciliação.",
+                "Criar camada analítica separada da origem e um dashboard validado com usuários.",
+                "Automatizar atualização, alertas de falha e monitoramento de dados divergentes.",
+            ]
+        elif "página" in objetivo_normalizado or "pagina" in objetivo_normalizado or "portal" in objetivo_normalizado:
+            caminhos_evolucao = [
+                "Mapear jornadas e conteúdo das páginas antes de escolher componentes visuais.",
+                "Criar design system responsivo e acessível para evitar páginas inconsistentes.",
+                "Separar portal público, área autenticada e permissões por perfil.",
+                "Medir conversão, abandono, erros e desempenho das jornadas essenciais.",
+            ]
+        elif "integra" in objetivo_normalizado or "automa" in objetivo_normalizado:
+            caminhos_evolucao = [
+                "Mapear sistemas de origem e destino, responsáveis e contratos de dados.",
+                "Isolar cada integração com timeout, repetição segura e fila de exceções.",
+                "Evitar automação irreversível sem aprovação humana e trilha de auditoria.",
+                "Implantar por fluxo, com simuladores e reconciliação antes de operar em produção.",
+            ]
+        elif "modernizar" in objetivo_normalizado or "migrar" in objetivo_normalizado:
+            caminhos_evolucao = [
+                "Inventariar dependências, dados, rotinas críticas e custos da tecnologia atual.",
+                "Criar testes de caracterização antes de alterar comportamento existente.",
+                "Migrar por módulos usando convivência controlada, sem reescrita total de uma vez.",
+                "Definir plano de reversão, observabilidade e critérios objetivos de desligamento.",
+            ]
+        elif "auditar" in objetivo_normalizado:
+            caminhos_evolucao = [
+                "Estabelecer linha de base de segurança, desempenho, disponibilidade e qualidade.",
+                "Classificar achados por impacto, probabilidade, esforço e evidência reproduzível.",
+                "Corrigir primeiro riscos críticos e caminhos usados com maior frequência.",
+                "Transformar recomendações em backlog verificável com responsável e critério de aceite.",
+            ]
+        else:
+            caminhos_evolucao = [
+                "Preservar os fluxos que já funcionam e medir os problemas antes de redesenhar.",
+                "Organizar débitos de usabilidade, regras de negócio, dados e arquitetura por impacto.",
+                "Entregar melhorias em fatias pequenas com testes de regressão e demonstração.",
+                "Comparar métricas antes e depois para confirmar que a evolução gerou resultado.",
+            ]
+        mvp.extend(caminhos_evolucao[:2])
 
     arquitetura = [
         f"Canal principal: {_TIPOS[tipo]}.",
@@ -512,11 +703,21 @@ def gerar_blueprint(dados: dict[str, Any]) -> Blueprint:
         },
     )
 
-    riscos = [
-        "A ideia ainda pode conter mais de um produto; manter um unico fluxo principal no MVP.",
-        "Prazo, custo e escopo precisam ser negociados juntos; fixar os tres aumenta risco.",
-        "Automacao sem caminho de excecao pode transformar erro raro em operacao bloqueada.",
-    ]
+    if modo_projeto == "existente":
+        riscos = [
+            "Alterar o projeto sem inventário e testes de regressão pode quebrar fluxos que hoje funcionam.",
+            "Dados históricos podem conter divergências; reconciliar as fontes antes de automatizar indicadores.",
+            "Prazo, custo e escopo precisam ser negociados juntos; fixar os três aumenta risco.",
+        ]
+    else:
+        riscos = [
+            "A ideia ainda pode conter mais de um produto; manter um unico fluxo principal no MVP.",
+            "Prazo, custo e escopo precisam ser negociados juntos; fixar os tres aumenta risco.",
+        ]
+    if tipo == "automacao":
+        riscos.append(
+            "Automacao sem caminho de excecao pode transformar erro raro em operacao bloqueada."
+        )
     if integracoes:
         riscos.append(
             "Integracoes externas podem mudar ou ficar indisponiveis; contratos e simuladores sao obrigatorios."
@@ -571,12 +772,15 @@ def gerar_blueprint(dados: dict[str, Any]) -> Blueprint:
         "perguntas_pendentes": tuple(pendentes),
         "documentos_referencia": documentos,
         "decisoes_descoberta": decisoes,
+        "caminhos_evolucao": tuple(caminhos_evolucao),
         "volumes_recomendados": volumes,
     }
     markdown = _para_markdown(blueprint_sem_markdown)
     return Blueprint(
         nome=nome,
         motor_elaboracao=MOTOR_ELABORACAO,
+        modo_projeto=modo_projeto,
+        objetivo_transformacao=objetivo_transformacao,
         resumo=resumo,
         mvp=tuple(mvp),
         arquitetura=tuple(arquitetura),
@@ -585,6 +789,7 @@ def gerar_blueprint(dados: dict[str, Any]) -> Blueprint:
         perguntas_pendentes=tuple(pendentes),
         documentos_referencia=documentos,
         decisoes_descoberta=decisoes,
+        caminhos_evolucao=tuple(caminhos_evolucao),
         volumes_recomendados=volumes,
         markdown=markdown,
     )
@@ -596,6 +801,7 @@ def _para_markdown(dado: dict[str, Any]) -> str:
         "",
         f"**Motor de elaboração:** {MOTOR_ELABORACAO}",
         "**Modelo de IA no servidor:** nenhum; este documento é gerado por regras verificáveis.",
+        f"**Modo:** {'Análise e evolução de projeto existente' if dado.get('caminhos_evolucao') else 'Criação de novo projeto'}",
         "",
         "## Entendimento",
         "",
@@ -632,6 +838,9 @@ def _para_markdown(dado: dict[str, Any]) -> str:
         )
     else:
         linhas.append("- Nenhuma decisão adicional registrada.")
+    if dado["caminhos_evolucao"]:
+        linhas.extend(["", "## Caminhos de evolução recomendados", ""])
+        linhas.extend(f"- {item}" for item in dado["caminhos_evolucao"])
     linhas.extend(["", "## Escopo inicial do MVP", ""])
     linhas.extend(f"- {item}" for item in dado["mvp"])
     linhas.extend(["", "## Direção de arquitetura", ""])

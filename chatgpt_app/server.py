@@ -17,7 +17,8 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic import Field
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import JSONResponse
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, JSONResponse
 
 from ferramentas import painel
 from ferramentas.contrato import carregar
@@ -152,11 +153,14 @@ async def abrir_construtor() -> types.CallToolResult:
 async def personalizar_descoberta(
     ideia: Annotated[str, Field(min_length=20, max_length=4000)],
     tipo: Annotated[
-        str, Field(description="Um de: auto, web, mobile, desktop ou automacao.")
+        str, Field(description="Um de: auto, web, mobile, desktop, automacao ou extensao.")
     ] = "auto",
+    modo: Annotated[
+        str, Field(description="novo para criar ou existente para analisar e evoluir.")
+    ] = "novo",
 ) -> types.CallToolResult:
     try:
-        descoberta = gerar_perguntas_personalizadas(ideia, tipo)
+        descoberta = gerar_perguntas_personalizadas(ideia, tipo, modo)
     except ProjetoInvalido as erro:
         return types.CallToolResult(
             content=[types.TextContent(type="text", text=f"Entrada invalida: {erro}")],
@@ -197,7 +201,7 @@ async def planejar_software(
     problema: Annotated[str, Field(min_length=3, max_length=4000)],
     nome: Annotated[str, Field(max_length=200)] = "",
     tipo: Annotated[
-        str, Field(description="Um de: web, mobile, automacao, api ou desktop.")
+        str, Field(description="Um de: web, mobile, automacao, api, desktop ou extensao.")
     ] = "web",
     prioridade: Annotated[
         str, Field(description="Uma de: qualidade, velocidade, custo ou escala.")
@@ -207,10 +211,13 @@ async def planejar_software(
     dados_sensiveis: bool = False,
     prazo: Annotated[str, Field(max_length=300)] = "",
     restricoes: Annotated[str, Field(max_length=1000)] = "",
+    modo_projeto: Annotated[
+        str, Field(description="novo ou existente.")
+    ] = "novo",
     documentos: Annotated[
         list[dict[str, Any]] | None,
         Field(
-            max_length=10,
+            max_length=30,
             description=(
                 "Documentos de referencia com nome, tipo, tamanho e conteudo textual "
                 "opcional. Arquivos binarios podem ser registrados sem conteudo."
@@ -236,6 +243,7 @@ async def planejar_software(
                 "dados_sensiveis": dados_sensiveis,
                 "prazo": prazo,
                 "restricoes": restricoes,
+                "modo_projeto": modo_projeto,
                 "documentos": documentos or [],
                 "respostas_descoberta": respostas_descoberta or {},
             }
@@ -338,11 +346,46 @@ async def saude(_request):
             "nome": "AI-ENGINEERING-OS ChatGPT App",
             "status": "ok",
             "mcp": "/mcp",
+            "interface": "/widget.html",
         }
     )
 
 
+async def interface_local(_request: Request):
+    """Entrega o mesmo widget fora do ChatGPT para uso e teste local."""
+    return HTMLResponse(WIDGET.read_text(encoding="utf-8"))
+
+
+async def perguntas_locais(request: Request):
+    """API do navegador local; reutiliza exatamente o motor exposto pelo MCP."""
+    try:
+        entrada = await request.json()
+        descoberta = gerar_perguntas_personalizadas(
+            entrada.get("ideia", ""),
+            entrada.get("tipo", "auto"),
+            entrada.get("modo", "novo"),
+        )
+        return JSONResponse({"modo": "descoberta", **descoberta})
+    except (AttributeError, ValueError, ProjetoInvalido) as erro:
+        return JSONResponse({"modo": "erro", "erro": str(erro)}, status_code=400)
+
+
+async def planejar_local(request: Request):
+    """Elabora o plano no navegador local sem depender da ponte do ChatGPT."""
+    try:
+        entrada = await request.json()
+        blueprint = gerar_blueprint(entrada).para_dict()
+        return JSONResponse(
+            {"modo": "blueprint", "blueprint": blueprint, "stateVersion": 1}
+        )
+    except (AttributeError, ValueError, ProjetoInvalido) as erro:
+        return JSONResponse({"modo": "erro", "erro": str(erro)}, status_code=400)
+
+
 app.add_route("/", saude, methods=["GET"])
+app.add_route("/widget.html", interface_local, methods=["GET"])
+app.add_route("/api/perguntas", perguntas_locais, methods=["POST"])
+app.add_route("/api/planejar", planejar_local, methods=["POST"])
 
 
 if __name__ == "__main__":

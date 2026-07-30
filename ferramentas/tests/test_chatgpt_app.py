@@ -2,6 +2,8 @@
 
 import asyncio
 
+from starlette.testclient import TestClient
+
 from chatgpt_app import server as S
 
 
@@ -44,7 +46,15 @@ def test_recurso_do_widget_usa_mime_e_bridge_mcp_apps():
     assert "Opcional" in html
     assert "sem modelo de IA no servidor" in html
     assert "Começar diagnóstico" in html
+    assert "Analisar projeto existente" in html
+    assert "Caminhos de evolução recomendados" in html
     assert "Pergunta 1" in html
+    assert "Suplemento" in html
+    assert "Agente de produto" in html
+    assert ">Prévia<" in html
+    assert ">Gerenciar<" in html
+    assert "Aplicar ajuste" in html
+    assert "Publicar versão" in html
     assert "https://" not in html
 
 
@@ -85,6 +95,63 @@ def test_descoberta_mcp_personaliza_mobile():
     assert resposta.isError is False
     assert resposta.structuredContent["modo"] == "descoberta"
     assert resposta.structuredContent["tipo_inferido"] == "mobile"
+
+
+def test_interface_local_funciona_sem_ponte_mcp():
+    with TestClient(S.app) as cliente:
+        pagina = cliente.get("/widget.html")
+        assert pagina.status_code == 200
+        assert "Começar diagnóstico" in pagina.text
+
+        descoberta = cliente.post(
+            "/api/perguntas",
+            json={
+                "ideia": "Programa para PC que controla estoque mesmo sem internet.",
+                "tipo": "auto",
+            },
+        )
+        assert descoberta.status_code == 200
+        assert descoberta.json()["tipo_inferido"] == "desktop"
+
+        suplemento = cliente.post(
+            "/api/perguntas",
+            json={
+                "ideia": "Suplemento do Excel para analisar células e gerar fórmulas.",
+                "tipo": "auto",
+            },
+        )
+        assert suplemento.status_code == 200
+        assert suplemento.json()["tipo_inferido"] == "extensao"
+
+        existente = cliente.post(
+            "/api/perguntas",
+            json={
+                "ideia": "Temos planilhas e um sistema antigo de vendas sem integração.",
+                "tipo": "web",
+                "modo": "existente",
+            },
+        )
+        assert existente.status_code == 200
+        assert existente.json()["modo"] == "descoberta"
+        assert existente.json()["modo_projeto"] == "existente"
+        assert any(
+            p["id"] == "objetivo_transformacao"
+            for p in existente.json()["perguntas"]
+        )
+
+        plano = cliente.post(
+            "/api/planejar",
+            json={
+                "ideia": "Programa para PC que controla estoque mesmo sem internet.",
+                "publico": "equipe do estoque",
+                "problema": "planilhas divergentes e falta de rastreabilidade",
+                "tipo": "desktop",
+                "prioridade": "qualidade",
+            },
+        )
+        assert plano.status_code == 200
+        assert plano.json()["modo"] == "blueprint"
+        assert "Plano de Solução" in plano.json()["blueprint"]["markdown"]
 
 
 def test_consultas_leem_o_acervo_real():

@@ -6,6 +6,25 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-30
 
+### Construtor universal e independente de fornecedor
+
+O construtor passou a funcionar imediatamente após o clone com Python 3.11+, sem chave de
+API e sem exigir ChatGPT, Claude, Codex ou outro modelo. `python iniciar.py verificar`
+audita o ambiente; `python iniciar.py interface` abre a mesma jornada guiada por um servidor
+local de biblioteca padrão.
+
+`AGENTS.md` e `PROTOCOLO-UNIVERSAL-DA-IA.md` definem o contrato comum para agentes.
+`CLAUDE.md`, `CODEX.md`, `GEMINI.md` e as instruções do GitHub Copilot encaminham ao mesmo
+protocolo, sem fixar versões de modelos. `GUIA-DE-USO.md` documenta download, instalação,
+anexos, descoberta, Plano de Solução, continuidade com qualquer IA, atualização e problemas
+comuns.
+
+A interface ganhou descoberta personalizada para projetos novos e existentes, anexos,
+suporte a sistemas, BI, páginas, integrações, automações e extensões, além da área de
+trabalho com Plano, Prévia e Gerenciar. Publicação continua bloqueada até existir uma versão
+executável aprovada por testes. Verificação: 214 testes da plataforma e 39 testes do
+exemplo do volume 07 aprovados; gate estrutural do volume 07 e referências cruzadas verdes.
+
 ### Volume `12-MEMORY` auditado e promovido a `PRONTO`
 
 Primeiro volume cujo código foi **extraído de um sistema em produção** e generalizado, em vez

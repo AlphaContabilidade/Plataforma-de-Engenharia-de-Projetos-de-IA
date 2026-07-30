@@ -125,6 +125,27 @@ def test_perguntas_mobile_sao_especificas_para_o_aparelho():
     assert "Câmera ou leitura de código" in perguntas["recurso_plataforma"]["opcoes"]
 
 
+def test_perguntas_de_suplemento_excel_definem_hospedeiro_e_acesso():
+    descoberta = gerar_perguntas_personalizadas(
+        "Suplemento do Excel para analisar células e gerar fórmulas.", "auto"
+    )
+    assert descoberta["tipo_inferido"] == "extensao"
+    perguntas = {p["id"]: p for p in descoberta["perguntas"]}
+    assert "Microsoft Excel" in perguntas["recurso_plataforma"]["opcoes"]
+    assert "Ler e inserir conteúdo" in perguntas["decisao_especifica"]["opcoes"]
+
+
+def test_suplemento_recomenda_integracao_interface_e_seguranca():
+    entrada = dict(
+        IDEIA,
+        ideia="Suplemento do Excel para analisar células e gerar fórmulas.",
+        tipo="extensao",
+    )
+    dado = gerar_blueprint(entrada).para_dict()
+    ids = {volume["id"] for volume in dado["volumes_recomendados"]}
+    assert {"16", "22", "17"} <= ids
+
+
 def test_perguntas_de_loja_incluem_decisao_de_pagamento():
     descoberta = gerar_perguntas_personalizadas(
         "Loja virtual para vender roupas com catálogo, pedidos e entrega.", "web"
@@ -146,3 +167,33 @@ def test_respostas_personalizadas_entram_no_plano():
     assert dado["decisoes_descoberta"]["recurso_plataforma"] == "Uso offline"
     assert "Decisões da descoberta personalizada" in dado["markdown"]
     assert any("Uso offline" in item for item in dado["mvp"])
+
+
+def test_projeto_existente_recebe_perguntas_de_transformacao():
+    descoberta = gerar_perguntas_personalizadas(
+        "Temos um sistema antigo de vendas e várias planilhas sem integração.",
+        "web",
+        "existente",
+    )
+    assert descoberta["modo_projeto"] == "existente"
+    perguntas = {p["id"]: p for p in descoberta["perguntas"]}
+    assert "objetivo_transformacao" in perguntas
+    assert "Transformar dados em BI ou dashboard" in perguntas["objetivo_transformacao"]["opcoes"]
+    assert "tecnologia_atual" in perguntas
+
+
+def test_transformacao_em_bi_gera_caminhos_especificos():
+    entrada = dict(
+        IDEIA,
+        modo_projeto="existente",
+        respostas_descoberta={
+            "estado_atual": "Planilhas de vendas e estoque",
+            "objetivo_transformacao": "Transformar dados em BI ou dashboard",
+            "fontes_dados": "Excel e ERP",
+        },
+    )
+    dado = gerar_blueprint(entrada).para_dict()
+    assert dado["modo_projeto"] == "existente"
+    assert dado["objetivo_transformacao"] == "Transformar dados em BI ou dashboard"
+    assert any("indicadores" in caminho for caminho in dado["caminhos_evolucao"])
+    assert "Caminhos de evolução recomendados" in dado["markdown"]

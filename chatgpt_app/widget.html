@@ -59,7 +59,8 @@ button:disabled { opacity:.55; cursor:wait; }
 .file button { padding:5px 8px; background:transparent; color:var(--accent); }
 .intro { padding:18px 20px 20px; }
 .intro textarea { min-height:120px; }
-.platforms { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+.platforms { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:8px; margin-top:12px; }
+.modes { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 15px; }
 .platform { background:transparent; color:var(--text); border-color:var(--line); text-align:left; padding:11px; }
 .platform.selected { border-color:var(--accent); background:var(--soft); color:var(--accent); }
 .guided { padding:18px 20px 20px; }
@@ -68,25 +69,52 @@ button:disabled { opacity:.55; cursor:wait; }
 .answer-option { background:transparent; color:var(--text); border-color:var(--line); text-align:left; }
 .answer-option.selected { border-color:var(--accent); background:var(--soft); color:var(--accent); }
 .review-title { margin-bottom:14px; }
+.workspace-tabs { display:flex; gap:6px; margin:14px 0 12px; padding:4px; border:1px solid var(--line); border-radius:9px; background:var(--bg); }
+.workspace-tab { flex:1; background:transparent; border-color:transparent; color:var(--muted); }
+.workspace-tab.active { background:var(--paper); border-color:var(--line); color:var(--accent); }
+.workspace-grid { display:grid; grid-template-columns:minmax(210px,.75fr) minmax(0,1.7fr); gap:10px; }
+.agent-console,.preview-shell,.manage-block { border:1px solid var(--line); border-radius:10px; background:var(--paper); overflow:hidden; }
+.panel-head { padding:10px 12px; border-bottom:1px solid var(--line); font-weight:750; }
+.agent-log { min-height:250px; max-height:390px; overflow:auto; padding:11px; background:var(--bg); }
+.agent-message { margin-bottom:8px; padding:8px 9px; border-radius:8px; background:var(--paper); border:1px solid var(--line); font-size:12px; }
+.agent-message.user { background:var(--soft); border-color:var(--accent); }
+.agent-compose { padding:10px; border-top:1px solid var(--line); }
+.agent-compose textarea { min-height:66px; }
+.prototype { --prototype-accent:#3545a8; min-height:390px; padding:22px; color:#172033; background:linear-gradient(145deg,#f6f8ff,#fff); }
+.prototype-nav { display:flex; justify-content:space-between; align-items:center; gap:12px; font-weight:800; }
+.prototype-badge { padding:4px 8px; border-radius:999px; color:var(--prototype-accent); background:#fff; border:1px solid currentColor; font-size:11px; }
+.prototype h2 { max-width:520px; margin-top:45px; font-size:32px; }
+.prototype p { max-width:590px; color:#566078; }
+.prototype-cta { display:inline-block; margin-top:16px; padding:9px 13px; border-radius:8px; color:#fff; background:var(--prototype-accent); font-weight:750; }
+.prototype-features { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:28px; }
+.prototype-feature { padding:11px; border:1px solid #dce1ee; border-radius:8px; background:#fff; font-size:12px; }
+.manage-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.manage-block { padding:13px; }
+.manage-block h3 { margin-bottom:7px; }
 .hidden { display:none!important; }
 .error { color:#b53d3d; margin-top:10px; }
-@media(max-width:600px){ .grid,.cards{grid-template-columns:1fr}.platforms{grid-template-columns:1fr 1fr}.wide{grid-column:auto} body{padding:0} main{border-radius:0;border-left:0;border-right:0} }
+@media(max-width:600px){ .grid,.cards,.workspace-grid,.manage-grid{grid-template-columns:1fr}.platforms{grid-template-columns:1fr 1fr}.prototype-features{grid-template-columns:1fr}.wide{grid-column:auto} body{padding:0} main{border-radius:0;border-left:0;border-right:0} }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <div class="eyebrow">AI-ENGINEERING-OS · dentro do ChatGPT</div>
+    <div class="eyebrow">AI-ENGINEERING-OS · compatível com qualquer IA</div>
     <h1>Transforme uma ideia em projeto de software</h1>
     <p>Consolide objetivos, referências e restrições em um Plano de Solução pronto para orientar a engenharia.</p>
     <div class="engine">
       <strong>Motor de elaboração: Planejador AI-ENGINEERING-OS v1</strong>
-      Geração local por regras verificáveis, sem modelo de IA no servidor. Ao continuar no chat, será usado o modelo ativo da conversa.
+      Geração local por regras verificáveis, sem modelo de IA no servidor. Na construção, você escolhe Claude, Codex, ChatGPT, Gemini ou outra IA.
     </div>
   </header>
 
   <section id="intro-view" class="intro">
-    <label for="initial-idea">O que você quer criar? <span class="field-kind required">Obrigatório</span></label>
+    <label>O que você deseja fazer?</label>
+    <div class="modes" id="project-modes">
+      <button class="platform selected" type="button" data-mode="novo">Criar projeto novo</button>
+      <button class="platform" type="button" data-mode="existente">Analisar projeto existente</button>
+    </div>
+    <label for="initial-idea"><span id="idea-label">O que você quer criar?</span> <span class="field-kind required">Obrigatório</span></label>
     <textarea id="initial-idea" minlength="20" required
       placeholder="Ex.: Quero um aplicativo para técnicos registrarem visitas, fotos e assinaturas mesmo sem internet."></textarea>
     <label style="margin-top:13px">Onde o produto será usado? <span class="field-kind optional">Podemos recomendar</span></label>
@@ -95,6 +123,7 @@ button:disabled { opacity:.55; cursor:wait; }
       <button class="platform" type="button" data-type="mobile">Celular</button>
       <button class="platform" type="button" data-type="desktop">Computador</button>
       <button class="platform" type="button" data-type="web">Navegador</button>
+      <button class="platform" type="button" data-type="extensao">Suplemento</button>
     </div>
     <div class="actions">
       <button id="start-guided" type="button">Começar diagnóstico</button>
@@ -138,6 +167,7 @@ button:disabled { opacity:.55; cursor:wait; }
             <option value="automacao">Automação</option>
             <option value="api">API ou integração</option>
             <option value="desktop">Programa desktop</option>
+            <option value="extensao">Suplemento ou extensão</option>
           </select>
         </div>
         <div class="wide">
@@ -192,11 +222,11 @@ button:disabled { opacity:.55; cursor:wait; }
         </div>
         <div class="wide upload">
           <label for="documents">Documentos de referência <span class="field-kind optional">Opcional</span></label>
-          <p class="upload-note">Anexe requisitos, propostas, fluxos, planilhas ou materiais existentes. Até 10 arquivos, com 5 MB cada.</p>
+          <p class="upload-note">Anexe requisitos, propostas, planilhas e arquivos de código do projeto. Até 30 arquivos, com 5 MB cada.</p>
           <input id="documents" type="file" multiple
-            accept=".txt,.md,.csv,.json,.yaml,.yml,.pdf,.doc,.docx,.xls,.xlsx">
+            accept=".txt,.md,.csv,.json,.yaml,.yml,.sql,.py,.js,.ts,.tsx,.jsx,.html,.css,.java,.cs,.php,.go,.rs,.xml,.env,.pdf,.doc,.docx,.xls,.xlsx,.pbix,.zip">
           <div id="file-list" class="files" aria-live="polite"></div>
-          <p class="upload-note">TXT, Markdown, CSV, JSON e YAML terão o texto incorporado ao plano. Os demais serão registrados como referência para aprofundamento no chat.</p>
+          <p class="upload-note">Arquivos textuais e de código terão o conteúdo incorporado à análise. PDF, Word, Excel, PBIX e ZIP ficam registrados para aprofundamento.</p>
         </div>
       </div>
       <div class="actions">
@@ -212,25 +242,93 @@ button:disabled { opacity:.55; cursor:wait; }
       <h2 id="result-name">Plano de Solução</h2>
       <button id="edit" class="secondary" type="button">Editar respostas</button>
     </div>
-    <div class="summary" id="summary"></div>
-    <div class="cards">
-      <article class="card"><h3>MVP inicial</h3><ul id="mvp"></ul></article>
-      <article class="card"><h3>Direção de arquitetura</h3><ul id="architecture"></ul></article>
-      <article class="card"><h3>Riscos</h3><ul id="risks"></ul></article>
-      <article class="card"><h3>Perguntas abertas</h3><ul id="questions"></ul></article>
+    <nav class="workspace-tabs" aria-label="Áreas do projeto">
+      <button class="workspace-tab active" type="button" data-panel="plan-panel">Plano</button>
+      <button class="workspace-tab" type="button" data-panel="preview-panel">Prévia</button>
+      <button class="workspace-tab" type="button" data-panel="manage-panel">Gerenciar</button>
+    </nav>
+
+    <div id="plan-panel" class="workspace-panel">
+      <div class="summary" id="summary"></div>
+      <div class="cards">
+        <article class="card"><h3>MVP inicial</h3><ul id="mvp"></ul></article>
+        <article class="card"><h3>Direção de arquitetura</h3><ul id="architecture"></ul></article>
+        <article class="card"><h3>Riscos</h3><ul id="risks"></ul></article>
+        <article class="card"><h3>Perguntas abertas</h3><ul id="questions"></ul></article>
+      </div>
+      <article class="card" style="margin-top:10px">
+        <h3>Conhecimento recomendado</h3>
+        <div id="volumes" class="chips"></div>
+      </article>
+      <article id="documents-card" class="card hidden" style="margin-top:10px">
+        <h3>Documentos considerados</h3>
+        <ul id="result-documents"></ul>
+      </article>
+      <article id="evolution-card" class="card hidden" style="margin-top:10px">
+        <h3>Caminhos de evolução recomendados</h3>
+        <ul id="evolution-paths"></ul>
+      </article>
+      <div class="actions">
+        <button id="continue" type="button">Continuar a construção no chat</button>
+        <button id="copy" class="secondary" type="button">Copiar Plano de Solução</button>
+        <span class="status" id="continue-status">O ChatGPT receberá o plano e fará as próximas perguntas.</span>
+      </div>
     </div>
-    <article class="card" style="margin-top:10px">
-      <h3>Conhecimento recomendado</h3>
-      <div id="volumes" class="chips"></div>
-    </article>
-    <article id="documents-card" class="card hidden" style="margin-top:10px">
-      <h3>Documentos considerados</h3>
-      <ul id="result-documents"></ul>
-    </article>
-    <div class="actions">
-      <button id="continue" type="button">Continuar a construção no chat</button>
-      <button id="copy" class="secondary" type="button">Copiar Plano de Solução</button>
-      <span class="status">O ChatGPT receberá o plano e fará as próximas perguntas.</span>
+
+    <div id="preview-panel" class="workspace-panel hidden">
+      <div class="workspace-grid">
+        <section class="agent-console">
+          <div class="panel-head">Agente de produto</div>
+          <div id="agent-log" class="agent-log"></div>
+          <div class="agent-compose">
+            <label for="refinement">Peça um ajuste na prévia</label>
+            <textarea id="refinement" placeholder="Ex.: deixe mais corporativo, use azul e destaque os relatórios."></textarea>
+            <button id="apply-refinement" type="button" style="margin-top:7px">Aplicar ajuste</button>
+          </div>
+        </section>
+        <section class="preview-shell">
+          <div class="panel-head">Prévia navegável · rascunho</div>
+          <div id="prototype" class="prototype">
+            <div class="prototype-nav">
+              <span id="prototype-brand">Novo produto</span>
+              <span class="prototype-badge">Prévia local</span>
+            </div>
+            <h2 id="prototype-title">Uma solução desenhada para o seu fluxo principal.</h2>
+            <p id="prototype-summary"></p>
+            <span class="prototype-cta">Começar agora</span>
+            <div id="prototype-features" class="prototype-features"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="manage-panel" class="workspace-panel hidden">
+      <div class="manage-grid">
+        <article class="manage-block">
+          <h3>Status do projeto</h3>
+          <p><strong>Rascunho validado.</strong> Plano e prévia foram gerados localmente.</p>
+          <p>Publicação real exige geração de código, testes e ambiente de hospedagem.</p>
+        </article>
+        <article class="manage-block">
+          <h3>Artefatos preparados</h3>
+          <ul>
+            <li>Plano de Solução em Markdown</li>
+            <li>Decisões da descoberta</li>
+            <li>Prévia visual editável</li>
+            <li>Backlog inicial e riscos</li>
+          </ul>
+        </article>
+        <article class="manage-block">
+          <h3>Próximas ações</h3>
+          <button id="download-plan" type="button">Baixar plano (.md)</button>
+          <button id="copy-build-prompt" class="secondary" type="button">Copiar instruções de construção</button>
+        </article>
+        <article class="manage-block">
+          <h3>Publicação</h3>
+          <p>A publicação está bloqueada até existir uma versão executável aprovada pelos testes.</p>
+          <button type="button" disabled>Publicar versão</button>
+        </article>
+      </div>
     </div>
   </section>
 </main>
@@ -242,6 +340,7 @@ let attachedFiles = [];
 let rpcId = 0;
 const pending = new Map();
 let selectedType = "auto";
+let projectMode = "novo";
 let guidedQuestions = [];
 let guidedIndex = 0;
 let guidedAnswers = {};
@@ -255,14 +354,30 @@ const request = (method, params) => new Promise((resolve, reject) => {
   window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
 });
 
-function localDiscovery(idea, requestedType) {
+function localDiscovery(idea, requestedType, mode = "novo") {
   const normalized = idea.toLocaleLowerCase("pt-BR");
   let type = requestedType;
   if (type === "auto") {
-    if (/celular|android|iphone|mobile|aplicativo/.test(normalized)) type = "mobile";
+    if (/excel|office|suplemento|add-in|extensão|extensao/.test(normalized)) type = "extensao";
+    else if (/celular|android|iphone|mobile|aplicativo/.test(normalized)) type = "mobile";
     else if (/windows|desktop|computador|\\bpc\\b|offline/.test(normalized)) type = "desktop";
     else if (/automat|robô|robo|processo repetitivo/.test(normalized)) type = "automacao";
     else type = "web";
+  }
+  if (mode === "existente") {
+    return {
+      tipo_inferido:type,
+      modo_projeto:mode,
+      perguntas:[
+        { id:"estado_atual", titulo:"O que já funciona no projeto atual?", ajuda:"Liste as partes usadas hoje, mesmo que sejam planilhas, páginas ou processos manuais.", tipo:"texto", obrigatoria:true },
+        { id:"publico", titulo:"Quem utiliza ou depende deste projeto?", ajuda:"Inclua usuários diretos e quem recebe relatórios ou resultados.", tipo:"texto", obrigatoria:true },
+        { id:"problema", titulo:"Qual é a principal limitação atual?", ajuda:"Ex.: retrabalho, dados divergentes, lentidão, aparência antiga ou falta de integração.", tipo:"texto", obrigatoria:true },
+        { id:"objetivo_transformacao", titulo:"Qual transformação você deseja primeiro?", ajuda:"A análise pode recomendar mais de um caminho, mas precisamos definir uma prioridade.", tipo:"opcao", obrigatoria:true, opcoes:["Melhorar o sistema atual","Transformar dados em BI ou dashboard","Criar páginas, portal ou área do cliente","Adicionar integrações e automações","Modernizar ou migrar a tecnologia","Auditar segurança, desempenho e qualidade"] },
+        { id:"tecnologia_atual", titulo:"Você sabe quais tecnologias são usadas hoje?", ajuda:"Informe linguagem, banco, planilhas, Power BI, ERP ou responda “não sei”.", tipo:"texto", obrigatoria:false },
+        { id:"fontes_dados", titulo:"Onde estão os dados importantes?", ajuda:"Ex.: Excel, banco SQL, ERP, API, arquivos locais ou terceiros.", tipo:"texto", obrigatoria:false },
+        { id:"prioridade", titulo:"O que mais importa nessa evolução?", ajuda:"A resposta orienta a ordem das recomendações.", tipo:"opcao", obrigatoria:true, opcoes:["Qualidade e menos retrabalho","Primeira versão rapidamente","Custo inicial baixo","Preparar grande crescimento"] },
+      ],
+    };
   }
   const questions = [
     { id:"publico", titulo:"Quem usará este produto no dia a dia?", ajuda:"Descreva o perfil principal, não apenas “todos”.", tipo:"texto", obrigatoria:true },
@@ -289,8 +404,21 @@ function localDiscovery(idea, requestedType) {
       ajuda:"Isso orienta autenticação, permissões e distribuição.",
       opcoes:["Conta individual com login","Acesso interno da empresa","Acesso público sem login","Ainda não sei"],
     },
+    extensao: {
+      titulo:"Em qual aplicativo a solução deverá funcionar?",
+      ajuda:"O aplicativo hospedeiro define manifesto, permissões e interface disponíveis.",
+      opcoes:["Microsoft Excel","Microsoft Word","Microsoft Outlook","Navegador como extensão","ERP ou sistema de terceiros"],
+    },
   };
   questions.push({ id:"recurso_plataforma", tipo:"opcao", obrigatoria:true, ...platformQuestions[type] });
+  if (type === "extensao") {
+    questions.push({
+      id:"decisao_especifica", titulo:"Que nível de acesso a extensão precisa?",
+      ajuda:"Solicite somente o necessário para reduzir risco e facilitar aprovação.",
+      tipo:"opcao", obrigatoria:true,
+      opcoes:["Somente ler contexto","Ler e inserir conteúdo","Alterar o documento completo","Executar ações após confirmação","Ainda precisa ser definido"],
+    });
+  }
   if (/loja|venda|e-?commerce|pedido|checkout|marketplace|pagamento|finance|banco|fatura/.test(normalized)) {
     questions.push({
       id:"decisao_especifica", titulo:"Como pagamentos ou cobranças deverão funcionar?",
@@ -356,12 +484,29 @@ function finishDiscovery() {
   $("#form-view").scrollIntoView({ behavior:"smooth", block:"start" });
 }
 
-document.querySelectorAll(".platform").forEach((button) => {
+document.querySelectorAll("#platforms .platform").forEach((button) => {
   button.addEventListener("click", () => {
     selectedType = button.dataset.type;
-    document.querySelectorAll(".platform").forEach((item) =>
+    document.querySelectorAll("#platforms .platform").forEach((item) =>
       item.classList.toggle("selected", item === button)
     );
+  });
+});
+
+document.querySelectorAll("#project-modes .platform").forEach((button) => {
+  button.addEventListener("click", () => {
+    projectMode = button.dataset.mode;
+    document.querySelectorAll("#project-modes .platform").forEach((item) =>
+      item.classList.toggle("selected", item === button)
+    );
+    const existing = projectMode === "existente";
+    $("#idea-label").textContent = existing
+      ? "Descreva o projeto que já existe"
+      : "O que você quer criar?";
+    $("#initial-idea").placeholder = existing
+      ? "Ex.: Temos planilhas e um sistema antigo de vendas; queremos analisar o que pode virar BI, portal e integrações."
+      : "Ex.: Quero um aplicativo para técnicos registrarem visitas, fotos e assinaturas mesmo sem internet.";
+    $("#start-guided").textContent = existing ? "Iniciar análise" : "Começar diagnóstico";
   });
 });
 
@@ -379,12 +524,21 @@ $("#start-guided").addEventListener("click", async () => {
       await bridgeReady;
       const response = await request("tools/call", {
         name:"personalizar_descoberta",
-        arguments:{ ideia:idea, tipo:selectedType },
+        arguments:{ ideia:idea, tipo:selectedType, modo:projectMode },
       });
       discovery = response?.structuredContent;
     } catch (_) { discovery = null; }
+  } else {
+    try {
+      const response = await fetch("/api/perguntas", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ ideia:idea, tipo:selectedType, modo:projectMode }),
+      });
+      discovery = await response.json();
+    } catch (_) { discovery = null; }
   }
-  if (!discovery || discovery.modo === "erro") discovery = localDiscovery(idea, selectedType);
+  if (!discovery || discovery.modo === "erro") discovery = localDiscovery(idea, selectedType, projectMode);
   guidedQuestions = discovery.perguntas;
   guidedAnswers = { tipo_inferido:discovery.tipo_inferido };
   guidedIndex = 0;
@@ -428,6 +582,56 @@ function list(target, items) {
   });
 }
 
+function constructionPrompt() {
+  if (!blueprint) return "";
+  return "Vamos continuar a construção deste software. Use o Plano de Solução abaixo como contrato inicial, faça uma pergunta simples por vez e não escreva código antes de confirmar as perguntas abertas.\n\n" + blueprint.markdown;
+}
+
+function safeFileName(value) {
+  return String(value || "plano-de-solucao")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase() || "plano-de-solucao";
+}
+
+function addAgentMessage(text, role = "agent") {
+  const message = document.createElement("div");
+  message.className = "agent-message" + (role === "user" ? " user" : "");
+  message.textContent = text;
+  $("#agent-log").appendChild(message);
+  $("#agent-log").scrollTop = $("#agent-log").scrollHeight;
+}
+
+function initializeWorkspace() {
+  document.querySelectorAll(".workspace-tab").forEach((tab) => {
+    const active = tab.dataset.panel === "plan-panel";
+    tab.classList.toggle("active", active);
+    $("#" + tab.dataset.panel).classList.toggle("hidden", !active);
+  });
+
+  $("#prototype-brand").textContent = blueprint.nome;
+  $("#prototype-title").textContent = blueprint.modo_projeto === "existente"
+    ? "Uma evolução clara para o que sua operação já utiliza."
+    : "Uma solução desenhada para o seu fluxo principal.";
+  $("#prototype-summary").textContent = blueprint.resumo;
+  $("#prototype").style.setProperty("--prototype-accent", "#3545a8");
+  const features = $("#prototype-features");
+  features.textContent = "";
+  (blueprint.mvp || []).slice(0, 3).forEach((item) => {
+    const feature = document.createElement("div");
+    feature.className = "prototype-feature";
+    feature.textContent = item;
+    features.appendChild(feature);
+  });
+
+  $("#agent-log").textContent = "";
+  addAgentMessage("Analisei as respostas e montei esta primeira prévia. Você pode pedir ajustes de cor, tom ou título sem perder o Plano de Solução.");
+  addAgentMessage("Esta é uma prévia local para validar a direção do produto; ela ainda não representa o software final publicado.");
+  $("#refinement").value = "";
+}
+
 function render(data) {
   if (!data || data.modo !== "blueprint" || !data.blueprint) return;
   blueprint = data.blueprint;
@@ -455,10 +659,17 @@ function render(data) {
   list("#result-documents", documents.map((document) =>
     document.nome + (document.conteudo_disponivel ? " · texto analisável" : " · referência registrada")
   ));
+  const evolution = blueprint.caminhos_evolucao || [];
+  $("#evolution-card").classList.toggle("hidden", evolution.length === 0);
+  list("#evolution-paths", evolution);
+  initializeWorkspace();
   window.openai?.setWidgetState?.({ blueprint, tela: "resultado" });
 }
 
-const TEXT_EXTENSIONS = new Set(["txt", "md", "csv", "json", "yaml", "yml"]);
+const TEXT_EXTENSIONS = new Set([
+  "txt","md","csv","json","yaml","yml","sql","py","js","ts","tsx","jsx",
+  "html","css","java","cs","php","go","rs","xml","env",
+]);
 
 function formatBytes(bytes) {
   if (bytes < 1024) return bytes + " B";
@@ -496,7 +707,7 @@ $("#documents").addEventListener("change", (event) => {
     event.target.value = "";
     return;
   }
-  attachedFiles = attachedFiles.concat(incoming).slice(0, 10);
+  attachedFiles = attachedFiles.concat(incoming).slice(0, 30);
   event.target.value = "";
   $("#error").classList.add("hidden");
   renderFiles();
@@ -546,16 +757,28 @@ $("#project-form").addEventListener("submit", async (event) => {
   payload.dados_sensiveis = payload.dados_sensiveis === "true";
   payload.documentos = await documentsPayload();
   payload.respostas_descoberta = guidedAnswers;
+  payload.modo_projeto = projectMode;
   const button = $("#generate");
   button.disabled = true;
   button.textContent = "Organizando...";
   $("#error").classList.add("hidden");
   try {
-    await bridgeReady;
-    const response = await request("tools/call", { name: "planejar_software", arguments: payload });
-    render(response?.structuredContent);
+    if (window.parent === window) {
+      const response = await fetch("/api/planejar", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.erro || "Falha ao elaborar o plano.");
+      render(data);
+    } else {
+      await bridgeReady;
+      const response = await request("tools/call", { name: "planejar_software", arguments: payload });
+      render(response?.structuredContent);
+    }
   } catch (error) {
-    $("#error").textContent = "Não foi possível elaborar o Plano de Solução. Tente novamente no chat.";
+    $("#error").textContent = error?.message || "Não foi possível elaborar o Plano de Solução.";
     $("#error").classList.remove("hidden");
   } finally {
     button.disabled = false;
@@ -566,6 +789,53 @@ $("#project-form").addEventListener("submit", async (event) => {
 $("#edit").addEventListener("click", () => {
   $("#result-view").classList.add("hidden");
   $("#form-view").classList.remove("hidden");
+});
+
+document.querySelectorAll(".workspace-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".workspace-tab").forEach((item) => {
+      const active = item === tab;
+      item.classList.toggle("active", active);
+      $("#" + item.dataset.panel).classList.toggle("hidden", !active);
+    });
+  });
+});
+
+$("#apply-refinement").addEventListener("click", () => {
+  const instruction = $("#refinement").value.trim();
+  if (!instruction) return;
+  addAgentMessage(instruction, "user");
+  const normalized = instruction.toLocaleLowerCase("pt-BR");
+  const colors = [
+    ["azul", "#1769e0"],
+    ["verde", "#07865c"],
+    ["roxo", "#7652c7"],
+    ["laranja", "#d76516"],
+    ["vermelho", "#c83e4d"],
+  ];
+  const selectedColor = colors.find(([name]) => normalized.includes(name));
+  if (selectedColor) $("#prototype").style.setProperty("--prototype-accent", selectedColor[1]);
+
+  const titleMatch = instruction.match(/t[íi]tulo\s*:\s*(.+)/i);
+  if (titleMatch) {
+    $("#prototype-title").textContent = titleMatch[1].trim();
+  } else if (normalized.includes("corporativ")) {
+    $("#prototype-title").textContent = "Controle, clareza e resultado para a sua operação.";
+  } else if (normalized.includes("modern") || normalized.includes("tecnológ")) {
+    $("#prototype-title").textContent = "Tecnologia simples para transformar o trabalho diário.";
+  } else if (normalized.includes("acolhedor") || normalized.includes("simples")) {
+    $("#prototype-title").textContent = "Tudo o que sua equipe precisa, sem complicação.";
+  }
+
+  const changes = [];
+  if (selectedColor) changes.push("cor " + selectedColor[0]);
+  if (titleMatch || /corporativ|modern|tecnológ|acolhedor|simples/.test(normalized)) changes.push("tom e título");
+  addAgentMessage(
+    changes.length
+      ? "Ajustei " + changes.join(" e ") + " nesta prévia. O Plano de Solução original continua preservado."
+      : "Registrei a solicitação. Para esta prévia, indique uma cor, peça um tom corporativo/moderno ou escreva “título: ...”."
+  );
+  $("#refinement").value = "";
 });
 
 $("#copy").addEventListener("click", async () => {
@@ -581,7 +851,17 @@ $("#copy").addEventListener("click", async () => {
 
 $("#continue").addEventListener("click", async () => {
   if (!blueprint) return;
-  const prompt = "Vamos continuar a construção deste software. Use o Plano de Solução abaixo como contrato inicial, faça uma pergunta simples por vez e não escreva código antes de confirmar as perguntas abertas.\\n\\n" + blueprint.markdown;
+  const prompt = constructionPrompt();
+  if (window.parent === window) {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      $("#continue").textContent = "Instruções copiadas";
+      $("#continue-status").textContent = "Cole as instruções em uma conversa com o Codex ou ChatGPT para continuar.";
+    } catch (_) {
+      $("#continue").textContent = "Use “Copiar Plano de Solução”";
+    }
+    return;
+  }
   try {
     await bridgeReady;
     await request("ui/message", {
@@ -592,6 +872,30 @@ $("#continue").addEventListener("click", async () => {
     if (window.openai?.sendFollowUpMessage) {
       await window.openai.sendFollowUpMessage({ prompt });
     }
+  }
+});
+
+$("#download-plan").addEventListener("click", () => {
+  if (!blueprint) return;
+  const blob = new Blob([blueprint.markdown], { type:"text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = safeFileName(blueprint.nome) + "-plano-de-solucao.md";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+$("#copy-build-prompt").addEventListener("click", async () => {
+  if (!blueprint) return;
+  try {
+    await navigator.clipboard.writeText(constructionPrompt());
+    $("#copy-build-prompt").textContent = "Instruções copiadas";
+    setTimeout(() => { $("#copy-build-prompt").textContent = "Copiar instruções de construção"; }, 1500);
+  } catch (_) {
+    $("#copy-build-prompt").textContent = "Não foi possível copiar";
   }
 });
 
