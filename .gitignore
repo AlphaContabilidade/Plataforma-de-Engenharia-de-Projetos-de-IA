@@ -7,3 +7,10 @@ __pycache__/
 
 # Gerado por /exportar a partir da estrutura real; nao e fonte.
 site/
+
+# Briefing gravado por ferramentas/painel.py (opcao 4). E artefato derivado:
+# reproduzivel a qualquer momento a partir de contrato.json mais ROADMAP.md, e
+# consumido por uma sessao de modelo, nao pelo acervo. Versionar criaria uma
+# segunda copia das regras do contrato que envelhece sozinha - exatamente o que
+# o teste test_convencoes_nao_derivou existe para impedir no Convencoes.md.
+briefings/

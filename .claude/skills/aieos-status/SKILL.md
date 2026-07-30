@@ -1,5 +1,5 @@
 ---
-name: status
+name: aieos-status
 description: Reporta o estado dos 42 volumes do acervo AI-ENGINEERING-OS — tipo, status, seções presentes, nota da última auditoria e marca de perecível — rodando `python -m ferramentas.status`. Use quando o pedido for `/status`, "como está o acervo", "quais volumes estão prontos" ou "quanto falta".
 ---
 
@@ -67,8 +67,13 @@ levantamento.
 
 ## 4. Nota de auditoria, e o que ela não prova
 
-A coluna `Auditoria` é a linha `media:` do arquivo `auditorias/VOL-NN-auditoria-*.md` mais
-recente (ordem alfabética do nome, que com data ISO é ordem cronológica). `-` significa
+A coluna `Auditoria` é a linha `media:` do relatório vigente do volume, escolhido por
+`status.relatorio_mais_recente()`. A escolha é por `(data, revisão)` extraídas do nome, na
+gramática `VOL-NN-auditoria-AAAA-MM-DD[-rN].md` — revisão ausente equivale a 1, e é comparada
+como inteiro. **Não é ordem alfabética**, e não pode ser: `-r2.md` ordena *antes* de `.md`
+porque o hífen é 0x2D e o ponto é 0x2E, então uma reauditoria do mesmo dia perderia para a
+auditoria antiga em silêncio; e `-r10` perderia para `-r2`. Relatório com nome fora da
+gramática é ignorado de propósito — nome inválido não vira nota. `-` significa
 "nenhuma auditoria" **ou** "o arquivo existe mas a linha `media:` não casou o formato" — as
 duas aparecem iguais na tabela. Se você esperava uma nota e veio `-`, verifique o formato da
 linha com:

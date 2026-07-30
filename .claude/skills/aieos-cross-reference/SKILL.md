@@ -1,5 +1,5 @@
 ---
-name: cross-reference
+name: aieos-cross-reference
 description: Roda o gate 3 do acervo AI-ENGINEERING-OS — `python -m ferramentas.validar --cross-refs`, que checa `depende_de` inexistente e ciclo no grafo de pré-requisitos — e, se verde, despacha o subagente `auditor-fable` para um passe semântico procurando contradições entre volumes. Use quando o pedido for `/cross-reference`, "checar referências cruzadas", "os volumes se contradizem?" ou "rodar o gate 3".
 ---
 

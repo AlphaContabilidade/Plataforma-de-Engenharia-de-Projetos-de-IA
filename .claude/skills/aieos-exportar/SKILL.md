@@ -1,5 +1,5 @@
 ---
-name: exportar
+name: aieos-exportar
 description: Gera o `mkdocs.yml` do acervo AI-ENGINEERING-OS a partir do que existe em disco rodando `python -m ferramentas.exportar`, e valida o build com `mkdocs build --strict` apenas quando o `mkdocs` está instalado. Use quando o pedido for `/exportar`, "gerar o site", "exportar para MkDocs" ou "publicar o acervo".
 ---
 

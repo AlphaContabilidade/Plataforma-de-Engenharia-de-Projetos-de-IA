@@ -1,5 +1,5 @@
 ---
-name: auditar
+name: aieos-auditar
 description: Audita um volume do acervo AI-ENGINEERING-OS despachando o subagente `auditor-fable`, grava o relatório datado em `auditorias/` e atualiza o status do volume conforme a média (≥ 8,0 e nenhuma seção < 6). Use quando o pedido for `/auditar N`, "auditar o volume NN", "rodar a auditoria do piloto" ou equivalente.
 ---
 

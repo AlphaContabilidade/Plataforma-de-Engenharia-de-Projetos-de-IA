@@ -1,5 +1,5 @@
 ---
-name: novo-volume
+name: aieos-novo-volume
 description: Produz um volume do acervo AI-ENGINEERING-OS de ponta a ponta — resolve o tipo pelo contrato, lê os pré-requisitos, escreve as seções aplicáveis, cria os exemplos executáveis com teste, roda os gates 1 e 2, grava o status honesto e registra no CHANGELOG. Use quando o pedido for `/novo-volume N nome`, "escrever o volume NN", "produzir o volume de MEMORY" ou equivalente.
 ---
 
