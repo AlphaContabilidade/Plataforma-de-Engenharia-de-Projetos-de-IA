@@ -1,7 +1,17 @@
+# Metadados do volume 03. Lido por ferramentas/validar.py e ferramentas/status.py.
+# depende_de esta vazio de proposito. Os vizinhos naturais deste volume sao o
+# 04-REQUIREMENTS (que recebe a especificacao e a transforma em requisito
+# rastreavel), o 05-BUSINESS (viabilidade e modelo de negocio) e o
+# 38-PROJECT-PLANNER (planejamento de entrega), e nenhum dos tres tem secao
+# escrita: existem apenas como pasta com _VOLUME.yml. Apontar depende_de para
+# volume sem conteudo passaria na regra `depende-de-inexistente` e produziria um
+# pre-requisito de leitura que nao pode ser lido, o que e pior que dependencia
+# nenhuma. A relacao com 04, 05, 38, 07 e 12 esta descrita em prosa em
+# 18-Referencias-Cruzadas.md, fora do grafo de pre-requisitos.
 volume: "03"
 nome: DISCOVERY
 tipo: PROCESSO
-status: RASCUNHO
+status: PRONTO
 perecivel: false
 depende_de: []
 escopo:

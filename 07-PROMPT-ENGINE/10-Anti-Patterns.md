@@ -9,10 +9,12 @@ atualizado_em: 2026-07-29
 
 # Anti-padrões
 
-Cada anti-padrão abaixo corresponde, pelo identificador, a uma prática de
-[`09-Boas-Praticas.md`](09-Boas-Praticas.md). A descrição diz o que o comportamento
-produz, e não apenas que ele é ruim: um anti-padrão sem consequência observável é gosto
-pessoal disfarçado de norma.
+Os anti-padrões de `A1` a `A8` correspondem, pelo identificador, à prática de mesmo número em
+[`09-Boas-Praticas.md`](09-Boas-Praticas.md). `A9` e `A10` **não têm par**, de propósito: eles
+descrevem falhas de processo em torno do motor, não o uso errado de uma prática dele, e
+inventar uma prática só para completar a simetria seria norma criada para caber na tabela. A
+descrição diz o que o comportamento produz, e não apenas que ele é ruim: um anti-padrão sem
+consequência observável é gosto pessoal disfarçado de norma.
 
 ## A1. Declarar tudo como texto
 

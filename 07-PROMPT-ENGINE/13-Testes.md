@@ -12,9 +12,14 @@ atualizado_em: 2026-07-29
 O motor tem trinta e sete funções de teste distribuídas em três arquivos — treze para o
 contrato, treze para o registro e onze para o avaliador — que o pytest coleta como **trinta e
 nove casos**, porque o teste de valores de fronteira da taxa de acerto é parametrizado em
-três. Trinta e nove é o número que `python -m pytest exemplos -q` imprime, e é ele que vale:
-contagem de funções e contagem de casos divergem sempre que há parametrização, e citar a
-primeira como se fosse a segunda faz o leitor que roda o comando duvidar do resto da seção.
+três. Trinta e nove é o número que `python -m pytest exemplos/07-prompt-engine -q` imprime, e
+é ele que vale: contagem de funções e contagem de casos divergem sempre que há parametrização,
+e citar a primeira como se fosse a segunda faz o leitor que roda o comando duvidar do resto da
+seção. Repare que o comando citado tem **escopo**, e isso é deliberado: `pytest exemplos -q`,
+sem escopo, soma os exemplos de todos os volumes do acervo, então o número que ele imprime
+cresce a cada volume novo. Uma afirmação verdadeira hoje apodreceria sozinha, sem que ninguém
+editasse esta seção e sem que gate nenhum percebesse — foi o que aconteceu com a primeira
+versão deste parágrafo, e a auditoria de 2026-07-30 pegou.
 A suíte roda a partir da raiz da plataforma, sem rede, sem credencial e sem estado em disco.
 Essa propriedade não é conveniência: é o que faz do segundo gate da plataforma um gate que
 ninguém tem motivo para desligar.

@@ -34,7 +34,8 @@ ninguém faz quando a decisão chegou pronta. É o anti-padrão A4 de
 
 A leitura correta é conjunta: taxa de indecisão só significa algo ao lado do custo médio de uma
 pendência e do custo médio de um erro no domínio. Se a pendência custa dez minutos de uma pessoa
-e o erro custa um lançamento financeiro incorreto, a taxa de indecisão **aceitável** é alta. O
+e o erro custa um prazo assumido com o solicitante errado, a taxa de indecisão **aceitável** é
+alta. O
 componente não escolhe esse ponto e não tem opinião sobre ele: por isso o limiar é parâmetro, e
 não constante.
 

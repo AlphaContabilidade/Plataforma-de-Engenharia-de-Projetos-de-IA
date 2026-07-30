@@ -1,7 +1,7 @@
 """Armazem de decisoes observadas, com a procedencia de cada evidencia gravada.
 
-Extraido de uma rotina de conciliacao financeira em producao, onde classificar
-errado custa dinheiro de verdade. La o classificador consultava duas fontes --
+Extraido de uma rotina de triagem automatica em producao, onde classificar errado
+manda a solicitacao para a fila errada. La o classificador consultava duas fontes --
 uma base curada e congelada numa data passada, e o historico do que foi
 realmente observado -- e a que respondia primeiro ganhava. Quando as duas
 discordavam, nada sinalizava: a precedencia era um acidente da ordem das linhas

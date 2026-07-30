@@ -26,7 +26,7 @@ Duas consequências práticas dessa inversão de ponto de partida:
 
 **1. O código de negócio permanece o dono da regra.** A função que calcula, valida ou grava
 continua sendo código testado. O modelo escolhe *quando* chamá-la; ele não reimplementa a regra
-em prosa. Para domínios em que a regra é normativa — fiscal, contábil, contratual — essa é a
+em prosa. Para domínios em que a regra é normativa — regulatório, contratual, tarifário — essa é a
 diferença entre um sistema auditável e um sistema opinativo.
 
 **2. A integração usa especificação de API como contrato.** A documentação menciona o uso de

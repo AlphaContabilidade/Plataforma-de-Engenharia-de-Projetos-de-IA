@@ -61,5 +61,5 @@ declarar_contrato = PromptTemplate(
 | Nome | Entradas | Padrão esperado | Por que este caso |
 |---|---|---|---|
 | `uma-variavel` | prompt com um único trecho variável | `r"## Variaveis"` e `r"\|\s*str\s*\|"` | Verifica o caminho mais simples e a presença das quatro seções de saída |
-| `tipo-numerico` | prompt que cita um valor monetário | `r"\bfloat\b"` | Verifica se o tipo estreito é escolhido em vez de texto |
+| `tipo-numerico` | prompt que cita uma quantidade de horas | `r"\bfloat\b"` | Verifica se o tipo estreito é escolhido em vez de texto |
 | `ambiguo` | prompt que menciona "o cliente" sem dizer se é nome ou identificador | `r"## Ambiguidades"` seguido de conteúdo | Verifica que a ambiguidade é reportada e não resolvida por conta própria |

@@ -1,6 +1,6 @@
 # RTF — Role, Task, Format
 
-> Técnica pública de estruturação de prompt · atualizado em 2026-07-29
+> Técnica pública de estruturação de prompt · atualizado em 2026-07-30
 > **Estado de atribuição:** `DOMINIO-PUBLICO-SEM-ATRIBUICAO-SEGURA`
 > Técnica de domínio público, origem não atribuída com segurança.
 
@@ -20,17 +20,17 @@ enxuta do conjunto, e essa é a sua vantagem.
 RTF não é mágica de prompt — é o preenchimento de três lacunas que o pedido informal
 costuma deixar abertas, e cada lacuna aberta é uma decisão que o modelo toma sozinho.
 
-- **Sem papel**, o modelo escolhe um registro por conta própria. Um pedido de análise
-  fiscal respondido com o vocabulário de um blog de finanças pessoais não está errado:
+- **Sem papel**, o modelo escolhe um registro por conta própria. Um pedido de triagem
+  técnica respondido com o vocabulário de um blog de produtividade não está errado:
   está sem papel definido.
-- **Sem tarefa explícita**, o modelo escolhe o verbo. "Fale sobre o CFOP 1352" pode virar
-  definição, comparação, histórico ou parecer. Cada um é uma resposta diferente para o
-  mesmo pedido.
+- **Sem tarefa explícita**, o modelo escolhe o verbo. "Fale sobre a categoria INF-104"
+  pode virar definição, comparação, histórico ou parecer. Cada um é uma resposta diferente
+  para o mesmo pedido.
 - **Sem formato**, a saída vem em prosa. Prosa é o formato mais difícil de consumir por
   programa e o mais difícil de comparar entre execuções.
 
 O terceiro campo é o que faz RTF valer num pipeline. Um formato declarado é um formato
-verificável: se você pede `JSON com as chaves cfop, direcao, base_credito`, o consumidor
+verificável: se você pede `JSON com as chaves categoria, fila, confianca`, o consumidor
 pode falhar de forma explícita quando a chave não vem — o que é infinitamente melhor que
 um parser tolerante que engole a divergência.
 
@@ -48,24 +48,24 @@ um parser tolerante que engole a divergência.
   dentro de `Task` transforma o campo num parágrafo longo e a estrutura deixa de ajudar.
   Use RISE.
 - **Tarefa em que o contexto de negócio é o que decide a resposta.** RTF não tem campo
-  de contexto. Empurrar as regras da empresa para dentro de `Role` ("você é um contador
-  que sabe que nesta empresa fretes de CFOP 1352 entram na base") mistura identidade com
-  fato, e o modelo trata fato como característica de personagem — que ele pode
-  reinterpretar. Use CARE.
+  de contexto. Empurrar as regras da operação para dentro de `Role` ("você é um analista
+  que sabe que nesta operação pedido de acesso vai sempre para a fila de infraestrutura")
+  mistura identidade com fato, e o modelo trata fato como característica de personagem —
+  que ele pode reinterpretar. Use CARE.
 - **Tarefa cujo critério de sucesso não é óbvio.** RTF diz o que fazer, não como saber
   se ficou bom. Use TAG.
 - **Saída longa e argumentativa** em que o formato rígido atrapalha o raciocínio.
 - **Quando o campo `Role` é usado para transferir competência que o modelo não tem.**
-  Escrever "você é um auditor fiscal sênior" não faz o modelo conhecer a legislação; faz
-  ele adotar o tom de quem conhece. Esse é o modo de falha mais caro do RTF, e está
-  descrito na seção de limitações.
+  Escrever "você é um analista de triagem sênior" não faz o modelo conhecer o catálogo
+  desta operação; faz ele adotar o tom de quem conhece. Esse é o modo de falha mais caro
+  do RTF, e está descrito na seção de limitações.
 
 ## Exemplo concreto
 
 Um pedido informal, do tipo que se digita sem pensar:
 
 ```text
-me ajuda a classificar esses lançamentos do extrato
+me ajuda a classificar essas solicitações que chegaram
 ```
 
 O mesmo pedido em RTF, com os três campos preenchidos:
@@ -79,21 +79,21 @@ solicitações além do que está neste prompt.
 # Task
 Para cada solicitação abaixo, proponha uma categoria do catálogo fornecido.
 Regras de decisão, em ordem de precedência:
-1. Se o histórico do lançamento identificar um fornecedor presente na lista de
-   fornecedores conhecidos, use a categoria daquele fornecedor.
-2. Se não identificar, e a linha tiver contrapartida de mesmo valor e sinal oposto na
-   mesma data, marque como transferência entre contas.
+1. Se a descrição da solicitação nomear um sistema presente na lista de sistemas
+   conhecidos, use a categoria daquele sistema.
+2. Se não nomear, e o solicitante pertencer a uma área que tem fila dedicada na
+   lista de filas, use a categoria padrão daquela fila.
 3. Se nenhuma das duas se aplicar, devolva a categoria vazia e confiança "baixa".
 Nunca escolha uma categoria apenas porque ela é a mais frequente. Categoria sem
-evidência na linha é categoria vazia.
+evidência na descrição é categoria vazia.
 
 # Format
 JSON, uma lista de objetos, sem texto antes ou depois. Chaves exatamente:
-  "data" (string YYYY-MM-DD),
-  "valor" (número, negativo para saída),
-  "historico" (string, copiada literalmente do extrato),
+  "id" (string, o identificador da solicitação como recebido),
+  "horas" (número, horas estimadas; 0 quando não informado),
+  "descricao" (string, copiada literalmente da solicitação),
   "categoria" (string, vazia se não houver evidência),
-  "regra_aplicada" (um de: "fornecedor", "transferencia", "sem-evidencia"),
+  "regra_aplicada" (um de: "sistema", "fila-da-area", "sem-evidencia"),
   "confianca" (um de: "alta", "media", "baixa").
 ```
 
@@ -111,10 +111,10 @@ tornou o resultado verificável.
 
 **1. O papel não confere competência.** Este é o mal-entendido central do RTF. `Role` é
 um seletor de registro e vocabulário; ele não injeta conhecimento que não está nos pesos
-nem no contexto. "Você é um especialista em legislação setorial" produz um texto com a
-segurança de um especialista, o que é precisamente o pior resultado possível quando o
+nem no contexto. "Você é um especialista nas políticas desta operação" produz um texto com
+a segurança de um especialista, o que é precisamente o pior resultado possível quando o
 conhecimento não está lá: aumenta a fluência sem aumentar a exatidão, e portanto reduz a
-chance de o leitor perceber o erro. Se a resposta depende de norma, a norma vai no
+chance de o leitor perceber o erro. Se a resposta depende do catálogo, o catálogo vai no
 contexto.
 
 **2. Não há campo para incerteza.** RTF não pede ao modelo que declare o que não sabe.

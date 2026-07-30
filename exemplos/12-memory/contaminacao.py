@@ -1,7 +1,7 @@
 """Separa evidencia de eco, e reporta contradicao em vez de resolve-la.
 
 Dois defeitos reais de producao moram aqui. Os dois foram observados numa rotina
-que escreve em sistema contabil, onde o erro custa dinheiro.
+que escreve em sistema de atendimento, onde o erro encaminha para a fila errada.
 
 **O eco.** A automacao classifica, escreve no sistema, e a base de historico e
 regenerada depois LENDO o proprio sistema -- inclusive as linhas que a automacao

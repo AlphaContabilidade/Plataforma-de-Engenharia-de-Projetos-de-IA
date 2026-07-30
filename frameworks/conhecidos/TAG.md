@@ -1,6 +1,6 @@
 # TAG — Task, Action, Goal
 
-> Técnica pública de estruturação de prompt · atualizado em 2026-07-29
+> Técnica pública de estruturação de prompt · atualizado em 2026-07-30
 > **Estado de atribuição:** `DOMINIO-PUBLICO-SEM-ATRIBUICAO-SEGURA`
 > Técnica de domínio público, origem não atribuída com segurança.
 
@@ -13,10 +13,10 @@
 | **G** | *Goal* (objetivo) | Para que serve o resultado, e o que caracteriza sucesso |
 
 A distinção entre `Task` e `Action` é a parte que costuma confundir e é o que dá utilidade
-à sigla: `Task` é o **escopo** ("revisar a cláusula de reajuste destes contratos"),
-`Action` é a **operação** ("compare o índice previsto na cláusula com o índice aplicado na
-última fatura e liste as divergências"). Escopo sem operação produz resposta vaga;
-operação sem escopo produz resposta fora de propósito.
+à sigla: `Task` é o **escopo** ("revisar a categoria atribuída a estas solicitações"),
+`Action` é a **operação** ("compare a categoria atribuída com a que o catálogo prevê para o
+sistema citado na descrição e liste as divergências"). Escopo sem operação produz resposta
+vaga; operação sem escopo produz resposta fora de propósito.
 
 ## Por que funciona
 
@@ -24,11 +24,12 @@ TAG existe por causa do terceiro campo. `Goal` responde a uma pergunta que quase
 prompt informal responde: **para que este resultado vai ser usado?** A mesma tarefa muda
 completamente de forma segundo o destino da saída.
 
-"Liste as divergências de reajuste" produz coisas diferentes se o objetivo é (a) decidir se
-vale abrir conversa com o cliente, (b) instruir uma cobrança retroativa, ou (c) alimentar
-uma planilha de acompanhamento. Em (a) o que importa é a materialidade — dois casos de R$
-30 não valem a conversa. Em (b) o que importa é a fundamentação, porque alguém vai
-contestar. Em (c) o que importa é a estrutura de colunas, e prosa é ruído.
+"Liste as divergências de categoria" produz coisas diferentes se o objetivo é (a) decidir
+se vale abrir conversa com a área solicitante, (b) instruir uma recategorização retroativa
+da fila, ou (c) alimentar um painel de acompanhamento. Em (a) o que importa é a
+materialidade — dois casos de meia hora não valem a conversa. Em (b) o que importa é a
+fundamentação, porque alguém vai contestar. Em (c) o que importa é a estrutura de colunas,
+e prosa é ruído.
 
 O `Goal` é também o campo que permite ao modelo **omitir**. Sem objetivo declarado, o
 comportamento seguro é incluir tudo, e a saída vem inflada com material que o consumidor
@@ -68,63 +69,65 @@ Um pedido sem `Goal`, e o mesmo pedido com ele.
 Sem:
 
 ```text
-Analise estes 40 contratos de prestação de serviço contábil e me diga quais estão
-desatualizados.
+Analise estas 40 solicitações da fila de infraestrutura e me diga quais estão mal
+categorizadas.
 ```
 
-O que "desatualizado" significa é decidido pelo modelo. A resposta vem provavelmente como
-uma lista longa misturando data de assinatura antiga, cláusula de índice extinto, valor
-abaixo da tabela atual e ausência de cláusula de LGPD — cada uma delas um critério
-diferente, nenhum deles o que se queria.
+O que "mal categorizada" significa é decidido pelo modelo. A resposta vem provavelmente
+como uma lista longa misturando código fora do catálogo, código válido mas de outra fila,
+categoria genérica onde havia uma específica e solicitação sem categoria nenhuma — cada
+uma delas um critério diferente, nenhum deles o que se queria.
 
 Com TAG:
 
 ```text
 # Task
-Revisar 40 contratos de prestação de serviço contábil quanto à cláusula de reajuste
-anual (cláusula 4.4 no modelo padrão; pode ter outra numeração nos contratos antigos).
+Revisar 40 solicitações da fila de infraestrutura quanto à categoria atribuída na
+triagem (código do catálogo na coluna "categoria"; solicitações antigas podem trazer
+código de uma versão anterior do catálogo).
 
 # Action
-Para cada contrato: localize a cláusula de reajuste; extraia o índice previsto e o mês
-de aniversário; compare com o índice e o mês efetivamente aplicados na última fatura
-emitida (fornecidos na planilha anexa). Registre divergência quando o índice previsto e
-o aplicado forem diferentes, OU quando o reajuste previsto não tiver sido aplicado em
-nenhuma fatura desde o aniversário. Quando o contrato não tiver cláusula de reajuste,
-registre como "sem cláusula" — não é divergência, é lacuna contratual.
+Para cada solicitação: localize o sistema citado na descrição; extraia a categoria que o
+catálogo vigente prevê para aquele sistema; compare com a categoria efetivamente
+atribuída e com a fila em que a solicitação foi atendida (fornecidas na planilha anexa).
+Registre divergência quando a categoria prevista e a atribuída forem diferentes, OU
+quando a categoria atribuída pertencer a outra fila. Quando a descrição não citar sistema
+algum, registre como "sem sistema" — não é divergência, é lacuna da solicitação.
 
 # Goal
-A saída vai ser usada para decidir, cliente por cliente, se vale abrir a conversa de
-cobrança retroativa. Duas consequências: (1) ordene por valor não faturado acumulado,
-decrescente, porque a decisão é sobre onde gastar a conversa; (2) para cada divergência,
-cite o trecho literal da cláusula, porque o cliente vai contestar e quem for conversar
-precisa ter o texto em mãos. Itens abaixo de R$ 500 acumulados podem ser agrupados em
-uma linha "materialidade baixa" com a contagem — não detalhe cada um.
+A saída vai ser usada para decidir, área por área, se vale abrir a conversa de
+recategorização retroativa. Duas consequências: (1) ordene por horas acumuladas na
+categoria errada, decrescente, porque a decisão é sobre onde gastar a conversa; (2) para
+cada divergência, cite o trecho literal da descrição, porque a área vai contestar e quem
+for conversar precisa ter o texto em mãos. Itens abaixo de 2 horas acumuladas podem ser
+agrupados em uma linha "materialidade baixa" com a contagem — não detalhe cada um.
 ```
 
-O `Goal` fez três coisas que a `Action` não faria: definiu a **ordenação** (por valor, não
+O `Goal` fez três coisas que a `Action` não faria: definiu a **ordenação** (por horas, não
 por nome nem por data), exigiu **citação literal** (porque haverá contestação), e autorizou
 **agregar o irrelevante** (materialidade). Nenhuma dessas três decisões é dedutível da
 tarefa; todas as três são dedutíveis do uso.
 
-Note ainda que a `Action` cria uma terceira categoria — "sem cláusula" — em vez de forçar
+Note ainda que a `Action` cria uma terceira categoria — "sem sistema" — em vez de forçar
 tudo em divergente/não divergente. Categoria de escape explícita é o que impede o modelo
 de encaixar à força o caso que não encaixa.
 
 ## Limitações
 
 **1. Só três campos, e nenhum deles guarda dado.** TAG é a estrutura mais leve depois do
-RTF. Se a resposta depende de regra interna, norma ou histórico, esse material não tem
+RTF. Se a resposta depende de regra interna, catálogo ou histórico, esse material não tem
 lugar aqui e vai acabar empurrado para dentro de `Action`, que então deixa de ser uma
 operação e vira um parágrafo.
 
-**2. `Goal` pode induzir viés de conveniência.** Declarar "o objetivo é embasar a cobrança"
-inclina o modelo a encontrar divergências. O contrapeso é escrever o objetivo em termos da
-**decisão** ("decidir se vale abrir a conversa" — que admite a resposta "não vale") e não
-em termos do **resultado desejado** ("embasar a cobrança" — que já pressupõe que há o que
-cobrar). A diferença entre essas duas formulações é a diferença entre análise e advocacia.
+**2. `Goal` pode induzir viés de conveniência.** Declarar "o objetivo é embasar a
+recategorização" inclina o modelo a encontrar divergências. O contrapeso é escrever o
+objetivo em termos da **decisão** ("decidir se vale abrir a conversa" — que admite a
+resposta "não vale") e não em termos do **resultado desejado** ("embasar a
+recategorização" — que já pressupõe que há o que recategorizar). A diferença entre essas
+duas formulações é a diferença entre análise e advocacia.
 
 **3. Não substitui verificação.** `Goal` melhora a utilidade da saída, não a sua exatidão.
-O contrato citado literalmente pode ter sido citado errado.
+O trecho citado literalmente pode ter sido citado errado.
 
 **4. Confusão entre `Task` e `Action`.** Quando os dois campos dizem a mesma coisa com
 palavras diferentes, a estrutura degenerou para um RTF sem formato. O teste rápido: se

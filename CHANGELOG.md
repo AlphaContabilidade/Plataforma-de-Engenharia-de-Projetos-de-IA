@@ -6,6 +6,69 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-30
 
+### Volume `03-DISCOVERY` auditado e promovido a `PRONTO`
+
+Motor de descoberta: recebe uma ideia em linguagem natural e conduz uma entrevista adaptativa
+até uma especificação. Desenhado do princípio, sem observar nenhuma ferramenta de terceiros —
+a tentativa de estudar uma delas falhou (aplicação atrás de autenticação, e o servidor não
+entra em conta de ninguém), e isso está registrado aqui em vez de disfarçado.
+
+Auditoria independente em Fable 5: `auditorias/VOL-03-auditoria-2026-07-30.md`.
+**Veredicto Aprovado, média 8.8**, nenhuma seção abaixo de 6. Os quatro critérios: gate 1
+`exit 0`, gate 2 **375 testes**, gate 3 `exit 0`, auditoria 8.8 — e esta entrada é o critério 4.
+
+**Os cinco princípios que o volume defende**, cada um verificável no código: a especificação é
+um conjunto de lacunas, algumas condicionais; a próxima pergunta é a de maior peso, não a
+próxima de uma lista; inferência nunca entra sem confirmação e sempre carrega **o trecho que a
+produziu**; há critério de parada explícito, porque perguntar tudo é não priorizar; e lacuna sem
+resposta sai como decisão aberta, nunca como valor assumido.
+
+**Medido, não estimado:** 37 lacunas no catálogo; 14 perguntas no caminho correto contra as 37
+de um formulário sem priorização — economia de relevância de 0,595. E o caminho contrafactual:
+aceitar em silêncio um palpite errado de aparelho de mão produz 15 perguntas, **sete inúteis**
+(quatro de aparelho que não existe, três de navegador nunca feitas). É o custo da inferência
+silenciosa, com número.
+
+**Um defeito que o próprio autor achou executando**, e que nenhum gate pegaria: a função de
+evidência devolvia a frase inteira, então três palpites da mesma frase saíam com evidência
+idêntica — o código rodava e os testes passavam. Corrigido para uma janela de até três palavras
+de cada lado, com teste de regressão.
+
+**Quatro achados da auditoria, incorporados antes da promoção.** O mais sério: `15-Checklist`
+mandava conferir um teste que **não existe**. Em vez de apagar a linha, o checklist passou a
+declarar a lacuna real que ela escondia — nenhum teste confere as contagens escritas em
+`12-Exemplos`, então acrescentar uma lacuna ao catálogo torna aqueles números falsos **sem nada
+ficar vermelho**, e remedir à mão é obrigação de quem mexe no catálogo. Os outros três eram
+contagens: seis pontos de decisão no fluxograma onde o texto dizia cinco, um teste de fronteira
+de palavra com dois casos onde o texto dizia dois testes, e a mesma confusão repetida em
+`11-Implementacao`.
+
+### Tela de descoberta na interface web
+
+`/descoberta` em `ferramentas/web.py`, ligando o motor do volume 03 sem reimplementar uma única
+pergunta, peso ou regra de completude — há teste que compara o texto exibido caractere a
+caractere com o catálogo.
+
+**Uma decisão de produto que corrigiu um defeito nosso.** A plataforma passou a ser um seletor
+visível (Web, Mobile, Desktop, Automação) em vez de inferência a confirmar. O motivo é o número
+acima: a inferência de plataforma é a mais consequente do motor, e um controle de custo zero a
+elimina. A detecção continua valendo para **contexto** — loja e pagamentos, saúde, dado pessoal
+—, onde cada palpite aparece com a evidência ao lado e recusar é um clique. Quando a escolha
+contradiz o que o texto sugeria, a tela **mostra o desencontro** em vez de engolir: esconder
+faria a escolha da pessoa parecer ignorada.
+
+A tela mostra **uma pergunta por vez**, com botão que revela por que ela está sendo feita, e um
+progresso honesto: o denominador **cresce** quando uma resposta destrava lacunas novas, e a tela
+diz isso em vez de fingir uma barra que só avança.
+
+**Segurança, porque o servidor guarda estado sem login:** id de sessão por
+`secrets.token_urlsafe` — sem autenticação, o id **é** a credencial, e sequencial deixaria outra
+aba adivinhar entrevista alheia. Teto de 32 sessões com descarte da mais antiga; tetos de corpo
+(64 KiB no socket, com `413` antes de alocar, porque `Content-Length` é alegação do cliente),
+de ideia e de resposta; `lacuna_id` conferido contra o catálogo antes de qualquer uso; e a
+especificação em `GET .../especificacao/<sessao>` e não em query string, porque credencial em
+query termina em log, histórico e `Referer`.
+
 ### Volume `12-MEMORY` auditado e promovido a `PRONTO`
 
 Primeiro volume cujo código foi **extraído de um sistema em produção** e generalizado, em vez
@@ -139,7 +202,8 @@ duas divergirem. Documentação que pode envelhecer sozinha não é contrato.
 
 Criados `CLAUDE.md` (contexto local, com o aviso explícito de que a raiz do repositório é
 outro projeto e não deve ser tocada), `README.md`, `CHANGELOG.md`, `ROADMAP.md`,
-`CONTRIBUTING.md` e `LICENSE` (MIT, titular Alpha Contabilidade); e em `00-INTRODUCAO/` os
+`CONTRIBUTING.md` e `LICENSE` (MIT, com o titular declarado no próprio arquivo); e em
+`00-INTRODUCAO/` os
 arquivos `Prefacio.md`, `Como-Utilizar.md`, `Glossario.md`, `Convencoes.md` e
 `Arquitetura-Geral.md`.
 

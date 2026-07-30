@@ -1,6 +1,6 @@
 # RISE — Role, Input, Steps, Expectation
 
-> Técnica pública de estruturação de prompt · atualizado em 2026-07-29
+> Técnica pública de estruturação de prompt · atualizado em 2026-07-30
 > **Estado de atribuição:** `DOMINIO-PUBLICO-SEM-ATRIBUICAO-SEGURA`
 > Técnica de domínio público, origem não atribuída com segurança.
 
@@ -34,14 +34,14 @@ intermediário, cujo ganho em tarefas de múltiplos passos está documentado em
 Zero-Shot Reasoners* (Takeshi Kojima et al., 2022) — ambos em
 [`referencias/papers.md`](../../referencias/papers.md). O segundo é operacional e menos
 citado: **etapas nomeadas dão ao revisor humano um lugar para apontar o defeito.** "A
-etapa 3 usou o valor do título em vez do valor pago" é um diagnóstico; "a resposta está
-errada" não é.
+etapa 3 usou as horas orçadas em vez das horas estimadas" é um diagnóstico; "a resposta
+está errada" não é.
 
 O campo `Input`, por sua vez, faz um trabalho silencioso: descrever o que o material
 contém permite ao modelo detectar quando ele *não* contém. Um `Input` declarado como
-"extrato OFX com data, valor e histórico; o histórico pode vir truncado pelo banco" cria a
-possibilidade de o modelo dizer "o histórico desta linha está truncado" em vez de adivinhar
-o que vinha depois do corte.
+"solicitação com identificador, horas estimadas e descrição; a descrição pode vir truncada
+pelo formulário de origem" cria a possibilidade de o modelo dizer "a descrição desta
+solicitação está truncada" em vez de adivinhar o que vinha depois do corte.
 
 ## Quando serve
 
@@ -73,10 +73,10 @@ o que vinha depois do corte.
 
 ## Exemplo concreto
 
-Tarefa real: decidir se um boleto liquidado no banco pode ser baixado automaticamente
-contra um título em aberto, ou se precisa de decisão humana. É uma tarefa em que a ordem
-das checagens é o núcleo da correção — inverter duas delas produz dinheiro lançado em
-duplicidade.
+Tarefa real: decidir se uma solicitação recebida pode ser encaminhada automaticamente para
+um item de trabalho já aberto na fila, ou se precisa de decisão humana. É uma tarefa em que
+a ordem das checagens é o núcleo da correção — inverter duas delas produz a mesma
+solicitação encaminhada duas vezes, e o orçamento de horas da fila consumido em dobro.
 
 ```text
 # Role
@@ -86,33 +86,35 @@ decisão humana — nunca escolher a alternativa mais provável.
 
 # Input
 Você recebe:
-1. UMA liquidação de boleto: data, valor liquidado, nome do pagador (como o banco
-   registrou, podendo estar truncado ou abreviado), conta bancária.
-2. A LISTA de títulos em aberto daquela conta: identificador, sacado, valor, vencimento.
-3. A TRILHA de baixas já realizadas por esta automação: identificador do título, data,
-   valor.
-Nem toda liquidação tem título correspondente na lista. O nome do pagador NÃO é
-identificador confiável: dois clientes podem ter nomes parecidos.
+1. UMA solicitação: identificador, horas estimadas, nome do solicitante (como o
+   formulário registrou, podendo estar truncado ou abreviado), fila de entrada.
+2. A LISTA de itens de trabalho abertos daquela fila: identificador, solicitante,
+   horas orçadas, prazo.
+3. A TRILHA de encaminhamentos já feitos por esta automação: identificador do item,
+   data, horas.
+Nem toda solicitação tem item correspondente na lista. O nome do solicitante NÃO é
+identificador confiável: dois solicitantes podem ter nomes parecidos.
 
 # Steps
-1. Consulte a TRILHA. Se esta liquidação (mesma conta, mesma data, mesmo valor) já
-   consta, PARE e devolva decisao="ja-processado". Não prossiga.
-2. Filtre os títulos em aberto do mesmo sacado. Compare por identificador quando houver;
-   por nome apenas como reforço, nunca como prova isolada.
-3. Se sobrar exatamente 1 candidato e o valor liquidado for igual ao valor do título,
-   devolva decisao="baixar", com o identificador.
-4. Se sobrar exatamente 1 candidato e o valor liquidado for MENOR, devolva
-   decisao="baixar-parcial" — pagamento parcial é normal neste domínio.
+1. Consulte a TRILHA. Se esta solicitação (mesma fila, mesmo identificador, mesmas
+   horas) já consta, PARE e devolva decisao="ja-processado". Não prossiga.
+2. Filtre os itens abertos do mesmo solicitante. Compare por identificador quando
+   houver; por nome apenas como reforço, nunca como prova isolada.
+3. Se sobrar exatamente 1 candidato e as horas estimadas forem iguais às horas orçadas
+   do item, devolva decisao="encaminhar", com o identificador.
+4. Se sobrar exatamente 1 candidato e as horas estimadas forem MENORES, devolva
+   decisao="encaminhar-parcial" — consumo parcial do orçamento é normal neste domínio.
 5. Se sobrarem 2 ou mais candidatos, devolva decisao="humano", motivo="ambiguo", e liste
-   os candidatos. Não escolhe por vencimento, não escolhe por proximidade de nome.
+   os candidatos. Não escolhe por prazo, não escolhe por proximidade de nome.
 6. Se não sobrar nenhum candidato, devolva decisao="humano",
-   motivo="sem-titulo-correspondente". NÃO conclua que o título não existe: a hipótese
-   mais provável é que ele já foi baixado, e lançar avulso aqui duplicaria o valor.
+   motivo="sem-item-correspondente". NÃO conclua que o item não existe: a hipótese
+   mais provável é que ele já foi encerrado, e abrir um item novo aqui duplicaria a
+   demanda.
 
 # Expectation
-Um objeto JSON com as chaves: decisao (um de: "ja-processado", "baixar",
-"baixar-parcial", "humano"), titulo_id (string, vazia quando não se aplica), motivo
-(string, vazia quando decisao é "baixar"), candidatos (lista, vazia quando não se
+Um objeto JSON com as chaves: decisao (um de: "ja-processado", "encaminhar",
+"encaminhar-parcial", "humano"), item_id (string, vazia quando não se aplica), motivo
+(string, vazia quando decisao é "encaminhar"), candidatos (lista, vazia quando não se
 aplica), etapa_que_decidiu (inteiro de 1 a 6).
 Critério de aceitação: um revisor humano tem de conseguir refazer a decisão lendo apenas
 o campo etapa_que_decidiu e o insumo. Se ele não conseguir, a saída está incompleta.
@@ -136,7 +138,8 @@ errada. A estrutura amplifica a qualidade do procedimento; ela não a cria.
 
 **2. `Steps` é instrução, não execução.** O modelo não é obrigado a executar as etapas na
 ordem, e em geral não há como verificar internamente que executou. Se a ordem é
-crítica — como no exemplo acima, onde inverter 1 e 3 custa dinheiro — a ordem precisa ser
+crítica — como no exemplo acima, onde inverter 1 e 3 custa uma solicitação encaminhada em
+duplicidade — a ordem precisa ser
 imposta **fora** do prompt: uma chamada por etapa, com o resultado de cada uma validado por
 código antes de alimentar a seguinte. Prompt não é mecanismo de controle de fluxo.
 

@@ -73,7 +73,7 @@ neste parágrafo e custaria a única coisa que a seção afirma sobre si mesma.
 
 ```python
 registrar(CHAVE, "fila-suporte", Origem.ESCRITO_PELO_AGENTE, date(2026, 6, 1), n=9,
-          evidencia="lancamento gravado por esta automacao")
+          evidencia="encaminhamento gravado por esta automacao")
 
 assert mem.contagem(CHAVE) == {"fila-suporte": 10, "fila-financeiro": 9}
 assert mem.dominancia(CHAVE) == ("fila-suporte", 10 / 19)   # numero cru, com eco dentro

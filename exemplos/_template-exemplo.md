@@ -63,9 +63,10 @@ honesta.
 ensina a engolir falha. Levante exceção nomeada — `ContratoViolado`, não `ValueError` genérica — e
 ponha na mensagem **a diferença encontrada**, não só a constatação de que houve diferença.
 
-**5. Nenhum dado real de cliente, nenhum segredo, em nenhuma circunstância.** Nem CNPJ, nem nome
-de empresa, nem chave, nem trecho de extrato bancário. Quando o exemplo precisa de dado com forma
-realista, use dado claramente fictício e diga que é fictício.
+**5. Nenhum dado real de cliente, nenhum segredo, em nenhuma circunstância.** Nem documento de
+identificação, nem nome de empresa, nem chave, nem trecho de registro de sistema de produção.
+Quando o exemplo precisa de dado com forma realista, use dado claramente fictício e diga que é
+fictício.
 
 ## O arquivo de teste
 

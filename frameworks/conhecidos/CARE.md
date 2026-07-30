@@ -1,6 +1,6 @@
 # CARE — Context, Action, Result, Example
 
-> Técnica pública de estruturação de prompt · atualizado em 2026-07-29
+> Técnica pública de estruturação de prompt · atualizado em 2026-07-30
 > **Estado de atribuição:** `DOMINIO-PUBLICO-SEM-ATRIBUICAO-SEGURA`
 > Técnica de domínio público, origem não atribuída com segurança.
 
@@ -40,8 +40,8 @@ característica de personagem que o modelo pode reinterpretar quando o caso não
 - Quando existe **um exemplo real e representativo** para mostrar. Este é o gatilho
   principal: se você tem o caso resolvido em mãos, CARE aproveita-o.
 - Quando a saída tem **convenção sutil** que é mais fácil demonstrar que descrever
-  (nomenclatura interna, casas decimais, formato de identificador, como escrever
-  observações de lançamento).
+  (nomenclatura interna, casas decimais, formato de identificador, como escrever a
+  observação de uma solicitação triada).
 - Como estrutura de *few-shot*: o campo `Example` é o encaixe natural para uma ou mais
   demonstrações.
 
@@ -64,8 +64,8 @@ característica de personagem que o modelo pode reinterpretar quando o caso não
 
 ## Exemplo concreto
 
-Tarefa real do domínio: escrever a observação de um lançamento a pagar que será lido por
-outro contador seis meses depois.
+Tarefa real do domínio: escrever a observação de uma solicitação triada que será lida por
+outro analista seis meses depois.
 
 ```text
 # Context
@@ -80,34 +80,35 @@ Convenções internas em vigor:
 - nunca se escreve "conforme conversado" nem "ajuste" sem dizer qual.
 
 # Action
-Escreva a observação do lançamento a partir dos dados brutos que eu fornecer.
+Escreva a observação da solicitação a partir dos dados brutos que eu fornecer.
 Se algum dado necessário para cumprir as convenções não estiver presente, escreva a
 observação com o que há e acrescente, na última linha, "FALTA: <o que falta>".
 
 # Result
 Uma observação de 1 a 3 linhas, sem abreviação nova, legível por quem não participou da
-decisão, e suficiente para que essa pessoa reconstitua o raciocínio sem abrir o extrato.
+decisão, e suficiente para que essa pessoa reconstitua o raciocínio sem abrir a
+descrição de origem.
 
 # Example
 Entrada:
-  fornecedor_cadastro: "SABESP - CIA SANEAMENTO BASICO SP"
-  valor_titulo: 400.00
-  valor_pago: 322.42
-  origem_da_decisao: "fatura recebida por e-mail em 27/07/2026"
+  solicitante_cadastro: "NUCLEO DE INFRAESTRUTURA - ACESSOS"
+  horas_orcadas: 400.00
+  horas_apontadas: 322.42
+  origem_da_decisao: "planilha de apontamento fechada em 27/07/2026"
 Saída:
-  SABESP - CIA SANEAMENTO BASICO SP. Título aberto de 400,00 alterado para 322,42,
-  valor da fatura recebida em 27/07/2026. Diferença de 77,58 é consumo menor no mês,
-  não desconto.
+  NUCLEO DE INFRAESTRUTURA - ACESSOS. Item aberto de 400,00 horas ajustado para 322,42,
+  conforme apontamento fechado em 27/07/2026. Diferença de 77,58 é volume menor de
+  chamados no mês, não corte de escopo.
 ```
 
 O que cada campo entregou: `Context` colocou as quatro convenções internas como fatos, e
-explicou *por que* elas existem — o modelo que entende que a observação substitui um
-extrato ilegível escreve diferente do modelo que só recebeu a regra. `Action` criou uma
-saída honesta para dado ausente (`FALTA:`), em vez de deixar o modelo preencher. `Result`
-definiu o teste de aceitação em termos de outra pessoa, não de adjetivos. E `Example`
-transmitiu em cinco linhas o que a prosa transmitiria mal: que "77,58" é escrito com
-vírgula, que a diferença é explicada e não só mencionada, e que a última frase mata a
-interpretação errada mais provável ("não desconto").
+explicou *por que* elas existem — o modelo que entende que a observação substitui uma
+descrição truncada e ilegível escreve diferente do modelo que só recebeu a regra. `Action`
+criou uma saída honesta para dado ausente (`FALTA:`), em vez de deixar o modelo preencher.
+`Result` definiu o teste de aceitação em termos de outra pessoa, não de adjetivos. E
+`Example` transmitiu em cinco linhas o que a prosa transmitiria mal: que "77,58" é escrito
+com vírgula, que a diferença é explicada e não só mencionada, e que a última frase mata a
+interpretação errada mais provável ("não corte de escopo").
 
 Esse último detalhe é o argumento inteiro a favor do campo `Example`. Nenhuma instrução
 em prosa produziria, com a mesma economia, a percepção de que a observação deve fechar a
@@ -131,7 +132,7 @@ exceções em que nem o autor sabe mais o que é regra viva. Versione o prompt (
 
 **4. `Result` tende a virar adjetivo.** "Resultado: uma observação clara e profissional"
 não é critério — é elogio antecipado. Critério é: quem lê consegue reconstituir a decisão
-sem abrir o extrato. A diferença é que o segundo pode ser testado.
+sem abrir a descrição de origem. A diferença é que o segundo pode ser testado.
 
 **5. Não há atribuição, e a expansão do `E` diverge entre fontes.** Este arquivo registra
 as duas leituras e não atribui autoria.

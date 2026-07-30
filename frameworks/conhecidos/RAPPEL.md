@@ -1,6 +1,6 @@
 # RAPPEL — sigla sem expansão padronizada
 
-> Técnica pública de estruturação de prompt · atualizado em 2026-07-29
+> Técnica pública de estruturação de prompt · atualizado em 2026-07-30
 > **Estado de atribuição:** `DOMINIO-PUBLICO-SEM-ATRIBUICAO-SEGURA`
 > Técnica de domínio público, origem não atribuída com segurança.
 
@@ -58,7 +58,7 @@ Os dois campos que a leitura de trabalho acrescenta, porém, **valem por si**, i
 da sigla:
 
 - **Público.** Declarar para quem a saída é escrita muda mais a resposta do que declarar o
-  papel de quem escreve. Um parecer para o cliente e o mesmo parecer para o contador
+  papel de quem escreve. Um parecer para o solicitante e o mesmo parecer para o analista
   responsável têm vocabulário, extensão e nível de ressalva diferentes.
 - **Limites.** Uma lista explícita de "não faça" é a forma mais direta de bloquear os modos
   de falha conhecidos daquele prompt. É também a parte mais fácil de manter: cada incidente
@@ -79,15 +79,16 @@ expansão estável — em vez de adotar a sigla incerta.
 ## Exemplo concreto
 
 Um prompt escrito com os seis campos da leitura de trabalho, explicitamente marcado como
-convenção interna. Tarefa: redigir a nota que acompanha o envio de uma apuração ao cliente.
+convenção interna. Tarefa: redigir a nota que acompanha o encaminhamento de uma solicitação
+triada de volta ao solicitante.
 
 ```text
 # Rôle / Papel
-Contador responsável pela apuração, escrevendo em nome do escritório.
+Analista responsável pela triagem, escrevendo em nome da equipe.
 
 # Action / Ação
-Redija a nota de encaminhamento da apuração do mês, a partir dos números que eu fornecer
-e das três observações de fechamento que eu listar.
+Redija a nota de encaminhamento da solicitação, a partir dos números que eu fornecer
+e das três observações de triagem que eu listar.
 
 # Précision / Precisão
 Cite cada número com duas casas decimais, exatamente como fornecido — não arredonde e não
@@ -95,18 +96,19 @@ recalcule nada. Se um número que a nota precisa citar não estiver na minha lis
 "[não fornecido]" no lugar; não estime.
 
 # Public / Público
-O sócio-administrador da empresa cliente, que não é contador. Ele lê no celular, tem dois
-minutos, e vai encaminhar a nota para o financeiro dele. Evite sigla sem expansão na
-primeira ocorrência. Não use "conforme legislação vigente" sem dizer qual.
+O solicitante, que não é da equipe técnica. Ele lê no celular, tem dois minutos, e vai
+encaminhar a nota para a área dele. Evite sigla sem expansão na primeira ocorrência. Não
+use "conforme a política vigente" sem dizer qual.
 
 # Exemple / Exemplo
-[cole aqui uma nota real de mês anterior, aprovada, com os dados do cliente removidos]
+[cole aqui uma nota real de uma solicitação anterior, aprovada, com os dados do
+solicitante removidos]
 
 # Limites
-- Não afirme que o valor está "correto": diga que a apuração foi feita com as notas
-  recebidas até a data X, e nomeie a data.
+- Não afirme que a categoria está "correta": diga que a triagem foi feita com o catálogo
+  vigente até a data X, e nomeie a data.
 - Não prometa prazo que não esteja na minha lista de observações.
-- Não recomende decisão tributária nesta nota; se houver oportunidade, escreva apenas
+- Não recomende mudança de escopo nesta nota; se houver oportunidade, escreva apenas
   que há um ponto a discutir e qual é o assunto.
 - Não passe de 15 linhas.
 ```
@@ -114,7 +116,7 @@ primeira ocorrência. Não use "conforme legislação vigente" sem dizer qual.
 Os campos `Public` e `Limites` são os que carregam o peso. O primeiro determinou vocabulário,
 extensão e formato (celular, dois minutos, encaminhável). O segundo bloqueou os três modos de
 falha reais desse tipo de nota: afirmar correção que não se pode afirmar, prometer prazo, e
-dar recomendação tributária num documento que não é o lugar dela. Note que `Précision`
+dar recomendação de escopo num documento que não é o lugar dela. Note que `Précision`
 também criou a saída honesta `[não fornecido]`, em vez de deixar o modelo estimar.
 
 Note, por fim, que o campo `Exemple` está aqui como marcador de onde o exemplo entra — e

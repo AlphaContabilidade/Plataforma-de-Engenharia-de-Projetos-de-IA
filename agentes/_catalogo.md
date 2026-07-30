@@ -54,7 +54,7 @@ Publicar aqui um catálogo de 300 agentes exigiria inventar 299 missões, 299 co
 entradas e saídas e 299 listas de limitações. Seria o mesmo erro descrito em
 [`frameworks/_backlog.md`](../frameworks/_backlog.md), com um agravante: um agente inventado é
 mais perigoso que um framework inventado, porque tem aparência de coisa executável. Alguém lê
-`agentes/revisor-fiscal.md`, supõe que existe, e planeja trabalho em cima de um arquivo que
+`agentes/revisor-de-catalogo.md`, supõe que existe, e planeja trabalho em cima de um arquivo que
 nunca foi mais que texto.
 
 O critério para um agente entrar neste catálogo, portanto, é o mesmo dos volumes: **ele existe

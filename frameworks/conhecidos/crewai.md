@@ -47,8 +47,8 @@ na fronteira, e não três etapas adiante.
 ## O risco: papel confundido com competência
 
 O mesmo mecanismo que estreita escopo pode virar teatro. Escrever que o agente "é um auditor
-fiscal com 20 anos de experiência" não lhe dá conhecimento fiscal — dá-lhe o registro
-linguístico de quem tem. É a limitação 1 do [`RTF.md`](RTF.md) elevada à escala de sistema, e
+de processos com 20 anos de experiência" não lhe dá conhecimento do processo — dá-lhe o
+registro linguístico de quem tem. É a limitação 1 do [`RTF.md`](RTF.md) elevada à escala de sistema, e
 com um agravante: num sistema multiagente, o agente seguinte trata a saída do anterior como
 insumo confiável. Uma afirmação inventada com tom de especialista, produzida no primeiro
 agente, propaga-se pela equipe inteira sem que nenhum agente tenha razão para duvidar dela.
@@ -76,7 +76,7 @@ saída de um agente pode ser verificada por código, verifique por código.
 - **Quando a saída de um agente não é verificável.** O risco de propagação descrito acima
   torna-se dominante.
 - **Quando o determinismo é requisito.** Fluxos de negócio com efeito irreversível
-  (transferência, baixa de título, emissão de documento) precisam de código no caminho crítico
+  (encerrar item de fila, notificar solicitante, emitir documento) precisam de código no caminho crítico
   e de agente no caminho de recomendação — nunca o contrário.
 
 ## Relação com esta plataforma
