@@ -69,8 +69,8 @@ mecanismo. A diferença aparece no dia em que o modelo decide diferente.
 - **Quando alguém espera que "chamada de função" signifique determinismo.** A função é
   determinística; a **decisão** de chamá-la não é. Se o efeito é irreversível, o gate fica no
   código — antes da execução — não na esperança de que o modelo chame a função certa. Esta é a
-  mesma regra que o repositório desta plataforma aprendeu no domínio de conciliação bancária:
-  escrita em sistema financeiro passa por verificação de programa, sempre.
+  mesma regra que esta plataforma aprendeu construindo classificadores apoiados em
+  evidência: escrita irreversível passa por verificação de programa, sempre.
 
 ## Relação com esta plataforma
 

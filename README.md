@@ -5,7 +5,7 @@ contrato legível por máquina, três gates executáveis e auditoria por um segu
 Nenhum volume se declara pronto sem que um programa confirme que ele é.
 
 > Esta pasta é um projeto independente. O diretório pai deste repositório é outro projeto
-> (rotina de conciliação Sicoob × Omie) e **não é tocado** por trabalho feito aqui.
+> e **não é tocado** por trabalho feito aqui.
 
 ## O que é
 

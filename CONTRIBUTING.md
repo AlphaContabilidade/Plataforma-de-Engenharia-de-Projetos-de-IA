@@ -102,7 +102,7 @@ permite a seção `10-Anti-Patterns` existir.
    biblioteca padrão. A restrição do front-matter a um subconjunto YAML existe exatamente para
    dispensar PyYAML e ainda apontar o erro na linha certa.
 7. **Nunca tocar em nada fora de `AI-ENGINEERING-OS/`.** O diretório pai é outro projeto — a
-   rotina de conciliação Sicoob × Omie, com escrita real em sistema contábil. As únicas
+   outro projeto, de assunto diferente. As únicas
    exceções combinadas são o spec e o plano em `docs/superpowers/`.
 8. **Nunca publicar diagrama sem parágrafo descritivo.** Diagrama sem legenda é ilegível para
    quem chega depois e irrecuperável para leitor de tela e para busca textual.

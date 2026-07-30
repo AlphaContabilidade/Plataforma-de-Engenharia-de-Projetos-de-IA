@@ -5,19 +5,18 @@ Contexto local **desta pasta**. Vale para qualquer agente trabalhando dentro de
 
 ## ⚠️ A raiz do repositório é outro projeto
 
-O diretório pai (`C:\Users\Usuário\Desktop\CLAUDE\`) **não** é esta plataforma. É a
-**rotina de conciliação Sicoob × Omie** do grupo Rezoluti: automação financeira que
-escreve de verdade em sistema contábil, com dinheiro real do outro lado. Ela tem o seu
-próprio `CLAUDE.md` na raiz, com regras de segurança próprias.
+O diretório pai (`C:\Users\Usuário\Desktop\CLAUDE\`) **não** é esta plataforma. É **outro projeto, de
+assunto completamente diferente**, com o seu próprio `CLAUDE.md` na raiz e as suas próprias
+regras de segurança.
 
 Consequências operacionais, sem exceção:
 
 - **Nada fora de `AI-ENGINEERING-OS/` é criado, editado ou apagado** por trabalho desta
   plataforma. A única exceção combinada são o spec e o plano em `docs/superpowers/`.
-- **Não rode, não teste e não "conserte" nada da conciliação.** `scripts/`, `casos/`,
-  `cloud_state/`, `tests/` da raiz e `omie_client.py` não são assunto daqui.
+- **Não rode, não teste e não "conserte" nada do projeto da raiz.** Nada do que vive lá é
+  assunto daqui, nem para consultar, nem para corrigir de passagem.
 - O `CLAUDE.md` da raiz tem precedência absoluta sobre este arquivo em qualquer questão
-  que toque a conciliação. Este arquivo só governa o conteúdo desta subpasta.
+  que toque o projeto da raiz. Este arquivo só governa o conteúdo desta subpasta.
 - Se uma tarefa parecer exigir mudança fora desta pasta, pare e pergunte. Provavelmente é
   contexto trocado.
 

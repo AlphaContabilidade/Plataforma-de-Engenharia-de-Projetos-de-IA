@@ -18,9 +18,9 @@ busca textual — e a primeira fonte que responde ganha. Ganhar por ordem de con
 escritas.
 
 Este volume documenta o armazém de decisões observadas, a guarda que separa evidência de
-eco e a regra de precedência entre origens. Ele foi extraído de uma rotina de conciliação
-financeira que roda diariamente e escreve em sistema contábil, onde classificar errado
-custa dinheiro. Os três módulos generalizam o que aquela rotina aprendeu à força, e cada
+eco e a regra de precedência entre origens. Ele foi extraído de um sistema em produção que roda
+diariamente e escreve em sistema de terceiros, onde classificar errado custa dinheiro. Os
+três módulos generalizam o que aquele sistema aprendeu à força, e cada
 um existe para tornar impossível um defeito que já aconteceu.
 
 ## Os três defeitos que motivaram o componente

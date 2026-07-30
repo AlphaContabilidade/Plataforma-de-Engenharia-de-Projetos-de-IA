@@ -49,7 +49,7 @@ derivar_casos = PromptTemplate(
     corpo=CORPO_DERIVAR_CASOS,
     variaveis=(
         Variavel("contrato", str, descricao="Nome, corpo e variaveis do prompt a avaliar"),
-        Variavel("dominio", str, descricao="Dominio de aplicacao, ex.: classificacao contabil"),
+        Variavel("dominio", str, descricao="Dominio de aplicacao, ex.: triagem de solicitacoes"),
         Variavel("quantidade", int, descricao="Numero de casos pedido; a saida pode entregar menos"),
     ),
 )

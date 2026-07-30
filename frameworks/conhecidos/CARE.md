@@ -36,7 +36,7 @@ característica de personagem que o modelo pode reinterpretar quando o caso não
 ## Quando serve
 
 - **Domínio com regra própria**, em que a resposta genericamente correta é a resposta
-  errada para esta empresa. Contabilidade, fiscal, jurídico e compliance vivem disso.
+  errada para esta empresa. Áreas com norma própria e convenção interna vivem disso.
 - Quando existe **um exemplo real e representativo** para mostrar. Este é o gatilho
   principal: se você tem o caso resolvido em mãos, CARE aproveita-o.
 - Quando a saída tem **convenção sutil** que é mais fácil demonstrar que descrever
@@ -69,13 +69,13 @@ outro contador seis meses depois.
 
 ```text
 # Context
-Contabilidade brasileira, cliente do regime Lucro Presumido. Os lançamentos a pagar são
-criados por automação e revisados por humanos. A observação do lançamento é o único
-lugar onde fica registrado *por que* aquele valor foi classificado daquela forma — o
-histórico do extrato bancário é truncado pelo banco e frequentemente ilegível.
+Operação de triagem de solicitações. Os registros são criados por automação e
+revisados por humanos. O campo de observação é o único lugar onde fica registrado
+*por que* aquele item foi classificado daquela forma — o texto que chega da origem é
+truncado pelo sistema emissor e frequentemente ilegível.
 Convenções internas em vigor:
-- a observação começa pelo nome do fornecedor em maiúsculas, como aparece no cadastro;
-- valor divergente do contratado é sempre explicitado, com os dois valores;
+- a observação começa pelo nome do solicitante em maiúsculas, como aparece no cadastro;
+- divergência em relação ao esperado é sempre explicitada, com os dois valores;
 - quando a decisão veio de regra e não de documento, a regra é nomeada;
 - nunca se escreve "conforme conversado" nem "ajuste" sem dizer qual.
 

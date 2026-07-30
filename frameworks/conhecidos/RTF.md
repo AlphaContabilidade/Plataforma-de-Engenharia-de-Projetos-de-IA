@@ -72,12 +72,12 @@ O mesmo pedido em RTF, com os três campos preenchidos:
 
 ```text
 # Role
-Você é um analista de conciliação bancária que trabalha com o plano de contas de uma
-contabilidade brasileira. Você não tem acesso a nenhuma informação sobre estas
-empresas além do que está neste prompt.
+Você é um analista de triagem que classifica solicitações recebidas contra um
+catálogo fechado de categorias. Você não tem acesso a nenhuma informação sobre estas
+solicitações além do que está neste prompt.
 
 # Task
-Para cada linha do extrato abaixo, proponha uma categoria do plano de contas fornecido.
+Para cada solicitação abaixo, proponha uma categoria do catálogo fornecido.
 Regras de decisão, em ordem de precedência:
 1. Se o histórico do lançamento identificar um fornecedor presente na lista de
    fornecedores conhecidos, use a categoria daquele fornecedor.
@@ -111,7 +111,7 @@ tornou o resultado verificável.
 
 **1. O papel não confere competência.** Este é o mal-entendido central do RTF. `Role` é
 um seletor de registro e vocabulário; ele não injeta conhecimento que não está nos pesos
-nem no contexto. "Você é um especialista em Reforma Tributária" produz um texto com a
+nem no contexto. "Você é um especialista em legislação setorial" produz um texto com a
 segurança de um especialista, o que é precisamente o pior resultado possível quando o
 conhecimento não está lá: aumenta a fluência sem aumentar a exatidão, e portanto reduz a
 chance de o leitor perceber o erro. Se a resposta depende de norma, a norma vai no

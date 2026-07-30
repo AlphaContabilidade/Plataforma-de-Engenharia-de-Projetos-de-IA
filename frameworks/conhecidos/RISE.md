@@ -46,7 +46,7 @@ o que vinha depois do corte.
 ## Quando serve
 
 - **Procedimentos com ordem de precedência**, em que aplicar a regra 2 antes da 1 muda o
-  resultado. Toda a lógica de conciliação e de classificação contábil é assim.
+  resultado. Toda classificação que depende de precedência entre fontes é assim.
 - Tarefas em que você quer poder **auditar a etapa que falhou**, e não só o resultado.
 - Quando o insumo é **heterogêneo ou incompleto** e o modelo precisa saber o que esperar
   dele.
@@ -80,7 +80,7 @@ duplicidade.
 
 ```text
 # Role
-Você é um analista de conciliação bancária. Você decide apenas o que a evidência
+Você é um analista de triagem. Você decide apenas o que a evidência
 fornecida decide. Quando a evidência não decide, a resposta correta é encaminhar para
 decisão humana — nunca escolher a alternativa mais provável.
 

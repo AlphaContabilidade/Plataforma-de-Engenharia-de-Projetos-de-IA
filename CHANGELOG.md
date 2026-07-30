@@ -32,8 +32,8 @@ não decide não vira chute de confiança baixa).
 contradizendo o histórico sem sinalizar; o sistema lendo a própria escrita como evidência
 independente e se autoconfirmando; e evidência insuficiente sendo tratada como se decidisse.
 
-Verificado por varredura: nenhuma menção a Omie, Sicoob, boleto, CNPJ, conta bancária, valor
-monetário real ou código de categoria contábil no código, nos testes ou nas seções. O auditor
+Verificado por varredura: nenhuma menção ao domínio de origem do código — nem nome de sistema, nem
+identificador de cliente, nem valor real, nem código de classificação — no código, nos testes ou nas seções. O auditor
 repetiu a varredura de forma independente e confirmou.
 
 **Cinco achados da auditoria, todos incorporados antes da promoção.** Todos de texto — nenhum
@@ -271,5 +271,5 @@ a nome sem definição seria invenção. Permanecem no backlog aguardando o auto
   `perecivel: true`, com regra própria em `Convencoes.md`: finos, sem fixar preço ou nome de
   modelo, apontando para fonte viva.
 - **Conflito de `CLAUDE.md` resolvido.** O `CLAUDE.md` da plataforma vive nesta subpasta; o da
-  raiz, da rotina de conciliação Sicoob × Omie, permanece intocado e tem precedência em
+  raiz, do projeto que vive nele, permanece intocado e tem precedência em
   qualquer questão que toque aquele projeto.

@@ -37,7 +37,7 @@ A revisão da especificação encontrou sete problemas que impedem a construçã
 6. **Conteúdo perecível.** `26-AI-MODELS`, `27-LLM-ROUTER` e `34-COST-OPTIMIZATION`
    dependem de modelos e preços que mudam em semanas.
 7. **Conflito de `CLAUDE.md`.** A raiz deste repositório já tem o `CLAUDE.md` da rotina
-   de conciliação Sicoob × Omie. A plataforma não pode colocar o seu na raiz.
+   de conciliação financeira. A plataforma não pode colocar o seu na raiz.
 
 O que a especificação acerta e vale construir: o modelo criador/auditor (implementável
 com subagentes), os cinco comandos operacionais, `Convencoes.md` como contrato único,
