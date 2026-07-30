@@ -63,6 +63,61 @@ python -m ferramentas.exportar               # gera mkdocs.yml
 `validar.py` devolve `0` sem violação, `1` com violação e `2` em erro de uso ou de contrato.
 Cada violação sai como `arquivo:linha: [regra] mensagem`.
 
+## Interface interativa
+
+Para quem quer começar por uma ideia de software, sem conhecer os comandos ou a estrutura
+dos 42 volumes:
+
+```bash
+python -m ferramentas.web
+```
+
+O navegador abre uma jornada guiada em quatro etapas:
+
+1. ideia do software em linguagem simples;
+2. público e problema que precisa ser resolvido;
+3. formato do produto, quantidade de usuários e prioridade;
+4. integrações, dados sensíveis, prazo e restrições.
+
+Ao final, a plataforma gera um **Plano de Solução** personalizado com escopo inicial do
+MVP, direção de arquitetura, fases, riscos, perguntas ainda abertas e os volumes do acervo
+recomendados para aquele projeto. O formulário também aceita até dez documentos de
+referência; arquivos textuais entram no plano e formatos binários ficam registrados para
+aprofundamento no chat. O rascunho das respostas fica salvo apenas no armazenamento local
+do navegador. A interface funciona sem CDN e sem conta externa.
+
+O Plano de Solução é um contrato de descoberta, não uma alegação de que o software já foi
+implementado. Ele pode ser copiado e entregue a um agente construtor; geração e alteração
+de código devem continuar sujeitas a revisão humana, testes e gates.
+
+O formulário distingue visualmente campos **Obrigatórios** e **Opcionais**. A elaboração
+inicial usa o `Planejador determinístico AI-ENGINEERING-OS v1`, baseado em regras locais e
+sem chamada a um modelo de IA. Ao continuar dentro do ChatGPT, entra em ação o modelo
+selecionado para aquela conversa; o servidor MCP não presume nem inventa esse nome.
+
+Antes do formulário completo, o construtor executa uma descoberta conversacional: recebe
+a ideia, identifica se o produto é web, mobile, desktop ou automação e apresenta uma
+pergunta por vez. A trilha muda conforme o contexto — lojas recebem decisões sobre
+pagamento, saúde recebe perguntas sobre dados clínicos, mobile recebe recursos do aparelho
+e desktop recebe decisões sobre instalação, nuvem e operação offline. As respostas são
+transferidas para a revisão e registradas no Plano de Solução.
+
+### Usar dentro do ChatGPT
+
+O adaptador em [`chatgpt_app/`](chatgpt_app/) expõe o mesmo construtor como um ChatGPT App:
+o modelo faz as perguntas, o servidor MCP consulta o acervo e o widget aparece dentro da
+conversa. A versão inicial oferece apenas ferramentas de leitura e planejamento; não grava
+código nem executa comandos.
+
+```bash
+python -m pip install -r chatgpt_app/requirements.txt
+python -m chatgpt_app.server
+```
+
+O endpoint local é `http://127.0.0.1:8000/mcp`. Consulte
+[`chatgpt_app/README.md`](chatgpt_app/README.md) para conectar por HTTPS ao modo de
+desenvolvedor do ChatGPT.
+
 ## Os três gates
 
 | Gate | Comando | Reprova |

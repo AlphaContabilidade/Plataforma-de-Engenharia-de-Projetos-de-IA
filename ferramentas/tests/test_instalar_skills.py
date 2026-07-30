@@ -139,10 +139,18 @@ def test_origem_sem_skill_nao_e_erro(tmp_path, capsys):
 
 
 def test_destino_padrao_e_o_claude_skills_da_raiz_do_repo():
-    """O default aponta para o diretorio que o harness comprovadamente descobre."""
+    """O default acompanha a raiz Git tanto no clone quanto no uso aninhado."""
     destino = I.destino_padrao()
     assert destino.parts[-2:] == (".claude", "skills")
     assert destino.parent.parent == I.raiz_do_repo()
-    # A plataforma nao e a raiz do repo: se fosse, o destino seria a propria
-    # origem e o script nao teria o que resolver.
-    assert I.raiz_do_repo() != I.raiz_da_plataforma()
+    if I.raiz_do_repo() == I.raiz_da_plataforma():
+        assert destino == I.origem_padrao()
+
+
+def test_clone_independente_trata_origem_igual_ao_destino_como_noop():
+    """A instalacao no clone standalone nao reescreve nem perde as skills."""
+    origem = _origem()
+    acoes = I.planejar(origem, origem)
+    assert len(acoes) == len(ESPERADAS)
+    assert {acao.situacao for acao in acoes} == {I.IDENTICO}
+    assert I.aplicar(acoes) == ()

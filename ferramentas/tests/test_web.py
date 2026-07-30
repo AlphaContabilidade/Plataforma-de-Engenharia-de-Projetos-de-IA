@@ -81,6 +81,83 @@ def test_a_pagina_nao_busca_nada_de_fora(volume_engine):
     assert '<link rel="icon" href="data:,">' in texto
 
 
+def test_a_pagina_tem_construtor_guiado(volume_engine):
+    raiz, _ = volume_engine
+    _, _, corpo = W.responder("GET", "/", raiz, C.carregar(raiz))
+    texto = corpo.decode("utf-8")
+    assert "Descreva sua ideia" in texto
+    assert "Etapa 1 de 4" in texto
+    assert "/api/projeto/planejar" in texto
+    assert 'id="projeto-documentos"' in texto
+    assert "Plano de Solucao" in texto
+    assert "Obrigatorio" in texto
+    assert "Opcional" in texto
+    assert "sem modelo de IA no servidor" in texto
+
+
+def test_planejar_projeto_devolve_blueprint_personalizado(volume_engine):
+    raiz, _ = volume_engine
+    entrada = {
+        "nome": "Agenda Facil",
+        "ideia": "Organizar agendamentos e reduzir faltas em clinicas pequenas.",
+        "publico": "recepcionistas de clinicas",
+        "problema": "confirmacoes manuais causam faltas",
+        "tipo": "web",
+        "prioridade": "qualidade",
+        "integracoes": ["WhatsApp"],
+        "dados_sensiveis": True,
+    }
+    status, dado = _json_de(
+        W.responder(
+            "POST",
+            "/api/projeto/planejar",
+            raiz,
+            C.carregar(raiz),
+            corpo=json.dumps(entrada).encode("utf-8"),
+        )
+    )
+    assert status == 200
+    assert dado["nome"] == "Agenda Facil"
+    assert "WhatsApp" in dado["markdown"]
+    assert dado["volumes_recomendados"]
+
+
+def test_api_personaliza_perguntas_para_software_desktop(volume_engine):
+    raiz, _ = volume_engine
+    status, dado = _json_de(
+        W.responder(
+            "POST",
+            "/api/projeto/perguntas",
+            raiz,
+            C.carregar(raiz),
+            corpo=json.dumps(
+                {
+                    "ideia": "Programa para PC que controla estoque mesmo sem internet.",
+                    "tipo": "auto",
+                }
+            ).encode("utf-8"),
+        )
+    )
+    assert status == 200
+    assert dado["tipo_inferido"] == "desktop"
+    assert any("programa para PC" in p["titulo"] for p in dado["perguntas"])
+
+
+def test_planejar_projeto_recusa_ideia_incompleta(volume_engine):
+    raiz, _ = volume_engine
+    status, dado = _json_de(
+        W.responder(
+            "POST",
+            "/api/projeto/planejar",
+            raiz,
+            C.carregar(raiz),
+            corpo=b'{"ideia": ""}',
+        )
+    )
+    assert status == 400
+    assert "ideia" in dado["erro"]
+
+
 # --- acervo ---------------------------------------------------------------
 
 

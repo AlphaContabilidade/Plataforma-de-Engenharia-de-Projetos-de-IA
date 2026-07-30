@@ -45,6 +45,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import painel as P
+from .projetos import (
+    ProjetoInvalido,
+    gerar_blueprint,
+    gerar_perguntas_personalizadas,
+)
 from .contrato import Contrato, ContratoInvalido, carregar
 from .instalar_skills import raiz_da_plataforma
 from .status import levantar, nota_da_ultima_auditoria, relatorio_mais_recente
@@ -74,7 +79,7 @@ COMANDO_DA_SUITE = "python -m pytest ferramentas/tests exemplos -q"
 # Limite do corpo de POST que o handler aceita ler antes de descartar. Os POSTs
 # desta interface nao tem corpo; o limite existe so para nao ficar lendo um corpo
 # arbitrario de um cliente qualquer.
-_LIMITE_DE_CORPO = 64 * 1024
+_LIMITE_DE_CORPO = 256 * 1024
 
 
 class IdRecusado(ValueError):
@@ -322,6 +327,8 @@ def normalizar_caminho(caminho: str) -> str:
 _ROTAS_EXATAS: dict[str, tuple[str, ...]] = {
     "/": ("GET",),
     "/api/acervo": ("GET",),
+    "/api/projeto/perguntas": ("POST",),
+    "/api/projeto/planejar": ("POST",),
 }
 _ROTAS_COM_ID: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("/api/volume/", ("GET",)),
@@ -337,6 +344,7 @@ def responder(
     ct: Contrato,
     *,
     rodar_testes: bool = True,
+    corpo: bytes = b"",
 ) -> tuple[int, str, bytes]:
     """Resolve uma requisicao e devolve `(status, content_type, corpo)`.
 
@@ -356,6 +364,31 @@ def responder(
             )
         if caminho == "/":
             return 200, HTML_UTF8, PAGINA.encode("utf-8")
+        if caminho == "/api/projeto/planejar":
+            if not corpo:
+                return _erro(400, "descreva a ideia e responda as perguntas do projeto")
+            try:
+                entrada = json.loads(corpo.decode("utf-8"))
+                return _json(200, gerar_blueprint(entrada).para_dict())
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                return _erro(400, "o corpo precisa ser JSON UTF-8 valido")
+            except ProjetoInvalido as erro:
+                return _erro(400, str(erro))
+        if caminho == "/api/projeto/perguntas":
+            if not corpo:
+                return _erro(400, "descreva a ideia para personalizar as perguntas")
+            try:
+                entrada = json.loads(corpo.decode("utf-8"))
+                return _json(
+                    200,
+                    gerar_perguntas_personalizadas(
+                        entrada.get("ideia", ""), entrada.get("tipo", "auto")
+                    ),
+                )
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                return _erro(400, "o corpo precisa ser JSON UTF-8 valido")
+            except (AttributeError, ProjetoInvalido) as erro:
+                return _erro(400, str(erro))
         return _json(200, dados_do_acervo(raiz, ct))
 
     for prefixo, metodos in _ROTAS_COM_ID:
@@ -394,7 +427,8 @@ def responder(
     return _erro(
         404,
         f"nao existe {caminho} nesta interface. As rotas sao: GET /, GET /api/acervo, "
-        "GET /api/volume/NN, GET /api/briefing/NN, POST /api/gates/NN.",
+        "GET /api/volume/NN, GET /api/briefing/NN, POST /api/gates/NN e "
+        "POST /api/projeto/planejar.",
     )
 
 
@@ -421,11 +455,17 @@ class _Manipulador(BaseHTTPRequestHandler):
     def _atender(self, metodo: str) -> None:
         if not self._cabecalhos_confiaveis():
             return
-        self._descartar_corpo()
+        corpo = self._ler_corpo()
+        if corpo is None:
+            return
         servidor = self.server
         try:
             status, tipo, corpo = responder(
-                metodo, self.path, servidor.raiz, servidor.contrato  # type: ignore[attr-defined]
+                metodo,
+                self.path,
+                servidor.raiz,
+                servidor.contrato,  # type: ignore[attr-defined]
+                corpo=corpo,
             )
         except Exception as erro:  # noqa: BLE001 - o servidor local nao pode cair
             status, tipo, corpo = _erro(
@@ -477,24 +517,25 @@ class _Manipulador(BaseHTTPRequestHandler):
                 return False
         return True
 
-    def _descartar_corpo(self) -> None:
-        """Le e joga fora o corpo, para nao dessincronizar a conexao.
-
-        Nenhum endpoint desta interface le corpo de requisicao - o id do volume
-        vem no caminho e nada mais e aceito. Mas deixar bytes nao lidos no socket
-        com keep-alive faz a requisicao seguinte ser interpretada como corpo da
-        anterior, e ai a pagina quebra sem motivo aparente.
-        """
+    def _ler_corpo(self) -> bytes | None:
+        """Le um corpo pequeno; recusa antes de alocar se exceder o limite."""
         try:
             tamanho = int(self.headers.get("Content-Length") or 0)
         except ValueError:
-            tamanho = 0
+            self._enviar(*_erro(400, "Content-Length invalido"))
+            return None
         if tamanho <= 0:
-            return
+            return b""
         if tamanho > _LIMITE_DE_CORPO:
             self.close_connection = True
-            return
-        self.rfile.read(tamanho)
+            self._enviar(
+                *_erro(
+                    413,
+                    f"corpo maior que {_LIMITE_DE_CORPO} bytes; resuma a descricao",
+                )
+            )
+            return None
+        return self.rfile.read(tamanho)
 
     def _enviar(self, status: int, tipo: str, corpo: bytes) -> None:
         self.send_response(status)
@@ -754,6 +795,69 @@ button.tema {
 }
 button.tema:hover { border-color: var(--acento); color: var(--acento); }
 
+/* --- construtor guiado ---------------------------------------------- */
+.construtor {
+  margin: 22px 0 0; background: var(--papel); border: 1px solid var(--linha);
+  border-top: 5px solid var(--acento); border-radius: 4px; padding: 22px;
+}
+.construtor-cabeca { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; }
+.construtor-cabeca p { margin: 6px 0 0; max-width: 74ch; color: var(--texto-fraco); }
+.progresso { font-family: var(--mono); color: var(--acento); font-size: 0.78rem; white-space: nowrap; }
+.barra { height: 6px; background: var(--fundo); border: 1px solid var(--linha); margin: 18px 0; }
+.barra > span { display: block; height: 100%; width: 25%; background: var(--acento); transition: width .2s ease; }
+.etapa { display: none; }
+.etapa.ativa { display: block; }
+.etapa h3 { font-size: 1.2rem; margin-bottom: 4px; }
+.etapa > p { color: var(--texto-fraco); margin: 0 0 16px; }
+.campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.campo--largo { grid-column: 1 / -1; }
+.campo label, .campo legend {
+  display: block; font-weight: 650; margin-bottom: 5px; font-size: 0.9rem;
+}
+.tipo-campo { display: inline-block; margin-left: 6px; border-radius: 999px; padding: 2px 6px; font-family: var(--mono); font-size: .62rem; font-weight: 700; vertical-align: 1px; }
+.tipo-campo--obrigatorio { color: var(--papel); background: var(--acento); }
+.tipo-campo--opcional { color: var(--texto-fraco); border: 1px solid var(--linha); }
+.motor-plano { margin: 14px 0 0; padding: 11px 13px; border: 1px solid var(--linha); border-radius: 3px; background: var(--acento-fraco); font-size: .82rem; }
+.motor-plano strong { display: block; margin-bottom: 3px; }
+.campo small { display: block; color: var(--texto-fraco); margin-top: 4px; }
+.campo input, .campo textarea, .campo select {
+  width: 100%; font: inherit; color: var(--texto); background: var(--fundo);
+  border: 1px solid var(--linha); border-radius: 3px; padding: 10px 11px;
+}
+.campo textarea { resize: vertical; min-height: 96px; }
+.campo input:focus, .campo textarea:focus, .campo select:focus {
+  outline: 2px solid var(--acento); outline-offset: 1px; border-color: var(--acento);
+}
+.anexos { border: 1px dashed var(--acento); border-radius: 4px; padding: 13px; background: var(--painel-2); }
+.lista-anexos { display: grid; gap: 6px; margin-top: 8px; }
+.item-anexo { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--linha); border-radius: 3px; padding: 7px 9px; background: var(--painel); }
+.item-anexo span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-anexo button { border: 0; background: transparent; color: var(--acento); cursor: pointer; font-weight: 700; }
+.opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; }
+.opcao { position: relative; }
+.opcao input { position: absolute; opacity: 0; pointer-events: none; }
+.opcao label {
+  height: 100%; cursor: pointer; border: 1px solid var(--linha); background: var(--fundo);
+  border-radius: 3px; padding: 10px; display: block; font-weight: 500;
+}
+.opcao input:checked + label { border-color: var(--acento); background: var(--acento-fraco); }
+.opcao input:focus-visible + label { outline: 2px solid var(--acento); outline-offset: 2px; }
+.navegacao { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+.resultado-projeto { margin-top: 22px; border-top: 1px solid var(--linha); padding-top: 20px; }
+.resumo-projeto { padding: 14px; background: var(--acento-fraco); border-left: 4px solid var(--acento); }
+.resultado-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.resultado-bloco { border: 1px solid var(--linha); border-radius: 3px; padding: 13px 14px; }
+.resultado-bloco h3 { margin-bottom: 7px; }
+.resultado-bloco ul { margin: 0; padding-left: 20px; }
+.resultado-bloco li { margin-bottom: 5px; }
+.volumes-recomendados { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.volume-recomendado { font-family: var(--mono); font-size: .75rem; border: 1px solid var(--acento); color: var(--acento); padding: 3px 7px; }
+@media (max-width: 700px) {
+  .campos, .resultado-grade { grid-template-columns: 1fr; }
+  .campo--largo { grid-column: auto; }
+  .construtor-cabeca { grid-template-columns: 1fr; }
+}
+
 /* --- como funciona --------------------------------------------------- */
 .como {
   margin: 22px 0 0; background: var(--papel); border: 1px solid var(--linha);
@@ -881,6 +985,143 @@ footer.pe { margin-top: 30px; color: var(--texto-fraco); font-size: 0.78rem; fon
 </header>
 
 <div class="envelope">
+  <section class="construtor" id="construtor" aria-labelledby="titulo-construtor">
+    <div class="construtor-cabeca">
+      <div>
+        <span class="selo">comece por aqui</span>
+        <h2 id="titulo-construtor" style="margin-top:9px">Descreva sua ideia. Nos organizamos o projeto.</h2>
+        <p>
+          Responda perguntas curtas, sem precisar conhecer tecnologia. Ao final voce recebe
+          um Plano de Solucao personalizado com MVP, arquitetura, fases, riscos e os volumes do
+          acervo que orientam a construcao.
+        </p>
+        <div class="motor-plano">
+          <strong>Motor de elaboracao: Planejador AI-ENGINEERING-OS v1</strong>
+          Geracao local por regras verificaveis, sem modelo de IA no servidor.
+          Ao continuar no ChatGPT, sera usado o modelo ativo da conversa.
+        </div>
+      </div>
+      <span class="progresso" id="texto-progresso">Etapa 1 de 4</span>
+    </div>
+    <div class="barra" aria-hidden="true"><span id="barra-progresso"></span></div>
+
+    <form id="form-projeto">
+      <section class="etapa ativa" data-etapa="1">
+        <h3>Qual e a sua ideia?</h3>
+        <p>Escreva como explicaria para uma pessoa de confianca. Nao precisa usar termos tecnicos.</p>
+        <div class="campos">
+          <div class="campo">
+            <label for="projeto-nome">Nome provisório <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <input id="projeto-nome" name="nome" autocomplete="off" placeholder="Ex.: Agenda Facil">
+          </div>
+          <div class="campo campo--largo">
+            <label for="projeto-ideia">Descreva o que o software deve fazer <span class="tipo-campo tipo-campo--obrigatorio">Obrigatorio</span></label>
+            <textarea id="projeto-ideia" name="ideia" required minlength="20"
+              placeholder="Ex.: Quero ajudar clinicas pequenas a organizar agendamentos, confirmar pacientes e reduzir faltas."></textarea>
+            <small>Inclua o resultado desejado; detalhes podem ser refinados depois.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="etapa" data-etapa="2">
+        <h3>Para quem e qual problema resolve?</h3>
+        <p>Um bom produto comeca por uma pessoa e uma dor concretas.</p>
+        <div class="campos">
+          <div class="campo">
+            <label for="projeto-publico">Quem vai usar? <span class="tipo-campo tipo-campo--obrigatorio">Obrigatorio</span></label>
+            <textarea id="projeto-publico" name="publico" required
+              placeholder="Ex.: recepcionistas e donos de clinicas com ate 10 profissionais"></textarea>
+          </div>
+          <div class="campo">
+            <label for="projeto-problema">O que hoje e dificil, lento ou arriscado? <span class="tipo-campo tipo-campo--obrigatorio">Obrigatorio</span></label>
+            <textarea id="projeto-problema" name="problema" required
+              placeholder="Ex.: os horarios ficam em planilhas e as confirmacoes sao manuais"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="etapa" data-etapa="3">
+        <h3>Como esse produto sera usado?</h3>
+        <p>Escolha o que mais se aproxima. A recomendacao pode ser ajustada depois.</p>
+        <div class="campo campo--largo">
+          <span style="display:block;font-weight:650;margin-bottom:6px">Formato principal <span class="tipo-campo tipo-campo--opcional">Opcional</span></span>
+          <div class="opcoes">
+            <div class="opcao"><input id="tipo-web" type="radio" name="tipo" value="web" checked><label for="tipo-web">Site ou sistema web</label></div>
+            <div class="opcao"><input id="tipo-mobile" type="radio" name="tipo" value="mobile"><label for="tipo-mobile">Aplicativo movel</label></div>
+            <div class="opcao"><input id="tipo-automacao" type="radio" name="tipo" value="automacao"><label for="tipo-automacao">Automacao de processo</label></div>
+            <div class="opcao"><input id="tipo-api" type="radio" name="tipo" value="api"><label for="tipo-api">API ou integracao</label></div>
+            <div class="opcao"><input id="tipo-desktop" type="radio" name="tipo" value="desktop"><label for="tipo-desktop">Programa desktop</label></div>
+          </div>
+        </div>
+        <div class="campos" style="margin-top:14px">
+          <div class="campo">
+            <label for="projeto-usuarios">Quantidade de usuarios esperada <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <select id="projeto-usuarios" name="usuarios">
+              <option value="">Ainda nao sei</option>
+              <option value="ate 10 usuarios internos">Ate 10, uso interno</option>
+              <option value="de 10 a 100 usuarios">De 10 a 100</option>
+              <option value="de 100 a 10 mil usuarios">De 100 a 10 mil</option>
+              <option value="mais de 10 mil usuarios">Mais de 10 mil</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="projeto-prioridade">O que mais importa agora? <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <select id="projeto-prioridade" name="prioridade">
+              <option value="qualidade">Qualidade e menos retrabalho</option>
+              <option value="velocidade">Colocar uma versao no ar rapido</option>
+              <option value="custo">Manter o custo baixo</option>
+              <option value="escala">Preparar para grande crescimento</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="etapa" data-etapa="4">
+        <h3>O que o projeto precisa respeitar?</h3>
+        <p>Essas respostas evitam uma arquitetura bonita que nao serve para a realidade.</p>
+        <div class="campos">
+          <div class="campo">
+            <label for="projeto-integracoes">Sistemas com os quais precisa conversar <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <input id="projeto-integracoes" name="integracoes"
+              placeholder="Ex.: WhatsApp, Omie, Google Agenda (separe por virgula)">
+          </div>
+          <div class="campo">
+            <label for="projeto-prazo">Existe prazo ou evento importante? <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <input id="projeto-prazo" name="prazo" placeholder="Ex.: piloto em 60 dias">
+          </div>
+          <div class="campo">
+            <label for="projeto-dados">Usa dados pessoais, financeiros ou de saude? <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <select id="projeto-dados" name="dados_sensiveis">
+              <option value="false">Nao ou ainda nao sei</option>
+              <option value="true">Sim</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="projeto-restricoes">Limites conhecidos <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <input id="projeto-restricoes" name="restricoes"
+              placeholder="Ex.: equipe de 2 pessoas, hospedagem no Brasil">
+          </div>
+          <div class="campo campo--largo anexos">
+            <label for="projeto-documentos">Documentos de referencia <span class="tipo-campo tipo-campo--opcional">Opcional</span></label>
+            <small>Anexe requisitos, propostas, fluxos ou planilhas existentes. Ate 10 arquivos, com 5 MB cada.</small>
+            <input id="projeto-documentos" type="file" multiple
+              accept=".txt,.md,.csv,.json,.yaml,.yml,.pdf,.doc,.docx,.xls,.xlsx">
+            <div class="lista-anexos" id="lista-documentos" aria-live="polite"></div>
+            <small>Arquivos de texto entram no plano; documentos binarios ficam registrados para aprofundamento no chat.</small>
+          </div>
+        </div>
+      </section>
+
+      <div class="navegacao">
+        <button class="acao acao--secundaria" id="btn-voltar" type="button" hidden>Voltar</button>
+        <button class="acao" id="btn-avancar" type="button">Continuar</button>
+        <button class="acao" id="btn-planejar" type="submit" hidden>Elaborar Plano de Solucao</button>
+      </div>
+      <p class="aviso" id="erro-projeto" role="alert" hidden></p>
+    </form>
+    <div class="resultado-projeto" id="resultado-projeto" aria-live="polite" hidden></div>
+  </section>
+
   <section class="como">
     <h2>Como funciona</h2>
     <ol>
@@ -952,13 +1193,18 @@ function pilula(status) {
   return criar("span", "pilula pilula--" + sufixo(status), status);
 }
 
-async function pedir(url, metodo) {
+async function pedir(url, metodo, corpo) {
   var resposta;
+  var opcoes = {
+    method: metodo || "GET",
+    headers: { "Accept": "application/json" }
+  };
+  if (corpo !== undefined) {
+    opcoes.headers["Content-Type"] = "application/json";
+    opcoes.body = JSON.stringify(corpo);
+  }
   try {
-    resposta = await fetch(url, {
-      method: metodo || "GET",
-      headers: { "Accept": "application/json" }
-    });
+    resposta = await fetch(url, opcoes);
   } catch (erro) {
     throw new Error(
       "Nao consegui falar com o servidor local. Confirme que a janela do terminal " +
@@ -973,6 +1219,228 @@ async function pedir(url, metodo) {
   }
   return dado;
 }
+
+/* --- construtor guiado ---------------------------------------------- */
+
+var etapaProjeto = 1;
+var TOTAL_ETAPAS = 4;
+var CHAVE_RASCUNHO = "ai-engineering-os:rascunho-projeto:v1";
+var documentosProjeto = [];
+var EXTENSOES_TEXTO = ["txt", "md", "csv", "json", "yaml", "yml"];
+
+function camposDaEtapa(numero) {
+  return q('.etapa[data-etapa="' + numero + '"]').querySelectorAll("input, textarea, select");
+}
+
+function etapaValida(numero) {
+  var campos = camposDaEtapa(numero);
+  for (var i = 0; i < campos.length; i++) {
+    if (!campos[i].checkValidity()) {
+      campos[i].reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+function mostrarEtapa(numero) {
+  etapaProjeto = Math.max(1, Math.min(TOTAL_ETAPAS, numero));
+  document.querySelectorAll(".etapa").forEach(function (el) {
+    el.classList.toggle("ativa", Number(el.dataset.etapa) === etapaProjeto);
+  });
+  q("#texto-progresso").textContent = "Etapa " + etapaProjeto + " de " + TOTAL_ETAPAS;
+  q("#barra-progresso").style.width = ((etapaProjeto / TOTAL_ETAPAS) * 100) + "%";
+  q("#btn-voltar").hidden = etapaProjeto === 1;
+  q("#btn-avancar").hidden = etapaProjeto === TOTAL_ETAPAS;
+  q("#btn-planejar").hidden = etapaProjeto !== TOTAL_ETAPAS;
+  q("#erro-projeto").hidden = true;
+  var primeira = q('.etapa[data-etapa="' + etapaProjeto + '"] input, ' +
+    '.etapa[data-etapa="' + etapaProjeto + '"] textarea, ' +
+    '.etapa[data-etapa="' + etapaProjeto + '"] select');
+  if (primeira) { primeira.focus(); }
+}
+
+function dadosDoFormulario() {
+  var fd = new FormData(q("#form-projeto"));
+  var dado = {};
+  fd.forEach(function (valor, chave) { dado[chave] = String(valor).trim(); });
+  dado.dados_sensiveis = dado.dados_sensiveis === "true";
+  dado.integracoes = (dado.integracoes || "").split(",").map(function (item) {
+    return item.trim();
+  }).filter(Boolean);
+  return dado;
+}
+
+function formatarBytes(bytes) {
+  if (bytes < 1024) { return bytes + " B"; }
+  if (bytes < 1024 * 1024) { return (bytes / 1024).toFixed(1) + " KB"; }
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function desenharDocumentos() {
+  var alvo = q("#lista-documentos");
+  alvo.textContent = "";
+  documentosProjeto.forEach(function (arquivo, indice) {
+    var linha = criar("div", "item-anexo");
+    linha.appendChild(criar("span", null, arquivo.name + " · " + formatarBytes(arquivo.size)));
+    var remover = criar("button", null, "Remover");
+    remover.type = "button";
+    remover.setAttribute("aria-label", "Remover " + arquivo.name);
+    remover.addEventListener("click", function () {
+      documentosProjeto.splice(indice, 1);
+      desenharDocumentos();
+    });
+    linha.appendChild(remover);
+    alvo.appendChild(linha);
+  });
+}
+
+q("#projeto-documentos").addEventListener("change", function (evento) {
+  var novos = Array.from(evento.target.files || []);
+  var grande = novos.find(function (arquivo) { return arquivo.size > 5 * 1024 * 1024; });
+  if (grande) {
+    q("#erro-projeto").textContent = grande.name + " excede o limite de 5 MB.";
+    q("#erro-projeto").hidden = false;
+    evento.target.value = "";
+    return;
+  }
+  documentosProjeto = documentosProjeto.concat(novos).slice(0, 10);
+  evento.target.value = "";
+  q("#erro-projeto").hidden = true;
+  desenharDocumentos();
+});
+
+async function documentosDoFormulario() {
+  return Promise.all(documentosProjeto.map(async function (arquivo) {
+    var partes = arquivo.name.split(".");
+    var extensao = partes.length > 1 ? partes.pop().toLowerCase() : "";
+    var conteudo = EXTENSOES_TEXTO.indexOf(extensao) >= 0
+      ? (await arquivo.text()).slice(0, 20000)
+      : "";
+    return { nome: arquivo.name, tipo: arquivo.type, tamanho: arquivo.size, conteudo: conteudo };
+  }));
+}
+
+function salvarRascunho() {
+  try { localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(dadosDoFormulario())); }
+  catch (erro) { /* armazenamento pode estar desativado; o formulario continua funcionando */ }
+}
+
+function restaurarRascunho() {
+  var dado;
+  try { dado = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO) || "null"); }
+  catch (erro) { dado = null; }
+  if (!dado) { return; }
+  Object.keys(dado).forEach(function (nome) {
+    var valor = dado[nome];
+    if (Array.isArray(valor)) { valor = valor.join(", "); }
+    var campo = q('[name="' + nome + '"]');
+    if (!campo) { return; }
+    if (campo.type === "radio") {
+      var opcao = q('[name="' + nome + '"][value="' + valor + '"]');
+      if (opcao) { opcao.checked = true; }
+    } else if (nome === "dados_sensiveis") {
+      campo.value = valor ? "true" : "false";
+    } else {
+      campo.value = valor;
+    }
+  });
+}
+
+function listaResultado(titulo, itens) {
+  var bloco = criar("section", "resultado-bloco");
+  bloco.appendChild(criar("h3", null, titulo));
+  var ul = criar("ul");
+  itens.forEach(function (item) { ul.appendChild(criar("li", null, item)); });
+  bloco.appendChild(ul);
+  return bloco;
+}
+
+function desenharBlueprint(dado) {
+  var alvo = q("#resultado-projeto");
+  alvo.hidden = false;
+  alvo.textContent = "";
+  var cabeca = criar("div", "topo-linha");
+  cabeca.appendChild(criar("h2", null, "Plano de Solucao — " + dado.nome));
+  var copiarBlueprint = criar("button", "acao acao--secundaria", "Copiar Plano de Solucao");
+  copiarBlueprint.type = "button";
+  copiarBlueprint.addEventListener("click", function () {
+    copiar(dado.markdown, copiarBlueprint);
+  });
+  cabeca.appendChild(copiarBlueprint);
+  alvo.appendChild(cabeca);
+  alvo.appendChild(criar("p", "dica", "Elaborado por: " + dado.motor_elaboracao + " · sem modelo de IA no servidor"));
+  alvo.appendChild(criar("p", "resumo-projeto", dado.resumo));
+
+  var grade = criar("div", "resultado-grade");
+  grade.appendChild(listaResultado("Escopo inicial do MVP", dado.mvp));
+  grade.appendChild(listaResultado("Direcao de arquitetura", dado.arquitetura));
+  grade.appendChild(listaResultado("Riscos para decidir", dado.riscos));
+  grade.appendChild(listaResultado("Perguntas ainda abertas", dado.perguntas_pendentes));
+  if (dado.documentos_referencia && dado.documentos_referencia.length) {
+    grade.appendChild(listaResultado(
+      "Documentos considerados",
+      dado.documentos_referencia.map(function (documento) {
+        return documento.nome + (documento.conteudo_disponivel
+          ? " · texto analisavel"
+          : " · referencia registrada");
+      })
+    ));
+  }
+  alvo.appendChild(grade);
+
+  var vols = criar("section", "resultado-bloco");
+  vols.style.marginTop = "12px";
+  vols.appendChild(criar("h3", null, "Conhecimento recomendado do acervo"));
+  vols.appendChild(criar("p", "dica",
+    "Estes volumes foram selecionados pelas respostas; nao e preciso ler os 42 para comecar."));
+  var chips = criar("div", "volumes-recomendados");
+  dado.volumes_recomendados.forEach(function (v) {
+    var chip = criar("button", "volume-recomendado", v.id + "-" + v.nome);
+    chip.type = "button";
+    chip.title = v.motivo;
+    chip.addEventListener("click", function () {
+      abrirVolume(v.id);
+      q("#detalhe").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    chips.appendChild(chip);
+  });
+  vols.appendChild(chips);
+  alvo.appendChild(vols);
+  alvo.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+q("#btn-avancar").addEventListener("click", function () {
+  if (!etapaValida(etapaProjeto)) { return; }
+  salvarRascunho();
+  mostrarEtapa(etapaProjeto + 1);
+});
+q("#btn-voltar").addEventListener("click", function () {
+  salvarRascunho();
+  mostrarEtapa(etapaProjeto - 1);
+});
+q("#form-projeto").addEventListener("input", salvarRascunho);
+q("#form-projeto").addEventListener("submit", async function (evento) {
+  evento.preventDefault();
+  if (!etapaValida(etapaProjeto)) { return; }
+  var botao = q("#btn-planejar");
+  var erro = q("#erro-projeto");
+  botao.disabled = true;
+  botao.textContent = "Organizando o projeto...";
+  erro.hidden = true;
+  try {
+    var entrada = dadosDoFormulario();
+    entrada.documentos = await documentosDoFormulario();
+    var dado = await pedir("/api/projeto/planejar", "POST", entrada);
+    desenharBlueprint(dado);
+  } catch (falha) {
+    erro.textContent = falha.message;
+    erro.hidden = false;
+  } finally {
+    botao.disabled = false;
+    botao.textContent = "Elaborar Plano de Solucao";
+  }
+});
 
 /* --- cabecalho ------------------------------------------------------- */
 
@@ -1294,6 +1762,8 @@ q("#btn-tema").addEventListener("click", function () {
 });
 
 aplicarTema();
+restaurarRascunho();
+mostrarEtapa(1);
 carregar();
 </script>
 </body>

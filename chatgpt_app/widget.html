@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-ENGINEERING-OS</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f8; --paper: #fff; --line: #d7dae4; --text: #171b2c;
+  --muted: #596078; --accent: #3545a8; --soft: #eceefe; --ok: #147563;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#11141c;--paper:#191d28;--line:#313747;--text:#f2f4fb;--muted:#a8afc3;--accent:#a7b1ff;--soft:#252b43;--ok:#6bd5bb; }
+}
+* { box-sizing: border-box; }
+body { margin:0; padding:14px; background:var(--bg); color:var(--text); font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:760px; margin:auto; background:var(--paper); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+header { padding:18px 20px 14px; border-bottom:1px solid var(--line); }
+.eyebrow { font:700 11px/1.2 ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+h1,h2,h3 { margin:0; line-height:1.2; }
+h1 { margin-top:6px; font-size:21px; }
+h2 { font-size:18px; }
+h3 { font-size:14px; }
+p { margin:6px 0 0; color:var(--muted); }
+#form-view,#result-view { padding:18px 20px 20px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.wide { grid-column:1/-1; }
+label { display:block; font-weight:650; margin-bottom:5px; }
+.field-kind { display:inline-block; margin-left:6px; border-radius:999px; padding:2px 6px; font:700 10px/1.2 ui-monospace,monospace; letter-spacing:.03em; vertical-align:1px; }
+.required { color:#fff; background:var(--accent); }
+.optional { color:var(--muted); border:1px solid var(--line); }
+.engine { margin-top:12px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--soft); color:var(--text); font-size:12px; }
+.engine strong { display:block; margin-bottom:2px; }
+input,textarea,select {
+  width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 11px;
+  background:var(--bg); color:var(--text); font:inherit;
+}
+textarea { min-height:82px; resize:vertical; }
+input:focus,textarea:focus,select:focus { outline:2px solid var(--accent); outline-offset:1px; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:15px; }
+button { border:1px solid var(--accent); border-radius:8px; padding:9px 14px; background:var(--accent); color:var(--paper); font:650 13px/1.2 inherit; cursor:pointer; }
+button.secondary { background:transparent; color:var(--accent); }
+button:disabled { opacity:.55; cursor:wait; }
+.status { color:var(--muted); font-size:12px; }
+.summary { margin-top:12px; padding:12px 14px; background:var(--soft); border-left:4px solid var(--accent); color:var(--text); }
+.cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.card { border:1px solid var(--line); border-radius:9px; padding:12px; }
+.card ul { margin:7px 0 0; padding-left:18px; }
+.card li { margin:0 0 5px; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.chip { border:1px solid var(--accent); color:var(--accent); border-radius:999px; padding:3px 8px; font:700 11px/1.2 ui-monospace,monospace; }
+.upload { border:1px dashed var(--accent); border-radius:10px; padding:13px; background:var(--soft); }
+.upload input { background:var(--paper); margin-top:7px; }
+.upload-note { font-size:12px; }
+.files { display:grid; gap:6px; margin-top:8px; }
+.file { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:7px 9px; border:1px solid var(--line); border-radius:7px; background:var(--paper); }
+.file span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.file button { padding:5px 8px; background:transparent; color:var(--accent); }
+.intro { padding:18px 20px 20px; }
+.intro textarea { min-height:120px; }
+.platforms { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+.platform { background:transparent; color:var(--text); border-color:var(--line); text-align:left; padding:11px; }
+.platform.selected { border-color:var(--accent); background:var(--soft); color:var(--accent); }
+.guided { padding:18px 20px 20px; }
+.question-meta { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:12px; margin-bottom:10px; }
+.answer-options { display:grid; gap:8px; margin-top:14px; }
+.answer-option { background:transparent; color:var(--text); border-color:var(--line); text-align:left; }
+.answer-option.selected { border-color:var(--accent); background:var(--soft); color:var(--accent); }
+.review-title { margin-bottom:14px; }
+.hidden { display:none!important; }
+.error { color:#b53d3d; margin-top:10px; }
+@media(max-width:600px){ .grid,.cards{grid-template-columns:1fr}.platforms{grid-template-columns:1fr 1fr}.wide{grid-column:auto} body{padding:0} main{border-radius:0;border-left:0;border-right:0} }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">AI-ENGINEERING-OS · dentro do ChatGPT</div>
+    <h1>Transforme uma ideia em projeto de software</h1>
+    <p>Consolide objetivos, referências e restrições em um Plano de Solução pronto para orientar a engenharia.</p>
+    <div class="engine">
+      <strong>Motor de elaboração: Planejador AI-ENGINEERING-OS v1</strong>
+      Geração local por regras verificáveis, sem modelo de IA no servidor. Ao continuar no chat, será usado o modelo ativo da conversa.
+    </div>
+  </header>
+
+  <section id="intro-view" class="intro">
+    <label for="initial-idea">O que você quer criar? <span class="field-kind required">Obrigatório</span></label>
+    <textarea id="initial-idea" minlength="20" required
+      placeholder="Ex.: Quero um aplicativo para técnicos registrarem visitas, fotos e assinaturas mesmo sem internet."></textarea>
+    <label style="margin-top:13px">Onde o produto será usado? <span class="field-kind optional">Podemos recomendar</span></label>
+    <div class="platforms" id="platforms">
+      <button class="platform selected" type="button" data-type="auto">Recomendar</button>
+      <button class="platform" type="button" data-type="mobile">Celular</button>
+      <button class="platform" type="button" data-type="desktop">Computador</button>
+      <button class="platform" type="button" data-type="web">Navegador</button>
+    </div>
+    <div class="actions">
+      <button id="start-guided" type="button">Começar diagnóstico</button>
+      <span class="status">As próximas perguntas serão escolhidas a partir da sua ideia.</span>
+    </div>
+    <p id="intro-error" class="error hidden" role="alert"></p>
+  </section>
+
+  <section id="guided-view" class="guided hidden">
+    <div class="question-meta">
+      <span id="question-progress">Pergunta 1</span>
+      <span id="question-kind">Obrigatória</span>
+    </div>
+    <h2 id="question-title"></h2>
+    <p id="question-help"></p>
+    <div id="answer-options" class="answer-options"></div>
+    <textarea id="answer-text" class="hidden" placeholder="Responda em linguagem simples."></textarea>
+    <div class="actions">
+      <button id="question-back" class="secondary" type="button">Voltar</button>
+      <button id="question-next" type="button">Continuar</button>
+    </div>
+    <p id="question-error" class="error hidden" role="alert"></p>
+  </section>
+
+  <section id="form-view" class="hidden">
+    <div class="review-title">
+      <h2>Revise o diagnóstico</h2>
+      <p>As respostas principais já foram preenchidas. Complete apenas o que fizer sentido.</p>
+    </div>
+    <form id="project-form">
+      <div class="grid">
+        <div>
+          <label for="name">Nome provisório <span class="field-kind optional">Opcional</span></label>
+          <input id="name" name="nome" placeholder="Ex.: Agenda Fácil">
+        </div>
+        <div>
+          <label for="type">Formato principal <span class="field-kind optional">Opcional</span></label>
+          <select id="type" name="tipo">
+            <option value="web">Sistema web</option>
+            <option value="mobile">Aplicativo móvel</option>
+            <option value="automacao">Automação</option>
+            <option value="api">API ou integração</option>
+            <option value="desktop">Programa desktop</option>
+          </select>
+        </div>
+        <div class="wide">
+          <label for="idea">O que o software deve fazer? <span class="field-kind required">Obrigatório</span></label>
+          <textarea id="idea" name="ideia" required minlength="20" placeholder="Explique como contaria a ideia para uma pessoa de confiança."></textarea>
+        </div>
+        <div>
+          <label for="audience">Quem vai usar? <span class="field-kind required">Obrigatório</span></label>
+          <textarea id="audience" name="publico" required placeholder="Ex.: recepcionistas de clínicas pequenas"></textarea>
+        </div>
+        <div>
+          <label for="problem">O que hoje é difícil ou arriscado? <span class="field-kind required">Obrigatório</span></label>
+          <textarea id="problem" name="problema" required placeholder="Ex.: horários em planilhas e confirmações manuais"></textarea>
+        </div>
+        <div>
+          <label for="priority">Maior prioridade agora <span class="field-kind optional">Opcional</span></label>
+          <select id="priority" name="prioridade">
+            <option value="qualidade">Qualidade e menos retrabalho</option>
+            <option value="velocidade">Primeira versão rapidamente</option>
+            <option value="custo">Custo baixo</option>
+            <option value="escala">Preparar grande crescimento</option>
+          </select>
+        </div>
+        <div>
+          <label for="users">Usuários esperados <span class="field-kind optional">Opcional</span></label>
+          <select id="users" name="usuarios">
+            <option value="">Ainda não sei</option>
+            <option value="ate 10 usuarios internos">Até 10, uso interno</option>
+            <option value="de 10 a 100 usuarios">De 10 a 100</option>
+            <option value="de 100 a 10 mil usuarios">De 100 a 10 mil</option>
+            <option value="mais de 10 mil usuarios">Mais de 10 mil</option>
+          </select>
+        </div>
+        <div>
+          <label for="integrations">Integrações <span class="field-kind optional">Opcional</span></label>
+          <input id="integrations" name="integracoes" placeholder="WhatsApp, Omie, Google Agenda">
+        </div>
+        <div>
+          <label for="deadline">Prazo importante <span class="field-kind optional">Opcional</span></label>
+          <input id="deadline" name="prazo" placeholder="Ex.: piloto em 60 dias">
+        </div>
+        <div>
+          <label for="sensitive">Há dados sensíveis? <span class="field-kind optional">Opcional</span></label>
+          <select id="sensitive" name="dados_sensiveis">
+            <option value="false">Não ou ainda não sei</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div>
+          <label for="constraints">Limites conhecidos <span class="field-kind optional">Opcional</span></label>
+          <input id="constraints" name="restricoes" placeholder="Equipe, orçamento, hospedagem...">
+        </div>
+        <div class="wide upload">
+          <label for="documents">Documentos de referência <span class="field-kind optional">Opcional</span></label>
+          <p class="upload-note">Anexe requisitos, propostas, fluxos, planilhas ou materiais existentes. Até 10 arquivos, com 5 MB cada.</p>
+          <input id="documents" type="file" multiple
+            accept=".txt,.md,.csv,.json,.yaml,.yml,.pdf,.doc,.docx,.xls,.xlsx">
+          <div id="file-list" class="files" aria-live="polite"></div>
+          <p class="upload-note">TXT, Markdown, CSV, JSON e YAML terão o texto incorporado ao plano. Os demais serão registrados como referência para aprofundamento no chat.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="generate" type="submit">Elaborar Plano de Solução</button>
+        <span class="status" id="status">Seus dados são usados somente para elaborar este plano.</span>
+      </div>
+      <p id="error" class="error hidden" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="result-view" class="hidden">
+    <div class="actions" style="justify-content:space-between;margin-top:0">
+      <h2 id="result-name">Plano de Solução</h2>
+      <button id="edit" class="secondary" type="button">Editar respostas</button>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="cards">
+      <article class="card"><h3>MVP inicial</h3><ul id="mvp"></ul></article>
+      <article class="card"><h3>Direção de arquitetura</h3><ul id="architecture"></ul></article>
+      <article class="card"><h3>Riscos</h3><ul id="risks"></ul></article>
+      <article class="card"><h3>Perguntas abertas</h3><ul id="questions"></ul></article>
+    </div>
+    <article class="card" style="margin-top:10px">
+      <h3>Conhecimento recomendado</h3>
+      <div id="volumes" class="chips"></div>
+    </article>
+    <article id="documents-card" class="card hidden" style="margin-top:10px">
+      <h3>Documentos considerados</h3>
+      <ul id="result-documents"></ul>
+    </article>
+    <div class="actions">
+      <button id="continue" type="button">Continuar a construção no chat</button>
+      <button id="copy" class="secondary" type="button">Copiar Plano de Solução</button>
+      <span class="status">O ChatGPT receberá o plano e fará as próximas perguntas.</span>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+const $ = (selector) => document.querySelector(selector);
+let blueprint = null;
+let attachedFiles = [];
+let rpcId = 0;
+const pending = new Map();
+let selectedType = "auto";
+let guidedQuestions = [];
+let guidedIndex = 0;
+let guidedAnswers = {};
+
+const notify = (method, params) => {
+  window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+};
+const request = (method, params) => new Promise((resolve, reject) => {
+  const id = ++rpcId;
+  pending.set(id, { resolve, reject });
+  window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+});
+
+function localDiscovery(idea, requestedType) {
+  const normalized = idea.toLocaleLowerCase("pt-BR");
+  let type = requestedType;
+  if (type === "auto") {
+    if (/celular|android|iphone|mobile|aplicativo/.test(normalized)) type = "mobile";
+    else if (/windows|desktop|computador|\\bpc\\b|offline/.test(normalized)) type = "desktop";
+    else if (/automat|robô|robo|processo repetitivo/.test(normalized)) type = "automacao";
+    else type = "web";
+  }
+  const questions = [
+    { id:"publico", titulo:"Quem usará este produto no dia a dia?", ajuda:"Descreva o perfil principal, não apenas “todos”.", tipo:"texto", obrigatoria:true },
+    { id:"problema", titulo:"Qual dificuldade deve desaparecer primeiro?", ajuda:"Conte como isso é resolvido hoje e onde ocorre perda de tempo, dinheiro ou qualidade.", tipo:"texto", obrigatoria:true },
+  ];
+  const platformQuestions = {
+    mobile: {
+      titulo:"Qual recurso do celular é mais importante?",
+      ajuda:"Isso muda permissões, testes e arquitetura do aplicativo.",
+      opcoes:["Câmera ou leitura de código","Localização e mapas","Notificações","Uso offline","Nenhum recurso especial"],
+    },
+    desktop: {
+      titulo:"Como o programa para PC deverá funcionar?",
+      ajuda:"Escolha o cenário mais próximo da operação real.",
+      opcoes:["Instalado e funcionando offline","Instalado, mas conectado à nuvem","Em rede dentro da empresa","Ainda não sei"],
+    },
+    automacao: {
+      titulo:"Quando a automação encontrar uma exceção, o que deve acontecer?",
+      ajuda:"Automação profissional precisa de um caminho de decisão humana.",
+      opcoes:["Pausar e pedir aprovação","Registrar e continuar os demais casos","Tentar novamente automaticamente","Ainda precisa ser definido"],
+    },
+    web: {
+      titulo:"Como as pessoas acessarão o sistema?",
+      ajuda:"Isso orienta autenticação, permissões e distribuição.",
+      opcoes:["Conta individual com login","Acesso interno da empresa","Acesso público sem login","Ainda não sei"],
+    },
+  };
+  questions.push({ id:"recurso_plataforma", tipo:"opcao", obrigatoria:true, ...platformQuestions[type] });
+  if (/loja|venda|e-?commerce|pedido|checkout|marketplace|pagamento|finance|banco|fatura/.test(normalized)) {
+    questions.push({
+      id:"decisao_especifica", titulo:"Como pagamentos ou cobranças deverão funcionar?",
+      ajuda:"Escolha uma direção inicial; provedores podem ser definidos depois.", tipo:"opcao", obrigatoria:true,
+      opcoes:["Pix e cartão","Assinatura recorrente","Pagamento fora do sistema","Sem pagamento nesta primeira versão"],
+    });
+  } else if (/saúde|saude|clínica|clinica|paciente|médico|medico/.test(normalized)) {
+    questions.push({
+      id:"decisao_especifica", titulo:"Que tipo de informação de saúde será armazenada?",
+      ajuda:"Dados clínicos exigem controles diferentes de simples dados de contato.", tipo:"opcao", obrigatoria:true,
+      opcoes:["Prontuário ou informação clínica","Agenda e dados de contato","Somente indicadores sem identificação","Ainda precisa ser definido"],
+    });
+  }
+  questions.push(
+    { id:"estilo_visual", titulo:"Qual direção visual combina com o produto?", ajuda:"A escolha orienta o primeiro protótipo.", tipo:"opcao", obrigatoria:false, opcoes:["Profissional e discreta","Moderna e tecnológica","Simples e acolhedora","Visual forte e marcante","Prefiro receber uma recomendação"] },
+    { id:"prioridade", titulo:"O que é mais importante na primeira entrega?", ajuda:"Prazo, qualidade, custo e escala geram decisões diferentes.", tipo:"opcao", obrigatoria:true, opcoes:["Qualidade e menos retrabalho","Primeira versão rapidamente","Custo inicial baixo","Preparar grande crescimento"] }
+  );
+  return { tipo_inferido:type, perguntas:questions };
+}
+
+function renderGuidedQuestion() {
+  const question = guidedQuestions[guidedIndex];
+  $("#question-progress").textContent = "Pergunta " + (guidedIndex + 1) + " de " + guidedQuestions.length;
+  $("#question-kind").textContent = question.obrigatoria ? "Obrigatória" : "Opcional";
+  $("#question-title").textContent = question.titulo;
+  $("#question-help").textContent = question.ajuda;
+  $("#question-error").classList.add("hidden");
+  $("#question-back").disabled = guidedIndex === 0;
+  $("#question-next").textContent = guidedIndex === guidedQuestions.length - 1 ? "Revisar projeto" : "Continuar";
+  const options = $("#answer-options");
+  const text = $("#answer-text");
+  options.textContent = "";
+  options.classList.toggle("hidden", question.tipo !== "opcao");
+  text.classList.toggle("hidden", question.tipo !== "texto");
+  text.value = question.tipo === "texto" ? (guidedAnswers[question.id] || "") : "";
+  (question.opcoes || []).forEach((label) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "answer-option" + (guidedAnswers[question.id] === label ? " selected" : "");
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      guidedAnswers[question.id] = label;
+      renderGuidedQuestion();
+    });
+    options.appendChild(button);
+  });
+}
+
+function finishDiscovery() {
+  $("#idea").value = $("#initial-idea").value.trim();
+  $("#audience").value = guidedAnswers.publico || "";
+  $("#problem").value = guidedAnswers.problema || "";
+  $("#type").value = selectedType === "auto" ? (guidedAnswers.tipo_inferido || "web") : selectedType;
+  const priorities = {
+    "Qualidade e menos retrabalho":"qualidade",
+    "Primeira versão rapidamente":"velocidade",
+    "Custo inicial baixo":"custo",
+    "Preparar grande crescimento":"escala",
+  };
+  $("#priority").value = priorities[guidedAnswers.prioridade] || "qualidade";
+  $("#guided-view").classList.add("hidden");
+  $("#form-view").classList.remove("hidden");
+  $("#form-view").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+document.querySelectorAll(".platform").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedType = button.dataset.type;
+    document.querySelectorAll(".platform").forEach((item) =>
+      item.classList.toggle("selected", item === button)
+    );
+  });
+});
+
+$("#start-guided").addEventListener("click", async () => {
+  const idea = $("#initial-idea").value.trim();
+  if (idea.length < 20) {
+    $("#intro-error").textContent = "Descreva a ideia com pelo menos 20 caracteres.";
+    $("#intro-error").classList.remove("hidden");
+    return;
+  }
+  $("#intro-error").classList.add("hidden");
+  let discovery = null;
+  if (window.parent !== window) {
+    try {
+      await bridgeReady;
+      const response = await request("tools/call", {
+        name:"personalizar_descoberta",
+        arguments:{ ideia:idea, tipo:selectedType },
+      });
+      discovery = response?.structuredContent;
+    } catch (_) { discovery = null; }
+  }
+  if (!discovery || discovery.modo === "erro") discovery = localDiscovery(idea, selectedType);
+  guidedQuestions = discovery.perguntas;
+  guidedAnswers = { tipo_inferido:discovery.tipo_inferido };
+  guidedIndex = 0;
+  $("#intro-view").classList.add("hidden");
+  $("#guided-view").classList.remove("hidden");
+  renderGuidedQuestion();
+});
+
+$("#question-back").addEventListener("click", () => {
+  if (guidedIndex > 0) {
+    const current = guidedQuestions[guidedIndex];
+    if (current.tipo === "texto") guidedAnswers[current.id] = $("#answer-text").value.trim();
+    guidedIndex -= 1;
+    renderGuidedQuestion();
+  }
+});
+
+$("#question-next").addEventListener("click", () => {
+  const question = guidedQuestions[guidedIndex];
+  if (question.tipo === "texto") guidedAnswers[question.id] = $("#answer-text").value.trim();
+  if (question.obrigatoria && !guidedAnswers[question.id]) {
+    $("#question-error").textContent = "Esta resposta é necessária para personalizar o projeto.";
+    $("#question-error").classList.remove("hidden");
+    return;
+  }
+  if (guidedIndex < guidedQuestions.length - 1) {
+    guidedIndex += 1;
+    renderGuidedQuestion();
+  } else {
+    finishDiscovery();
+  }
+});
+
+function list(target, items) {
+  const node = $(target);
+  node.textContent = "";
+  (items || []).forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    node.appendChild(li);
+  });
+}
+
+function render(data) {
+  if (!data || data.modo !== "blueprint" || !data.blueprint) return;
+  blueprint = data.blueprint;
+  $("#intro-view").classList.add("hidden");
+  $("#guided-view").classList.add("hidden");
+  $("#form-view").classList.add("hidden");
+  $("#result-view").classList.remove("hidden");
+  $("#result-name").textContent = "Plano de Solução — " + blueprint.nome;
+  $("#summary").textContent = blueprint.resumo;
+  list("#mvp", blueprint.mvp);
+  list("#architecture", blueprint.arquitetura);
+  list("#risks", blueprint.riscos);
+  list("#questions", blueprint.perguntas_pendentes);
+  const volumes = $("#volumes");
+  volumes.textContent = "";
+  (blueprint.volumes_recomendados || []).forEach((volume) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = volume.id + "-" + volume.nome;
+    chip.title = volume.motivo;
+    volumes.appendChild(chip);
+  });
+  const documents = blueprint.documentos_referencia || [];
+  $("#documents-card").classList.toggle("hidden", documents.length === 0);
+  list("#result-documents", documents.map((document) =>
+    document.nome + (document.conteudo_disponivel ? " · texto analisável" : " · referência registrada")
+  ));
+  window.openai?.setWidgetState?.({ blueprint, tela: "resultado" });
+}
+
+const TEXT_EXTENSIONS = new Set(["txt", "md", "csv", "json", "yaml", "yml"]);
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function renderFiles() {
+  const target = $("#file-list");
+  target.textContent = "";
+  attachedFiles.forEach((file, index) => {
+    const row = document.createElement("div");
+    row.className = "file";
+    const name = document.createElement("span");
+    name.textContent = file.name + " · " + formatBytes(file.size);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Remover";
+    remove.setAttribute("aria-label", "Remover " + file.name);
+    remove.addEventListener("click", () => {
+      attachedFiles.splice(index, 1);
+      renderFiles();
+    });
+    row.append(name, remove);
+    target.appendChild(row);
+  });
+}
+
+$("#documents").addEventListener("change", (event) => {
+  const incoming = Array.from(event.target.files || []);
+  const oversized = incoming.find((file) => file.size > 5 * 1024 * 1024);
+  if (oversized) {
+    $("#error").textContent = oversized.name + " excede o limite de 5 MB.";
+    $("#error").classList.remove("hidden");
+    event.target.value = "";
+    return;
+  }
+  attachedFiles = attachedFiles.concat(incoming).slice(0, 10);
+  event.target.value = "";
+  $("#error").classList.add("hidden");
+  renderFiles();
+});
+
+async function documentsPayload() {
+  return Promise.all(attachedFiles.map(async (file) => {
+    const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "";
+    const conteudo = TEXT_EXTENSIONS.has(extension)
+      ? (await file.text()).slice(0, 20000)
+      : "";
+    return { nome: file.name, tipo: file.type, tamanho: file.size, conteudo };
+  }));
+}
+
+window.addEventListener("message", (event) => {
+  if (event.source !== window.parent) return;
+  const message = event.data;
+  if (!message || message.jsonrpc !== "2.0") return;
+  if (typeof message.id === "number") {
+    const waiting = pending.get(message.id);
+    if (!waiting) return;
+    pending.delete(message.id);
+    message.error ? waiting.reject(message.error) : waiting.resolve(message.result);
+    return;
+  }
+  if (message.method === "ui/notifications/tool-result") {
+    render(message.params?.structuredContent);
+  }
+}, { passive: true });
+
+const bridgeReady = window.parent === window
+  ? Promise.resolve(null)
+  : request("ui/initialize", {
+      appInfo: { name: "ai-engineering-os-builder", version: "0.2.0" },
+      appCapabilities: {},
+      protocolVersion: "2026-01-26",
+    }).then(() => notify("ui/notifications/initialized", {})).catch(() => null);
+
+$("#project-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+  const form = new FormData(event.currentTarget);
+  const payload = Object.fromEntries(form.entries());
+  delete payload.documentos;
+  payload.integracoes = String(payload.integracoes || "").split(",").map((x) => x.trim()).filter(Boolean);
+  payload.dados_sensiveis = payload.dados_sensiveis === "true";
+  payload.documentos = await documentsPayload();
+  payload.respostas_descoberta = guidedAnswers;
+  const button = $("#generate");
+  button.disabled = true;
+  button.textContent = "Organizando...";
+  $("#error").classList.add("hidden");
+  try {
+    await bridgeReady;
+    const response = await request("tools/call", { name: "planejar_software", arguments: payload });
+    render(response?.structuredContent);
+  } catch (error) {
+    $("#error").textContent = "Não foi possível elaborar o Plano de Solução. Tente novamente no chat.";
+    $("#error").classList.remove("hidden");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Elaborar Plano de Solução";
+  }
+});
+
+$("#edit").addEventListener("click", () => {
+  $("#result-view").classList.add("hidden");
+  $("#form-view").classList.remove("hidden");
+});
+
+$("#copy").addEventListener("click", async () => {
+  if (!blueprint) return;
+  try {
+    await navigator.clipboard.writeText(blueprint.markdown);
+    $("#copy").textContent = "Copiado";
+    setTimeout(() => { $("#copy").textContent = "Copiar Plano de Solução"; }, 1500);
+  } catch (_) {
+    $("#copy").textContent = "Selecione e copie no chat";
+  }
+});
+
+$("#continue").addEventListener("click", async () => {
+  if (!blueprint) return;
+  const prompt = "Vamos continuar a construção deste software. Use o Plano de Solução abaixo como contrato inicial, faça uma pergunta simples por vez e não escreva código antes de confirmar as perguntas abertas.\\n\\n" + blueprint.markdown;
+  try {
+    await bridgeReady;
+    await request("ui/message", {
+      role: "user",
+      content: [{ type: "text", text: prompt }],
+    });
+  } catch (_) {
+    if (window.openai?.sendFollowUpMessage) {
+      await window.openai.sendFollowUpMessage({ prompt });
+    }
+  }
+});
+
+const initial = window.openai?.toolOutput;
+if (initial) render(initial);
+const saved = window.openai?.widgetState;
+if (saved?.blueprint) render({ modo: "blueprint", blueprint: saved.blueprint });
+</script>
+</body>
+</html>
