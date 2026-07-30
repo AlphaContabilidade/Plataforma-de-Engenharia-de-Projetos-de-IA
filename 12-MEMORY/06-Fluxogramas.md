@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 06-Fluxogramas
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -18,10 +18,10 @@ fluxograma diz em que ponto a resolução para e quem fica com a conta.
 
 ```mermaid
 flowchart TD
-    A[resolver chave com hoje, janela_dias e dominancia_minima] --> B[entradas da chave em ordem de registro]
-    B --> C{Chave em branco?}
-    C -- sim --> D[ChaveInvalida: erro de programa, nao pendencia]
-    C -- nao --> E[Descartar origem ESCRITO_PELO_AGENTE]
+    A[resolver chave com hoje, janela_dias e dominancia_minima] --> B{memoria.entradas valida a chave: em branco?}
+    B -- sim --> D[ChaveInvalida levantada dentro de entradas: erro de programa, nao pendencia]
+    B -- nao --> C[Entradas da chave em ordem de registro]
+    C --> E[Descartar origem ESCRITO_PELO_AGENTE]
     E --> F[Expirar o que passou da janela]
     F --> G[Procurar contradicao entre base congelada e dominante observada]
     G --> H{Existe entrada DECIDIDO_POR_HUMANO vigente?}
@@ -49,6 +49,12 @@ O fluxograma tem sete pontos de decisão e nenhum depende de julgamento. Três m
 comentário. O primeiro é que a chave em branco sai por um ramo próprio, que **levanta** em
 vez de devolver veredicto: falta de evidência é estado normal do domínio, chave vazia é
 defeito de quem chamou, e misturar os dois faria o chamador tratar bug como pendência. O
+desenho desse ramo foi corrigido depois da auditoria para não mentir sobre o lugar da
+verificação: ela não é um passo que `resolver` executa depois de obter as entradas, e sim
+acontece **dentro** de `memoria.entradas`, que valida a chave antes de procurar o balde. A
+diferença é operacional para quem for reimplementar — não existe ponto no meio em que a chave
+já foi consultada e ainda não foi validada, e é por isso que a decisão aparece antes do nó
+que devolve as entradas. O
 segundo é o desenho dos ramos `J` e `P`: o ramo negativo de `J` é a única entrada para a
 base congelada. Se a observação existe e não decide, o caminho segue para `L` ou `N`, e não
 para `P` — a base congelada não é rede de segurança da observação que falhou. O terceiro é

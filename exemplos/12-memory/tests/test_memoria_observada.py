@@ -18,6 +18,7 @@ import pytest
 
 from memoria_observada import (
     ChaveInvalida,
+    DecisaoInvalida,
     Entrada,
     MemoriaObservada,
     Origem,
@@ -49,6 +50,34 @@ def test_chave_vazia_levanta_chave_invalida():
 def test_chave_so_com_espaco_levanta_chave_invalida():
     with pytest.raises(ChaveInvalida, match="identidade"):
         _e("alfa", chave="   ")
+
+
+def test_decisao_em_branco_levanta_decisao_invalida():
+    """Simetria com a chave: branco na decisao e erro de programa, nao pendencia.
+
+    Sem esta guarda, `Entrada(chave="k", decisao="")` entrava como alternativa
+    legitima: somava contagem, podia empatar com uma decisao real e chegar ao
+    chamador dentro de um veredicto -- string vazia com confianca alta.
+    """
+    for branco in ("", "   ", "\t"):
+        with pytest.raises(DecisaoInvalida):
+            _e(branco)
+
+
+def test_decisao_em_branco_nao_e_chave_invalida():
+    """As duas excecoes sao irmas e nao se confundem: cada campo tem a sua."""
+    with pytest.raises(DecisaoInvalida) as erro:
+        _e("  ")
+    assert not isinstance(erro.value, ChaveInvalida)
+    assert issubclass(DecisaoInvalida, ValueError)
+
+
+def test_decisao_e_normalizada_na_borda():
+    """`"alfa"` e `" alfa "` sao a mesma decisao; contar separado partiria a dominancia."""
+    mem = MemoriaObservada()
+    mem.registrar(_e("alfa"))
+    mem.registrar(_e("  alfa  "))
+    assert mem.contagem("chave-a") == {"alfa": 2}
 
 
 def test_chave_e_normalizada_na_borda():

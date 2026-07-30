@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 07-Regras
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -25,9 +25,9 @@ caminho errado não existe, em vez de existir e ser verificado.
 | R5 | Precedência não é cascata de reserva | A fonte de maior precedência presente encerra a resolução; o ramo de `BASE_CONGELADA` só é alcançado quando não há entrada `OBSERVADO` vigente |
 | R6 | Empate nunca decide, qualquer que seja o limiar | Verificação explícita do topo da contagem antes de comparar a fração, e não confiança em o limiar ser maior que a metade |
 | R7 | Dominância abaixo do mínimo devolve indeciso, não palpite | `resolver` retorna `decisao=None`; não existe caminho que devolva a dominante com confiança rebaixada |
-| R8 | Veredicto indeciso tem confiança nula e justificativa não vazia | Os quatro retornos indecisos passam `None` nos dois primeiros campos e uma justificativa com os números |
+| R8 | Veredicto indeciso tem confiança nula e justificativa não vazia | Os **três** retornos indecisos de `resolver` — empate no topo da contagem, dominância abaixo do mínimo e nenhuma evidência vigente — passam `None` nos dois primeiros campos e uma justificativa com os números |
 | R9 | Entrada fora da janela não conta para nada, inclusive para contradição | A janela é aplicada antes de `contradicoes`, e não depois |
-| R10 | Falta de evidência nunca levanta; chave em branco sempre levanta | `entradas` devolve tupla vazia para chave desconhecida e `_chave_valida` levanta `ChaveInvalida` para branco |
+| R10 | Falta de evidência nunca levanta; campo em branco sempre levanta | `entradas` devolve tupla vazia para chave desconhecida; `_chave_valida` levanta `ChaveInvalida` e `_decisao_valida` levanta `DecisaoInvalida`, a irmã que fecha a assimetria — decisão vazia não é alternativa |
 
 ## Por que R1 é a regra que sustenta as outras
 
@@ -63,3 +63,13 @@ calculada por consulta, então uma janela ampliada revive evidência antiga, e a
 janela para obter a resposta desejada é adulteração de método, não ajuste de parâmetro. A
 terceira é que **uma chave com contradição aberta nunca produz confiança alta**, nem sob
 decisão humana: a decisão humana vence o veredicto, e não encerra a contradição na fonte.
+
+Uma palavra sobre a extensão de R10, porque ela foi acrescentada depois da auditoria e a razão
+importa mais que a linha de código. `ChaveInvalida` já recusava chave em branco, mas `decisao`
+aceitava a string vazia, e a assimetria não tinha defesa: uma entrada com decisão vazia somava
+contagem, podia empatar com uma decisão real e chegar ao chamador dentro de um veredicto de
+confiança alta. Recusar o branco não exige conhecimento de domínio nenhum — é a mesma
+verificação, no campo vizinho. O que **continua** fora do código é a lista de valores-marcador
+de ausência de cada operação, do tipo categoria genérica que não ensina nada: essa lista é
+conhecimento de quem usa, fixá-la aqui decidiria por todos os domínios, e ela segue registrada
+em [`16-Roadmap.md`](16-Roadmap.md).

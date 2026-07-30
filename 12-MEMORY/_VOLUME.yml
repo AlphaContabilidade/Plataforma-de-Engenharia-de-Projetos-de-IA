@@ -9,7 +9,7 @@
 volume: "12"
 nome: MEMORY
 tipo: ENGINE
-status: RASCUNHO
+status: PRONTO
 perecivel: false
 depende_de: []
 escopo:

@@ -60,6 +60,27 @@ class Origem(StrEnum):
     DECIDIDO_POR_HUMANO = "DECIDIDO_POR_HUMANO"
 
 
+class DecisaoInvalida(ValueError):
+    """Decisao vazia ou so com espaco. Irma de `ChaveInvalida`, e pelo mesmo motivo.
+
+    Branco na decisao e erro de programa, nao ausencia de evidencia: uma decisao
+    em branco entra como alternativa legitima, soma contagem, pode empatar com
+    uma decisao real e chegar ao chamador dentro de um veredicto de confianca
+    alta. Rejeitar aqui nao exige conhecimento de dominio nenhum -- e a mesma
+    verificacao que a chave ja fazia, na simetria que faltava.
+
+    O que esta excecao **nao** cobre e o valor-marcador de ausencia especifico de
+    cada dominio, do tipo categoria generica que nao ensina nada. Essa lista e
+    conhecimento de quem opera, fixa-la aqui seria decidir por todos os dominios,
+    e por isso ela segue em `16-Roadmap.md`.
+    """
+
+
+def _sem_borda(valor: str) -> str:
+    """Texto sem espaco de borda, tratando ausencia como vazio."""
+    return (valor or "").strip()
+
+
 def _chave_valida(chave: str) -> str:
     """Normaliza a borda e reprova o branco. Usado no registro e na consulta.
 
@@ -68,11 +89,29 @@ def _chave_valida(chave: str) -> str:
     sem normalizar existiriam dois baldes para a mesma coisa -- cada um com
     metade das observacoes e nenhum com dominancia.
     """
-    limpa = (chave or "").strip()
+    limpa = _sem_borda(chave)
     if not limpa:
         raise ChaveInvalida(
             f"chave {chave!r} vazia ou so com espaco: a chave e a identidade da "
             "decisao, e um balde sem identidade soma observacoes sem relacao"
+        )
+    return limpa
+
+
+def _decisao_valida(decisao: str) -> str:
+    """Normaliza a borda e reprova o branco, simetrico a `_chave_valida`.
+
+    A normalizacao vem pelo mesmo argumento da chave: `"alfa"` e `" alfa "` sao a
+    mesma decisao, e conta-las separado partiria a dominancia em duas metades sem
+    que nada aparecesse errado. O branco levanta `DecisaoInvalida` porque decisao
+    e o conteudo do veredicto, e veredicto com decisao vazia e resposta com cara
+    de resposta.
+    """
+    limpa = _sem_borda(decisao)
+    if not limpa:
+        raise DecisaoInvalida(
+            f"decisao {decisao!r} vazia ou so com espaco: decisao em branco nao e "
+            "alternativa, e ela empataria ou venceria a contagem como se fosse"
         )
     return limpa
 
@@ -85,6 +124,10 @@ class Entrada:
     entrada nova, o que preserva a trilha em vez de reescreve-la. `evidencia` e
     texto livre com o que sustentou a decisao -- fica fora de qualquer contagem
     e existe para o diagnostico humano, que sem ele depende de reexecutar.
+
+    `chave` e `decisao` recebem o mesmo tratamento de borda e a mesma recusa ao
+    branco, com uma excecao propria cada. `evidencia` nao recebe: ela nao entra em
+    contagem nenhuma, e evidencia vazia e ausencia de diagnostico, nao erro.
     """
 
     chave: str
@@ -95,6 +138,7 @@ class Entrada:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "chave", _chave_valida(self.chave))
+        object.__setattr__(self, "decisao", _decisao_valida(self.decisao))
 
 
 def contagem_de(entradas: Iterable[Entrada]) -> dict[str, int]:

@@ -4,6 +4,99 @@ Registro de estado do acervo. Toda mudança de status de volume passa por aqui c
 critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Datas em ISO
 `YYYY-MM-DD`, mais recente no topo.
 
+## 2026-07-30
+
+### Volume `12-MEMORY` auditado e promovido a `PRONTO`
+
+Primeiro volume cujo código foi **extraído de um sistema em produção** e generalizado, em vez
+de escrito para o volume. A plataforma passou a servir para construir software, e não para
+acumular prosa: o produto de cada volume é o componente executável, e o texto é o manual dele.
+
+Auditoria independente em Fable 5: `auditorias/VOL-12-auditoria-2026-07-30.md`.
+**Veredicto Aprovado, média 8.7**, nenhuma seção abaixo de 6 (menor nota 7, em `05-Diagramas`).
+`08-Modelos` recebeu 10 — zero divergência com o código, conferida item por item.
+
+Os quatro critérios de PRONTO: gate 1 `exit 0`, gate 2 **271 testes verdes**, gate 3 `exit 0`,
+auditoria 8.7 — e esta entrada é o critério 4.
+
+**O componente.** Três módulos em `exemplos/12-memory/`, sem nada do domínio de origem nas
+assinaturas: `memoria_observada.py` (armazém de decisões em que cada entrada carrega a
+**origem** — observada, escrita pelo próprio agente, base congelada, decidida por humano),
+`contaminacao.py` (entrada escrita pelo agente **nunca** conta como evidência, e a contradição
+entre base congelada e histórico observado é **reportada**, nunca resolvida em silêncio) e
+`precedencia.py` (veredicto **indeciso de primeira classe**, com justificativa — evidência que
+não decide não vira chute de confiança baixa).
+
+**Os três defeitos reais que o componente torna impossíveis** estão descritos em
+`10-Anti-Patterns.md` como padrão, sem nenhum identificador de cliente: base congelada
+contradizendo o histórico sem sinalizar; o sistema lendo a própria escrita como evidência
+independente e se autoconfirmando; e evidência insuficiente sendo tratada como se decidisse.
+
+Verificado por varredura: nenhuma menção a Omie, Sicoob, boleto, CNPJ, conta bancária, valor
+monetário real ou código de categoria contábil no código, nos testes ou nas seções. O auditor
+repetiu a varredura de forma independente e confirmou.
+
+**Cinco achados da auditoria, todos incorporados antes da promoção.** Todos de texto — nenhum
+tocava o comportamento do código:
+
+1. `12-Exemplos` afirmava que **dez** escritas do agente invertem a dominância. O auditor
+   mediu: **nove**. O parágrafo era justamente o que documenta uma correção feita por medição,
+   e continha um número que ninguém mediu. A correção não aceitou nem o número do autor nem o
+   do auditor: um script varreu `n` de 1 a 15 e o volume passou a trazer o valor medido, com a
+   fração exata. O detalhe que só aparece medindo: com **oito** a contagem empata em 9 × 9 e o
+   desempate alfabético mantém a liderança anterior — por isso oito não basta. Há agora
+   asserção que **fixa o mínimo** nos dois lados (8 não inverte, 9 inverte).
+2. `07-Regras` R8 dizia "quatro retornos indecisos"; o código tem **três** — empate, dominância
+   abaixo do mínimo, nenhuma evidência vigente. Corrigido nomeando os três.
+3. `05-Diagramas` dizia "zero ou uma contradição"; o diagrama e o código permitem **várias** por
+   chave, e há teste que prova duas.
+4. `11-Implementacao` citava "dez escritas" onde o teste diz **cinco**.
+5. "Oitenta dias" onde são **oitenta e um**.
+
+**Uma discordância parcial do auditor, aplicada.** O autor havia deixado no roadmap a rejeição
+de `decisao` em branco, argumentando que a lista de valores que significam ausência é
+conhecimento de domínio. O auditor concordou pela metade: a lista é domínio, mas string vazia é
+erro de programa simétrico ao de chave vazia e deveria ser rejeitada já. Entrou
+`DecisaoInvalida`, irmã de `ChaveInvalida` e não subclasse dela, com três testes — a suíte dos
+exemplos foi de 47 para 50 casos. O item do roadmap foi dividido para refletir que metade saiu.
+
+**Julgamento do auditor sobre as decisões discutíveis:** contradição aberta rebaixar a confiança
+mesmo com decisão humana — autor correto, porque `Confianca` qualifica o estado da evidência da
+chave, não a autoridade de quem decidiu; limiar zero de contradição — rigor e não ruído, porque
+`n_observacoes` viaja no relatório e suprimir sinal fraco é a erosão silenciosa que o volume
+existe para impedir.
+
+### Interface web local
+
+`ferramentas/web.py`, servidor de biblioteca padrão que abre no navegador. Grade dos 42 volumes
+clicável, ficha do volume com seções presentes e ausentes, botão que roda os três gates e mostra
+as violações agrupadas por regra, botão que gera e copia o briefing de produção. Verificada no
+navegador de verdade: clique no volume 07, os três gates aprovaram, o gate 2 executou pytest.
+
+Segurança, porque um endpoint que dispara processo é um executor: bind estritamente em
+`127.0.0.1`, id de volume validado contra o contrato antes de qualquer toque em disco, nenhum
+caminho de arquivo vindo da requisição, sem `shell=True`, e `Host`/`Origin` conferidos contra
+DNS rebinding e POST de outra origem.
+
+A placa de testes **não afirma verde**: mostra a contagem estática de funções em disco com o
+comando que produz o veredicto, e o JSON carrega `verificado: false`. Cravar "271 testes verdes"
+numa página estática seria a proibição 3 aplicada a todos menos a nós mesmos.
+
+Corrigido no caminho: os códigos de cor ANSI do pytest apareciam literais na página. `--color=no`
+na chamada e limpeza defensiva na camada de apresentação, que não sabe renderizar ANSI.
+
+### Skills renomeadas e o mecanismo confirmado
+
+As cinco skills ganharam prefixo — `aieos-novo-volume`, `aieos-auditar`, `aieos-status`,
+`aieos-cross-reference`, `aieos-exportar`. Duas razões: `status` colidia com um comando embutido
+do harness, e o prefixo torna a procedência óbvia na listagem.
+
+**Confirmado por invocação, não por suposição:** o harness descobre skills de `.claude/skills/`
+aninhado em subpasta, escopadas ao diretório (`AI-ENGINEERING-OS:aieos-*`). A descoberta acontece
+no início da sessão, então arquivo criado no meio dela não aparece até a sessão seguinte — foi o
+que produziu o `Unknown skill` inicial e a hipótese errada de que aninhamento não funcionava.
+`ferramentas/instalar_skills.py` permanece como alternativa para harness sem esse suporte.
+
 ## 2026-07-29
 
 ### Máquina de produção construída

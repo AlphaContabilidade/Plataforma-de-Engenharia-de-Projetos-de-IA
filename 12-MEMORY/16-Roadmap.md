@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 16-Roadmap
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -16,11 +16,29 @@ de não ter entrado agora — item de roadmap sem essa razão é apenas uma list
 | Evolução | O que acrescenta | Por que não entrou agora |
 |---|---|---|
 | Persistência do armazém | Guardar entradas fora da memória do processo, para que a trilha sobreviva a reinício | Exige decisão de formato e de local que pertence ao volume de banco de dados; a interface pública não muda quando a persistência entrar, porque `MemoriaObservada` já expõe apenas verbos |
-| Rejeição de decisão em branco | Impedir que uma decisão vazia entre como se fosse uma alternativa legítima | O conjunto de valores que funcionam como marcador de ausência é conhecimento do domínio de quem usa — na operação de origem havia uma categoria genérica que não ensinava nada — e fixar essa lista aqui seria decidir por todos os domínios |
+| Lista de valores-marcador de ausência | Recusar também os valores que, num domínio específico, significam "não sei" sem dizer — na operação de origem havia uma categoria genérica que não ensinava nada | O conjunto desses valores é conhecimento do domínio de quem usa, e fixar a lista aqui seria decidir por todos os domínios; a metade que **não** depende de domínio — a decisão em branco literal — já saiu do roadmap e está implementada, ver abaixo |
 | Janela por origem | Permitir que a base congelada expire em prazo diferente do da observação | Hoje a janela é uniforme e a uniformidade é uma regra só, testável; prazo por origem é a decisão de validade do documento, que pertence ao volume vizinho de conhecimento |
 | Peso por evidência | Deixar uma observação valer mais que outra segundo a qualidade do sinal | Ponderar transforma dominância em escore, e escore precisa de calibração própria; sem essa calibração, o peso seria opinião com aparência de número |
 | Trilha de veredictos | Guardar cada veredicto emitido, com data e parâmetros, para medir deriva da própria memória | As métricas de [`14-Metricas.md`](14-Metricas.md) hoje se calculam por instrumentação de quem chama; gravar veredicto dentro do componente o tornaria escritor, e escritor tem de decidir onde escreve |
 | Fechamento de contradição por revisão | Marcar uma contradição como examinada, sem apagá-la | Depende de existir a curadoria da fonte no volume 11; um estado de examinada criado aqui viraria, na prática, o botão de silenciar que a regra R3 proíbe |
+
+## O item que era um e virou dois: decisão em branco
+
+A auditoria independente do volume desmontou este item, e com razão. Ele tratava como uma coisa
+só duas que não são: a **string vazia ou só espaço**, que não é marcador de domínio nenhum, e a
+**lista de valores que significam ausência** em cada operação. A justificativa de conhecimento
+do domínio vale para a segunda e não vale para a primeira — recusar branco é a mesma verificação
+que `ChaveInvalida` já fazia na chave, e a assimetria era indefensável: `Entrada(chave="k",
+decisao="")` entrava como alternativa legítima, somava contagem, podia empatar com uma decisão
+real e chegar ao chamador dentro de um veredicto de confiança alta.
+
+A metade sem dependência de domínio saiu do roadmap na incorporação desta auditoria.
+`_decisao_valida` normaliza a borda e levanta `DecisaoInvalida`, irmã de `ChaveInvalida` e não
+subclasse dela, com três casos de teste em
+[`13-Testes.md`](13-Testes.md) e a regra registrada como extensão de R10 em
+[`07-Regras.md`](07-Regras.md). A metade restante — a lista de valores-marcador — continua na
+tabela acima com a justificativa original intacta, porque ali a razão de não entrar é real:
+qualquer lista que este volume fixasse seria a lista de um domínio imposta a todos os outros.
 
 ## Ligação com os volumes 11, 13 e 15
 

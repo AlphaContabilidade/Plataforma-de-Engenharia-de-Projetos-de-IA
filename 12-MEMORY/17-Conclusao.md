@@ -3,19 +3,22 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 17-Conclusao
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
 # Conclusão
 
 Este volume entregou uma memória de decisões observadas com três módulos, dez regras
-invioláveis e quarenta e sete casos de teste que rodam sem rede e sem depender do dia em que
+invioláveis e cinquenta casos de teste que rodam sem rede e sem depender do dia em que
 são executados. O que ela torna possível é uma frase que não era pronunciável antes: esta
-decisão foi tomada porque nove de dez observações independentes dos últimos oitenta dias
-concordaram, dez registros escritos por esta própria automação foram descartados da contagem, e
+decisão foi tomada porque nove de dez observações independentes dos últimos oitenta e um dias
+concordaram, nove registros escritos por esta própria automação foram descartados da contagem, e
 existe uma base curada em janeiro que discorda — a discordância está aberta e tem dono. Nenhuma
-parte dessa frase depende da memória de quem operou o sistema.
+parte dessa frase depende da memória de quem operou o sistema. Os números dela não são
+ilustrativos: oitenta e um é a idade exata da observação mais antiga contra a data de referência
+do exemplo, e nove é a contagem de descartes medida na execução, não um arredondamento
+conveniente.
 
 As três decisões que sustentam o resultado merecem ser repetidas no fechamento, porque são elas
 que um leitor levará para outro contexto. A primeira é que **procedência é campo obrigatório da

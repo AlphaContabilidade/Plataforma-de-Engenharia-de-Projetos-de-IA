@@ -3,15 +3,15 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 13-Testes
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
 # Testes
 
-O componente tem **quarenta e sete funções de teste** distribuídas em três arquivos — quinze
+O componente tem **cinquenta funções de teste** distribuídas em três arquivos — dezoito
 para o armazém, treze para a guarda e dezenove para a precedência. Nenhuma é parametrizada, de
-modo que quarenta e sete é ao mesmo tempo a contagem de funções e a contagem de casos que
+modo que cinquenta é ao mesmo tempo a contagem de funções e a contagem de casos que
 `python -m pytest exemplos/12-memory -q` imprime. A distinção importa porque contagem de funções
 e contagem de casos divergem sempre que há parametrização, e citar uma como se fosse a outra faz
 quem roda o comando duvidar do resto da seção.
@@ -25,9 +25,17 @@ desligar.
 
 | Arquivo de teste | Alvo | Casos que só existem por causa de um risco concreto |
 |---|---|---|
-| `tests/test_memoria_observada.py` | Identidade da chave, ordem de registro, contagem e dominância | Chave em branco levanta na construção e na consulta; borda é normalizada nos dois lados; a dominância é crua e inclui o eco; empate é determinístico e vale exatamente meio |
+| `tests/test_memoria_observada.py` | Identidade da chave, branco na decisão, ordem de registro, contagem e dominância | Chave em branco levanta na construção e na consulta; decisão em branco levanta `DecisaoInvalida`, que não é `ChaveInvalida`; borda é normalizada nos dois campos; a dominância é crua e inclui o eco; empate é determinístico e vale exatamente meio |
 | `tests/test_contaminacao.py` | Descarte do eco e relatório de contradição | Eco não silencia contradição; base congelada sozinha não contradiz nada; uma observação isolada já contradiz; duas bases discordantes geram duas contradições |
 | `tests/test_precedencia.py` | Janela, limiar, empate, precedência e forma do veredicto | Sete de dez decide no limite inclusivo; seis de dez não decide; observação indecisa não cai para a base congelada; contradição rebaixa até a decisão humana; janela maior muda o veredicto |
+
+Três dos dezoito casos do armazém entraram na incorporação da auditoria, e o motivo de estarem
+aqui é o mesmo que justifica os outros: cada um fecha um caminho pelo qual um valor sem sentido
+chegaria a um veredicto. `test_decisao_em_branco_levanta_decisao_invalida` cobre a string vazia,
+o espaço e a tabulação; `test_decisao_em_branco_nao_e_chave_invalida` fixa que as duas exceções
+são irmãs distintas, para que um `except` de chamador não trate um defeito como o outro; e
+`test_decisao_e_normalizada_na_borda` fixa que `"alfa"` e `" alfa "` contam como a mesma decisão,
+porque contá-las separado partiria a dominância em duas metades sem que nada aparecesse errado.
 
 ## Os quatro testes que carregam o volume
 

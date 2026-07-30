@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 05-Diagramas
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -28,7 +28,9 @@ stateDiagram-v2
     expirada --> [*]
 ```
 
-São quatro estados e cinco transições. Duas propriedades merecem ser lidas com atenção. A
+São quatro estados e sete setas, e vale declarar o critério de contagem em vez de deixar o
+leitor conferir: uma seta de entrada, **quatro** transições entre estados nomeados e duas de
+término. Duas propriedades merecem ser lidas com atenção. A
 primeira é que `descartada_por_contaminacao` é **terminal**: nenhuma seta sai dele para
 `evidencia_valida`, e não existe parâmetro que a crie. Essa ausência é a regra R1 de
 [`07-Regras.md`](07-Regras.md) desenhada como forma, e não como verificação — um limiar
@@ -111,9 +113,18 @@ erDiagram
     }
 ```
 
-O modelo mostra que a chave agrupa uma ou mais entradas, mas zero ou uma contradição e zero
-ou um veredicto — porque contradição e veredicto são **derivados**, calculados na consulta,
-e não guardados. Vale registrar com honestidade o que a caixa `ORIGEM` faz: os dois
+O modelo mostra que a chave agrupa uma ou mais entradas, mas **zero ou mais contradições** e
+zero ou um veredicto — porque contradição e veredicto são **derivados**, calculados na
+consulta, e não guardados. A cardinalidade das duas relações derivadas é diferente de
+propósito, e a diferença está no código: `resolver` devolve um `Veredicto` por chamada, logo
+zero ou um, enquanto `contradicoes` emite uma `Contradicao` **por entrada `BASE_CONGELADA`
+que discorde** da dominante observada. Duas bases congeladas discordantes na mesma chave
+produzem duas contradições, e isso está fixado em
+`test_duas_bases_congeladas_discordantes_geram_duas_contradicoes`. É por isso que o diagrama
+declara `CHAVE ||--o{ CONTRADICAO` e não `||--o|`: agregar as duas numa só exigiria escolher
+qual base reportar, que é escolher lado em silêncio — a regra R3 de
+[`07-Regras.md`](07-Regras.md) violada pelo modelo de dados. Vale registrar com honestidade o
+que a caixa `ORIGEM` faz: os dois
 atributos abaixo do nome não são campos do enumerado no código. Eles são os dois fatos que
 governam cada origem e que vivem em outros lugares — `conta_como_evidencia` é a guarda em
 `filtrar_contaminacao`, e `posicao_na_precedencia` é o índice na tupla `PRECEDENCIA`. Estão

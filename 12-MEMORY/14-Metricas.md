@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 14-Metricas
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -41,10 +41,12 @@ não constante.
 ## Fração de eco: o número que diz se a memória está medindo a si mesma
 
 Esta é a métrica que o defeito de produção pede. No passo 2 do exemplo executável, a fração de
-eco é de dez em vinte entradas, ou zero vírgula cinco, e a dominância crua já havia invertido: o
-lado escrito pelo agente liderava por onze contra nove, fração de zero vírgula cinquenta e
-cinco. Os dois números juntos descrevem o estado exato em que um sistema sem a guarda troca a
-decisão com base na própria escrita.
+eco é de nove em dezenove entradas, ou aproximadamente 0,474, e a dominância crua já havia
+invertido: o lado escrito pelo agente liderava por dez contra nove, fração 0,5263. Os dois
+números juntos descrevem o estado exato em que um sistema sem a guarda troca a decisão com base
+na própria escrita — e o par também mostra que a fração de eco **não** precisa passar de metade
+para o estrago acontecer, porque o que decide a inversão é a distribuição do eco entre as
+alternativas, e não o volume dele sobre o total.
 
 A leitura operacional é simples e tem um limite honesto. Fração de eco crescente em uma chave
 significa que o agente está agindo mais do que observando ali, e a partir de certo ponto a

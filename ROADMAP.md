@@ -1,11 +1,18 @@
 # ROADMAP
 
-**Atualizado em:** 2026-07-29
+**Atualizado em:** 2026-07-30
 
-Estado hoje: a máquina de produção está completa e testada, o contrato está em v1.0.0, e um
-volume-piloto padrão-ouro (`07-PROMPT-ENGINE`) atravessou a linha inteira. Os outros **41
-volumes** estão declarados no contrato e materializados como pasta com `_VOLUME.yml`, em
-`RASCUNHO`, sem seções escritas.
+Estado hoje: a máquina de produção está completa e testada, o contrato está em v1.0.0, e **dois
+volumes** atravessaram a linha inteira — `07-PROMPT-ENGINE`, o padrão-ouro, com auditoria 8,9, e
+`12-MEMORY`, com 8,7. Os outros **40 volumes** estão declarados no contrato e materializados
+como pasta com `_VOLUME.yml`, em `RASCUNHO`, sem seções escritas.
+
+A prioridade mudou em 2026-07-30, por decisão do autor: a plataforma serve para **construir
+software**, não para acumular prosa. O item de maior valor de um volume passou a ser o
+componente executável, e o texto é o manual dele. Em consequência, a ordem de produção deixa de
+seguir o índice e passa a seguir **onde existe código real para extrair e generalizar** — o
+`12-MEMORY` é o primeiro exemplo disso, e os candidatos seguintes são `11-KNOWLEDGE`,
+`31-TESTING` e `21-OBSERVABILITY`. Cobertura dos 42 não é meta.
 
 A ordem de produção não é a ordem numérica. Um volume só deve ser escrito depois dos volumes
 que ele declara em `depende_de`, porque `depende_de` significa pré-requisito de leitura — e
@@ -50,7 +57,7 @@ de prosa, ignorando código, justamente para não poder ser satisfeito colando a
 
 Quantidade de seções por tipo: `ENGINE`, `ARQUITETURA` e `GOVERNANCA` exigem as 18 da base;
 `PROCESSO` dispensa `08-Modelos` (17); `BIBLIOTECA` troca `04-Arquitetura` e `05-Diagramas`
-por `04-Catalogo` (17). Somados, os 41 pendentes representam 726 arquivos de seção.
+por `04-Catalogo` (17). Somados, os 40 pendentes representam 708 arquivos de seção.
 
 | Vol | Nome | Tipo | Seções | Observação |
 |---|---|---|---|---|
@@ -64,7 +71,6 @@ por `04-Catalogo` (17). Somados, os 41 pendentes representam 726 arquivos de se�
 | 09 | ORCHESTRATOR | ENGINE | 18 | fronteira com 10 precisa ser explícita |
 | 10 | WORKFLOW | ENGINE | 18 | fronteira com 09 precisa ser explícita |
 | 11 | KNOWLEDGE | ENGINE | 18 | a fonte do conhecimento; fronteira decidida contra 13, 14 e 15 |
-| 12 | MEMORY | ENGINE | 18 | |
 | 13 | RAG | ENGINE | 18 | o pipeline; depende de 11 e 14; fronteira decidida |
 | 14 | VECTOR | ENGINE | 18 | o índice; fronteira decidida contra 11, 13 e 15 |
 | 15 | CONTEXT | ENGINE | 18 | o orçamento da janela; vale sem RAG; fronteira decidida |
@@ -161,6 +167,34 @@ ATLAS, EVEREST, QUANTUM, IDEA+, PACE, BUILD, SMART-AI, ENTERPRISE-AI) vieram da 
 suficiente para escolher um critério — aqui não há o que decidir: qualquer escopo que eu
 atribuísse a esses nomes seria invenção, e inventar é a única coisa que esta plataforma proíbe
 sem exceção. Eles permanecem no backlog até que o autor defina escopo, entradas e saídas.
+
+## Dívida técnica registrada
+
+### Colisão do pacote `tests` entre diretórios de exemplo
+
+**Sintoma.** Dois ou mais `exemplos/<vol>/tests/` com `__init__.py` reivindicam o mesmo nome de
+pacote de topo, `tests`. Rodar a suíte de exemplos inteira — `python -m pytest exemplos -q` —
+quebra com `ModuleNotFoundError` no segundo diretório coletado: o primeiro ganha o nome e o
+segundo passa a procurar os seus módulos dentro dele. Rodar volume por volume
+(`python -m pytest exemplos/12-memory -q`) esconde o problema, e é assim que o gate 2 roda hoje,
+o que explica por que nada reprovou.
+
+**Solução usada no `12-memory`.** O diretório `exemplos/12-memory/tests/` **não** tem
+`__init__.py`, de modo que cada arquivo é importado pelo nome-base (`test_precedencia`), único no
+acervo. O preço é que a pasta do exemplo deixa de entrar no caminho de import automaticamente, e
+`exemplos/12-memory/conftest.py` paga esse preço em três linhas, inserindo o próprio diretório em
+`sys.path`. A escolha está documentada no docstring do `conftest.py`.
+
+**Estado do `07-prompt-engine`.** Continua na abordagem antiga. Não foi tocado de propósito: o
+volume está selado, e unificar convenção mexendo em volume selado troca uma dívida registrada por
+uma alteração não auditada.
+
+**O que falta.** Unificar a convenção nos dois volumes e escrevê-la em
+[00-INTRODUCAO/Convencoes.md](00-INTRODUCAO/Convencoes.md) **antes do próximo volume com
+exemplos** — a partir do terceiro, o custo de corrigir cresce e a chance de alguém copiar o padrão
+errado é alta. O gate estrutural não detecta a colisão hoje; se a convenção virar regra escrita,
+vale considerar uma verificação que reprove `__init__.py` dentro de `exemplos/*/tests/`, e vale
+considerar rodar o gate 2 uma vez sobre `exemplos` inteiro justamente para que a colisão apareça.
 
 ## Fora de escopo neste ciclo
 

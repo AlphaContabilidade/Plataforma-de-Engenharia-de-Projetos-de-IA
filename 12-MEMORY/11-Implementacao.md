@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 11-Implementacao
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -33,6 +33,13 @@ usa `object.__setattr__`, que é o caminho previsto para ajustar campo de datacl
 dentro do próprio construtor, e a mensagem de `ChaveInvalida` explica por que a chave importa
 em vez de apenas dizer que está inválida — o diagnóstico cabe na exceção.
 
+O campo `decisao` passa pela função irmã `_decisao_valida`, que compartilha com a da chave o
+mesmo núcleo de borda, `_sem_borda`, e levanta a própria exceção, `DecisaoInvalida`. Duas
+funções e duas exceções em vez de uma genérica com nome de campo: o `except` de quem chama
+consegue distinguir os dois defeitos sem inspecionar mensagem, e mensagem de erro não é
+interface. `evidencia` deliberadamente não recebe esse tratamento — ela não entra em contagem
+nenhuma, e evidência vazia é ausência de diagnóstico, não erro de programa.
+
 As duas funções puras, `contagem_de` e `dominancia_de`, existem para serem reusadas pelos
 outros dois módulos em vez de recontadas. `contagem_de` devolve um dicionário ordenado por
 contagem decrescente com desempate alfabético, e essa ordem é o que torna a dominante de um
@@ -50,8 +57,11 @@ em que a fila de pendências incomodasse.
 
 `contradicoes` agrupa por chave em um dicionário, e o recorte por origem acontece **antes** de
 calcular a dominante — só entradas `OBSERVADO` entram na contagem. Essa ordem é a diferença
-entre detectar e não detectar: no defeito real, dez escritas do próprio agente concordando com
-a base congelada apontariam a dominância para o lado da base, e a contradição desapareceria.
+entre detectar e não detectar: no defeito real, **cinco** escritas do próprio agente concordando
+com a base congelada apontariam a dominância para o lado da base, e a contradição desapareceria.
+Cinco é o número do cenário reproduzido em `test_eco_nao_silencia_a_contradicao` e citado em
+[`13-Testes.md`](13-Testes.md); não confundir com o exemplo sintético do passo 2 de
+[`12-Exemplos.md`](12-Exemplos.md), que usa nove escritas para inverter uma amostra maior.
 A saída é ordenada por chave, data de congelamento e decisão congelada, de modo que dois
 relatórios da mesma memória são idênticos byte a byte — relatório instável perde credibilidade
 antes de perder correção.
@@ -66,8 +76,9 @@ resolução já não usa.
 
 Duas funções internas concentram o que seria repetição. `descarte` monta o sufixo que informa
 o que ficou fora da deliberação, e ele é anexado a **toda** justificativa — inclusive às que
-decidem, porque um veredicto alto sobre dez observações das quais dez foram descartadas é uma
-informação que quem lê precisa ter. `veredicto` é o único ponto de construção do resultado, e
+decidem, porque um veredicto alto sobre dez observações vigentes ao lado de nove entradas
+descartadas por contaminação, que é exatamente o passo 2 de
+[`12-Exemplos.md`](12-Exemplos.md), é uma informação que quem lê precisa ter. `veredicto` é o único ponto de construção do resultado, e
 é ali que o rebaixamento por contradição acontece uma vez, para os três caminhos que decidem.
 Ter um construtor único é o que garante que nenhum retorno esqueça de anexar as contradições.
 

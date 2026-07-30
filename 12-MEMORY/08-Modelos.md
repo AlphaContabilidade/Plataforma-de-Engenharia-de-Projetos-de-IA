@@ -3,7 +3,7 @@ volume: "12"
 volume_nome: MEMORY
 tipo: ENGINE
 secao: 08-Modelos
-status: RASCUNHO
+status: PRONTO
 atualizado_em: 2026-07-30
 ---
 
@@ -18,6 +18,7 @@ liberdade de redação.
 
 ```python
 class ChaveInvalida(ValueError): ...
+class DecisaoInvalida(ValueError): ...
 
 class Origem(StrEnum):
     OBSERVADO = "OBSERVADO"
@@ -52,8 +53,14 @@ próprio agente. `chave` é normalizada na borda pelo construtor: espaço à esq
 direita é removido, e branco levanta `ChaveInvalida`. Normalizar nos dois lados — registro e
 consulta — é o que garante que gravar com espaço e consultar sem espaço alcancem o mesmo
 balde; sem isso existiriam dois baldes para a mesma identidade, cada um com metade das
-observações e nenhum com dominância. `evidencia` é texto livre, fica fora de qualquer
-contagem, e existe para o diagnóstico humano, que sem ele depende de reexecutar.
+observações e nenhum com dominância. `decisao` recebe o mesmo tratamento e tem a exceção
+irmã, `DecisaoInvalida`: branco não é alternativa, e uma decisão vazia somaria contagem,
+poderia empatar com uma decisão real e chegaria ao chamador dentro de um veredicto de
+confiança alta. As duas exceções são irmãs de `ValueError` e não subclasse uma da outra, para
+que quem trata um defeito não capture o outro por acidente. `evidencia` é texto livre, fica
+fora de qualquer contagem, e existe para o diagnóstico humano, que sem ele depende de
+reexecutar; ela não tem guarda de branco porque evidência ausente é falta de diagnóstico, e
+não erro de programa.
 
 `contagem_de` e `dominancia_de` são funções puras sobre qualquer iterável de entrada, e é
 por isso que os outros dois módulos as reusam em lugar de recontar. A ordem de saída de
@@ -138,6 +145,16 @@ acima dele, sem contradição aberta; `MEDIA` é o rebaixamento por contradiçã
 inclusive a decisão humana; `BAIXA` é a base congelada decidindo sozinha, sem confirmação
 observada. `Veredicto` com `decisao is None` é pendência humana, e nesse caso `confianca` é
 `None` também — não existe palpite rotulado como confiança baixa.
+
+Uma leitura precisa ficar explícita porque o código sozinho a deixa implícita: **`Confianca`
+qualifica o estado da evidência da chave, não a autoridade de quem decidiu.** Autoridade já é
+assunto de `PRECEDENCIA`, e lá a decisão humana vence qualquer dominância, inclusive contrária.
+É por isso que uma contradição aberta rebaixa para `MEDIA` mesmo quando quem decidiu foi uma
+pessoa: a chave continua conhecidamente inconsistente, a pessoa decidiu o veredicto e não
+consertou a fonte, e emitir `ALTA` sobre ela apagaria do painel de distribuição de confiança
+exatamente o sinal que mantém a contradição viva. Quem lê um veredicto isolado pode achar o
+rebaixamento injusto com o decisor; quem lê o agregado depende dele para não perder a chave de
+vista.
 
 Os parâmetros de `resolver` são todos por palavra-chave depois da chave. `hoje` é
 obrigatório, sem padrão, porque um padrão para a data de hoje faria a suíte depender do dia
