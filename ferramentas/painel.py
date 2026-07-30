@@ -390,7 +390,10 @@ def _rodar_pytest(raiz: Path, alvo: Path) -> tuple[bool, str]:
     """Roda pytest no alvo e devolve (passou, ultima linha util da saida)."""
     try:
         proc = subprocess.run(
-            [sys.executable, "-m", "pytest", str(alvo), "-q"],
+            # --color=no porque a saida e CAPTURADA, nao escrita num terminal:
+            # a interface web mostra essa string como texto e os codigos ANSI
+            # apareceriam literais na pagina.
+            [sys.executable, "-m", "pytest", str(alvo), "-q", "--color=no"],
             cwd=str(raiz),
             capture_output=True,
             text=True,

@@ -13,7 +13,7 @@ próprio `CLAUDE.md` na raiz, com regras de segurança próprias.
 Consequências operacionais, sem exceção:
 
 - **Nada fora de `AI-ENGINEERING-OS/` é criado, editado ou apagado** por trabalho desta
-  plataforma. A única exceção combinada são o spec e o plano em `docs/`.
+  plataforma. A única exceção combinada são o spec e o plano em `docs/superpowers/`.
 - **Não rode, não teste e não "conserte" nada da conciliação.** `scripts/`, `casos/`,
   `cloud_state/`, `tests/` da raiz e `omie_client.py` não são assunto daqui.
 - O `CLAUDE.md` da raiz tem precedência absoluta sobre este arquivo em qualquer questão

@@ -1,3 +1,11 @@
+# Metadados do volume 12. Lido por ferramentas/validar.py e ferramentas/status.py.
+# depende_de esta vazio de proposito, e a razao e diferente da de um volume sem
+# vizinhos: o 11-KNOWLEDGE E o vizinho natural (ele cura a base congelada que este
+# volume consome como origem), mas ainda nao tem secao escrita -- existe so como
+# pasta com _VOLUME.yml. Apontar depende_de para volume sem conteudo passaria em
+# `depende-de-inexistente` e produziria um pre-requisito de leitura que nao pode
+# ser lido. A relacao com 11, 13, 14, 15, 08 e 21 esta descrita em prosa em
+# 18-Referencias-Cruzadas.md, fora do grafo de pre-requisitos.
 volume: "12"
 nome: MEMORY
 tipo: ENGINE
