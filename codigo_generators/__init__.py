@@ -1,32 +1,37 @@
-"""Geradores de código (adaptadores opcionais).
-
-Camada de adaptadores que preenchem scaffold com código real usando LLMs.
+"""Geradores de código — tudo aqui, sem API externa.
 
 Módulos:
-  - llm_filler: Preenche scaffold vazio com código
-  - refinador_iterativo: Select & Edit para refinar código
-  - [futuro] local_generator: Preenche com modelos locais
-  - [futuro] templates_expander: Expande templates (pós-fase 4)
+  - scaffold_preencher: Gera React/Node.js funcionais (nativo)
+  - integrador: Cria scaffold + preenche tudo de uma vez
+  - [antigo] llm_filler, refinador_iterativo: Removidos (usavam API)
 """
 
-from codigo_generators.llm_filler import (
-    ArquivoPreenchido,
-    PreenchedorComLLM,
-    ScaffoldPreenchido,
-    preencher_com_claude,
+from codigo_generators.scaffold_preencher import (
+    gerar_app_jsx,
+    gerar_app_css,
+    gerar_index_js,
+    gerar_env_example,
+    gerar_package_json_frontend,
+    gerar_package_json_backend,
+    gerar_readme,
+    listar_arquivos_para_preencher,
 )
-from codigo_generators.refinador_iterativo import (
-    Refinacao,
-    RefinadorIterativo,
-    refinar_iterativo,
+from codigo_generators.integrador import (
+    ProjetoGerado,
+    gerar_projeto_completo,
+    exibir_resultado,
 )
 
 __all__ = [
-    "ArquivoPreenchido",
-    "PreenchedorComLLM",
-    "ScaffoldPreenchido",
-    "preencher_com_claude",
-    "Refinacao",
-    "RefinadorIterativo",
-    "refinar_iterativo",
+    "gerar_app_jsx",
+    "gerar_app_css",
+    "gerar_index_js",
+    "gerar_env_example",
+    "gerar_package_json_frontend",
+    "gerar_package_json_backend",
+    "gerar_readme",
+    "listar_arquivos_para_preencher",
+    "ProjetoGerado",
+    "gerar_projeto_completo",
+    "exibir_resultado",
 ]
