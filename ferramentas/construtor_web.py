@@ -16,6 +16,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from ferramentas.gerador_scaffold import gerar_scaffold
 from ferramentas.projetos import (
     ProjetoInvalido,
     gerar_blueprint,
@@ -112,6 +113,23 @@ class ConstrutorHandler(BaseHTTPRequestHandler):
                 self._json(
                     200,
                     {"modo": "blueprint", "blueprint": blueprint, "stateVersion": 1},
+                )
+                return
+            if caminho == "/api/gerar-codigo":
+                blueprint = entrada.get("blueprint", {})
+                destino = Path(entrada.get("destino", RAIZ / "saidas"))
+                scaffold = gerar_scaffold(blueprint, destino)
+                self._json(
+                    200,
+                    {
+                        "modo": "scaffold",
+                        "nome_projeto": scaffold.nome_projeto,
+                        "diretorio": str(scaffold.diretorio_raiz),
+                        "arquivos": [str(a) for a in scaffold.arquivos_criados],
+                        "status": scaffold.status,
+                        "package_json_frontend": scaffold.pacote_json_frontend,
+                        "package_json_backend": scaffold.pacote_json_backend,
+                    },
                 )
                 return
             self._json(404, {"modo": "erro", "erro": "rota não encontrada"})
