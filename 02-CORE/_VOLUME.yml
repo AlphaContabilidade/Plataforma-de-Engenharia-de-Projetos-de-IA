@@ -3,5 +3,9 @@ nome: CORE
 tipo: ARQUITETURA
 status: RASCUNHO
 perecivel: false
-depende_de: []
+# Aponta para o 01 porque este volume usa o vocabulario da fundacao
+# (procedencia, controle executavel, os anti-padroes de processo) em vez de
+# redefini-lo. O 01 tem as 18 secoes escritas, entao o pre-requisito de
+# leitura pode de fato ser lido.
+depende_de: ["01"]
 escopo:

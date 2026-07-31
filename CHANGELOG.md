@@ -6,6 +6,32 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-31
 
+### Volume `02-CORE` escrito — 18 seções, gates verdes, **ainda `RASCUNHO`**
+
+A anatomia mínima de um sistema de IA e a decisão de arquitetura que governa todas as outras: **onde
+fica a fronteira entre o determinístico e o probabilístico**. Seis partes, oito regras, sete
+anti-padrões. 5.301 palavras de prosa. Gate estrutural `exit 0`, cross-refs `exit 0`, incluindo os
+dois diagramas que o tipo `ARQUITETURA` exige — `C4Context` e `sequenceDiagram`.
+
+A regra que carrega o volume é a N2: nada além da fronteira de saída recebe texto livre do modelo.
+Barata de obedecer no começo, quase impossível de recuperar depois — cada chamador novo que decide
+sobre texto cru encarece a reversão.
+
+O volume separa **três** camadas de validação da resposta, com ações diferentes: forma (repetir
+adianta, uma vez), domínio (repetir é desperdício; a correção é no contexto) e **autorização** (não
+se corrige, se recusa). A terceira é a que quase nunca existe, e é a única que separa "o modelo
+errou" de "o modelo fez algo que não podia".
+
+Os exemplos são código deste repositório, não de terceiro: a função `responder()` que devolve tripla
+e não toca em socket; a rota que recusa campo faltando com a razão escrita em vez de assumir valor; e
+o motor do volume 03 como caso da regra N8 — quando existe alternativa determinística com qualidade
+suficiente, ela vence, porque falta de dado se corrige e variação de modelo só se administra.
+
+`depende_de` passou a apontar para `01`, com o comentário da razão no `_VOLUME.yml`. A prosa de
+`18-Referencias-Cruzadas` afirmava essa dependência enquanto o metadado dizia lista vazia; corrigir o
+metadado em vez da prosa foi a escolha certa, mas o desencontro só apareceu porque alguém foi
+conferir — não há gate que compare afirmação de prosa com campo de configuração.
+
 ### Volume `01-FUNDACAO` escrito — 18 seções, gates verdes, **ainda `RASCUNHO`**
 
 A constituição do acervo e a matriz de controles que a torna executável. 18 seções, 5.747 palavras de
