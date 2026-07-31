@@ -6,24 +6,28 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-31
 
-### Duas linhas de trabalho paralelas integradas num acervo só
+### Três linhas de trabalho paralelas integradas num acervo só
 
-Duas sessões trabalharam no mesmo repositório sem se ver, e as duas construíram, cada uma do seu
-jeito, a mesma ideia: conduzir alguém de uma frase até um software. Uma entregou o **construtor
-guiado** universal (`ferramentas/projetos.py`, `ferramentas/construtor_web.py`, `chatgpt_app/`,
-`iniciar.py`, protocolo comum em `AGENTS.md`); a outra entregou a **tela de descoberta** ligada ao
-motor do volume 03. Nada disso foi descartado — as duas famílias de rota convivem no mesmo servidor.
+Três frentes mexeram no mesmo repositório sem se ver, e as três atacavam a mesma ideia por caminhos
+diferentes: conduzir alguém de uma frase até um software. A primeira entregou o **construtor guiado**
+universal (`ferramentas/projetos.py`, `ferramentas/construtor_web.py`, `chatgpt_app/`, `iniciar.py`,
+protocolo comum em `AGENTS.md`). A segunda entregou a **tela de descoberta** ligada ao motor do volume
+03. A terceira entregou o **gerador de scaffold e o refinador iterativo** (`codigo_generators/`,
+`ferramentas/gerador_scaffold.py`, `gerar_projeto.py`), que pega o plano e produz código. Nada foi
+descartado: juntas elas fecham o caminho ideia → perguntas → plano → projeto gerado.
 
-A colisão real era em dois arquivos, `CHANGELOG.md` e `ferramentas/web.py`, com nove blocos de
-conflito. Oito eram aditivos e viraram união. **O único que exigiu decisão foi o teto de corpo de
-POST:** 64 KiB de um lado, 256 KiB do outro. Ficou o maior, e a razão está no código — a descoberta
-cabia folgada em 64 KiB, mas `/api/projeto/planejar` recebe ideia, respostas e anexos num JSON só, e
-apertar ali transformaria um projeto grande num `413` que ninguém entenderia. A checagem **antes de
-alocar** foi mantida, porque `Content-Length` é alegação do cliente.
+A colisão real estava só entre as duas primeiras, em `CHANGELOG.md` e `ferramentas/web.py`, com nove
+blocos de conflito. Oito eram aditivos e viraram união. **O único que exigiu decisão foi o teto de
+corpo de POST:** 64 KiB de um lado, 256 KiB do outro. Ficou o maior, e a razão está no código — a
+descoberta cabia folgada em 64 KiB, mas `/api/projeto/planejar` recebe ideia, respostas e anexos num
+JSON só, e apertar ali transformaria um projeto grande num `413` que ninguém entenderia. A checagem
+**antes de alocar** foi mantida, porque `Content-Length` é alegação do cliente. A terceira linha
+entrou sem conflito nenhum — dezoito arquivos novos, zero remoções.
 
-Verificado por execução, não por relato: **411 testes**, gate estrutural dos volumes 03, 07 e 12 com
+Verificado por execução, não por relato: **455 testes**, gate estrutural dos volumes 03, 07 e 12 com
 `exit 0`, gate de referências cruzadas com `exit 0`. E o servidor no ar em socket real — `GET /` e
-`GET /descoberta` em 200, as duas famílias de POST respondendo, plataforma inválida em 400.
+`GET /descoberta` em 200, as duas famílias de POST respondendo, plataforma inválida em 400 e ideia
+curta demais em 400 com a razão escrita.
 
 ### Um defeito achado rodando, que nenhum teste apontava
 
