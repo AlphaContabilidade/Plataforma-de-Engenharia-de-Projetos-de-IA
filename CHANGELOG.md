@@ -6,6 +6,29 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-31
 
+### Volume `01-FUNDACAO` escrito — 18 seções, gates verdes, **ainda `RASCUNHO`**
+
+A constituição do acervo e a matriz de controles que a torna executável. 18 seções, 5.747 palavras de
+prosa medidas por `palavras_de_prosa` (que ignora blocos de código, senão seção só de listagem passa
+o mínimo sem uma linha escrita). Gate estrutural `exit 0`, gate de referências cruzadas `exit 0`.
+
+**O status continua `RASCUNHO` de propósito, e isso não é trabalho pela metade — é o processo
+funcionando.** A Definição de PRONTO tem quatro critérios; dois estão cumpridos e verificados, o
+critério 3 exige auditoria por um modelo **diferente** do que escreveu, em sessão separada, e quem
+escreveu este volume não pode executá-lo sem violar a regra R5 que o próprio volume estabelece.
+Promover aqui seria o anti-padrão A1 cometido pela seção que define A1. Falta um comando: `/auditar 01`.
+
+O conteúdo é ancorado em quatro defeitos **reais** deste acervo, não em princípios genéricos: o
+marcador proibido que casava por substring dentro de "INDEPENDENTE" e reprovava o vocabulário da
+própria plataforma; a ordenação alfabética que faria uma reauditoria do mesmo dia reportar a nota
+antiga em silêncio; a contagem que virou falsa sem ninguém tocar no arquivo; e a suíte verde que não
+cobria o caso de comércio mais comum do país.
+
+A peça central é a **matriz de oito controles**, e a linha mais importante dela é a única não
+executável: nenhum gate lê número escrito por extenso em prosa. Ela está na tabela, marcada como não
+executável em negrito, porque omiti-la faria a matriz de sete linhas parecer completa — um instrumento
+de honestidade que esconde o próprio buraco mede a si mesmo, e mede bem.
+
 ### Três linhas de trabalho paralelas integradas num acervo só
 
 Três frentes mexeram no mesmo repositório sem se ver, e as três atacavam a mesma ideia por caminhos
