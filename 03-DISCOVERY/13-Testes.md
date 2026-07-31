@@ -4,15 +4,15 @@ volume_nome: DISCOVERY
 tipo: PROCESSO
 secao: 13-Testes
 status: PRONTO
-atualizado_em: 2026-07-30
+atualizado_em: 2026-07-31
 ---
 
 # Testes
 
-Sessenta e nove testes, distribuídos assim: dezenove em `test_catalogo.py`, dezesseis em
-`test_deteccao.py`, vinte e dois em `test_entrevista.py` e doze em `test_especificacao.py`. A
-distribuição não é acidental — o controle tem mais testes que os outros porque é onde vive a
-política, e política é o que muda por conveniência.
+Setenta e três testes, distribuídos assim: dezenove em `test_catalogo.py`, dezoito em
+`test_deteccao.py`, vinte e dois em `test_entrevista.py`, doze em `test_especificacao.py` e dois em
+`test_passo_a_passo.py`. A distribuição não é acidental — o controle tem mais testes que os outros
+porque é onde vive a política, e política é o que muda por conveniência.
 
 ```
 python -m pytest exemplos/03-discovery -q
@@ -20,7 +20,15 @@ python -m pytest exemplos/03-discovery -q
 
 Nenhum teste toca rede, disco ou relógio. A ausência de relógio é herdada do volume 12 pelo mesmo
 argumento: comportamento que depende do dia em que se roda não se reproduz. Aqui não há nem data — o
-motor não tem noção de tempo, e é por isso que a suíte roda em menos de dois décimos de segundo.
+motor não tem noção de tempo.
+
+Os corpos de teste somam **0,02 s**, medidos com `--durations=0 --durations-min=0`. O
+número que o terminal imprime no fim da linha é muito maior — na máquina onde isto foi escrito, cerca
+de dezessete segundos — e quase todo ele é partida do interpretador e coleta, não execução. A
+distinção está escrita aqui de propósito: uma versão anterior desta seção dizia que a suíte roda em
+menos de dois décimos de segundo, o que era **verdade sobre os corpos** e ainda assim lia como mentira
+para quem rodava o comando e via dezessete segundos na tela. Afirmação verdadeira que o leitor não
+consegue confirmar tem o mesmo efeito de uma falsa.
 
 ## Não existe `__init__.py` em `tests/`
 
@@ -62,6 +70,16 @@ mais fácil de errar: decisão aberta de peso baixo **não** impede a completude
 é verificado nas duas seções críticas e num detalhe que parece cosmético e não é: no caso vazio ele
 escreve `Nenhuma` em vez de omitir a seção, porque seção ausente é lida como "não havia nada disso".
 
+`test_passo_a_passo.py` cobre a **prosa**, e é o mais incomum dos cinco. Ele extrai os blocos de
+código de [`12-Exemplos.md`](12-Exemplos.md) e os executa em sequência, no mesmo escopo, como quem lê
+de cima para baixo. Aqueles blocos sempre foram cheios de `assert`, e até esta versão **nada os
+rodava** — eram prosa com aparência de verificação, e envelheciam como qualquer número escrito à mão.
+
+A prova de que ele não é decoração foi feita por mutação: trocar `assert len(CATALOGO) == 37` por
+`== 99` no Markdown deixa a suíte vermelha. O segundo teste do arquivo existe para um modo de falha
+mais discreto — seção renomeada, zero blocos encontrados, laço que não itera e tudo verde —, e por
+isso ele exige que os blocos existam antes de qualquer coisa.
+
 ## O que os testes não cobrem, e por quê
 
 Não há teste de qualidade do texto das perguntas. Perguntar se `problema` está bem redigida é
@@ -69,3 +87,9 @@ julgamento, e julgamento é assunto da auditoria — o gate executável reprova 
 pergunta ruim. Também não há teste de cobertura da tabela de termos contra um corpo de frases reais:
 isso exigiria um conjunto de frases anotadas que não existe, e inventá-lo produziria uma métrica que
 mede a própria escrita. A consequência prática está registrada em [`16-Roadmap.md`](16-Roadmap.md).
+
+E há uma fronteira fina que vale nomear, porque `test_passo_a_passo.py` a torna fácil de confundir:
+ele cobre o **código** de `12-Exemplos.md`, não a **prosa em volta dele**. Se um bloco mudar de
+resultado, a suíte fica vermelha; se a frase ao lado escrever "trinta e sete lacunas" quando já são
+trinta e oito, continua verde. Por isso o item correspondente em
+[`15-Checklist.md`](15-Checklist.md) não foi apagado, apenas encolhido para o que sobrou.

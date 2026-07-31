@@ -4,7 +4,7 @@ volume_nome: DISCOVERY
 tipo: PROCESSO
 secao: 17-Conclusao
 status: PRONTO
-atualizado_em: 2026-07-30
+atualizado_em: 2026-07-31
 ---
 
 # Conclusão
@@ -36,7 +36,7 @@ número um da plataforma, e a ausência de parâmetro para relaxá-la é o desen
 limiar afrouxável é limiar que será afrouxado no dia do prazo.
 
 O que ficou provado por execução, e não por argumento, é que os cinco princípios cabem em quatro
-arquivos de biblioteca padrão com sessenta e nove testes. E o que ficou provado sobre o próprio método
+arquivos de biblioteca padrão com setenta e três testes. E o que ficou provado sobre o próprio método
 de escrever este volume é menor e mais desconfortável: a primeira versão da evidência devolvia a frase
 inteira, os três palpites saíam idênticos, o código rodava, os testes passavam, e a prosa estava
 plausível. Só a execução do passo a passo pegou. Nenhum gate pegaria — gate confere que o código roda,

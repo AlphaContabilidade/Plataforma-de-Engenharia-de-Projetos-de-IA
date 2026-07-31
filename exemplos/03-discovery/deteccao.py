@@ -121,6 +121,17 @@ _TERMOS_CONTEXTO: tuple[tuple[str, Contexto, str], ...] = (
     ("carrinho", Contexto.LOJA_PAGAMENTOS, CONFIANCA_MEDIA),
     ("cobrar", Contexto.LOJA_PAGAMENTOS, CONFIANCA_MEDIA),
     ("vender online", Contexto.LOJA_PAGAMENTOS, CONFIANCA_MEDIA),
+    # Termos brasileiros. Ficaram de fora na primeira escrita e o vazio so
+    # apareceu rodando: "loja online que vende tenis e aceita pix" nao produzia
+    # palpite nenhum, que e o caso mais obvio de comercio que existe por aqui.
+    # `pix` e `boleto` sao meio de pagamento e valem ALTA; `loja` e `ecommerce`
+    # nomeiam o negocio e nao o pagamento, entao valem MEDIA - uma "loja de
+    # ferramentas" pode nunca cobrar nada dentro do software.
+    ("pix", Contexto.LOJA_PAGAMENTOS, CONFIANCA_ALTA),
+    ("boleto", Contexto.LOJA_PAGAMENTOS, CONFIANCA_ALTA),
+    ("loja", Contexto.LOJA_PAGAMENTOS, CONFIANCA_MEDIA),
+    ("ecommerce", Contexto.LOJA_PAGAMENTOS, CONFIANCA_MEDIA),
+    ("e-commerce", Contexto.LOJA_PAGAMENTOS, CONFIANCA_MEDIA),
     ("paciente", Contexto.SAUDE, CONFIANCA_ALTA),
     ("prontuario", Contexto.SAUDE, CONFIANCA_ALTA),
     ("clinica", Contexto.SAUDE, CONFIANCA_MEDIA),

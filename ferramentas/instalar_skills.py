@@ -1,11 +1,11 @@
 """Instala as cinco skills `aieos-*` num diretorio que o harness descobre.
 
 Por que existe: as skills desta plataforma moram em
-`AI-ENGINEERING-OS/.claude/skills/`, e esse caminho **nao foi descoberto** pelo
-harness nesta sessao - os comandos `/aieos-*` nao aparecem na listagem. O
-diretorio comprovadamente descoberto e o `.claude/skills/` da raiz do
-repositorio, porque `varredura-seguranca` mora la e aparece. Este script copia os
-`SKILL.md` de um lugar para o outro, sem apagar nada de terceiro.
+`AI-ENGINEERING-OS/.claude/skills/`. Quando a plataforma esta aninhada em outro
+repositorio, o harness pode descobrir apenas o `.claude/skills/` da raiz externa;
+este script copia os `SKILL.md` para la, sem apagar nada de terceiro. Quando a
+plataforma e o proprio repositorio (como no clone independente), origem e destino
+sao iguais e a instalacao vira deliberadamente uma operacao idempotente.
 
 Tres garantias, e as tres tem motivo:
 
@@ -63,8 +63,9 @@ def raiz_da_plataforma() -> Path:
 def raiz_do_repo(inicio: Path | None = None) -> Path:
     """Sobe procurando `.git`; sem repo, devolve o pai da plataforma.
 
-    O alvo nao e "o diretorio acima" por coincidencia: e a raiz do repositorio,
-    que e onde vive o `.claude/skills/` que o harness comprovadamente le.
+    O alvo nao e "o diretorio acima" por coincidencia: e a raiz do repositorio.
+    Em distribuicoes aninhadas ela difere da plataforma; num clone independente,
+    ambas sao corretamente a mesma pasta.
     """
     atual = (inicio or raiz_da_plataforma()).resolve()
     for candidato in (atual, *atual.parents):
@@ -228,9 +229,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         destino.relative_to(raiz_da_plataforma())
     except ValueError:
-        # Nao e erro - o destino descoberto pelo harness fica fora da plataforma
-        # de proposito. Mas escrever fora desta pasta e decisao do humano, e ele
-        # precisa ver isso escrito antes de acontecer.
+        # Nao e erro: em instalacoes aninhadas o destino descoberto pelo harness
+        # fica fora da plataforma. Mas escrever fora desta pasta e decisao do
+        # humano, e ele precisa ver isso escrito antes de acontecer.
         print(
             "aviso: o destino esta FORA de AI-ENGINEERING-OS/. Confira o caminho "
             "antes de rodar sem --dry-run."

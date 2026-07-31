@@ -128,3 +128,28 @@ def test_palpite_e_congelado():
     palpite = Palpite(valor="WEB", origem=Origem.INFERIDO, evidencia="um site", confianca="MEDIA")
     with pytest.raises(Exception):
         palpite.valor = "MOBILE"  # type: ignore[misc]
+
+
+def test_termos_brasileiros_de_pagamento_sao_detectados():
+    """Regressao: a frase de comercio mais obvia do pais nao produzia palpite.
+
+    "loja online que vende tenis e aceita pix" saia com contexto nenhum, porque a
+    tabela conhecia "checkout" e "carrinho" mas nao conhecia `pix`, `boleto` nem
+    `loja`. O defeito nao aparecia em teste nenhum - apareceu rodando a interface.
+    """
+    for frase in (
+        "loja online que vende tenis e aceita pix",
+        "sistema de vendas com boleto registrado",
+        "quero montar um e-commerce de roupas",
+    ):
+        contextos = {p.valor for p in detectar_contextos(frase)}
+        assert Contexto.LOJA_PAGAMENTOS in contextos, frase
+
+
+def test_pix_nao_casa_dentro_de_pixel():
+    """`pix` e curto, e termo curto e onde o falso positivo por substring mora.
+
+    Um editor de imagem que fala em "pixel" nao e uma loja. A fronteira de palavra
+    e o que separa os dois, e sem este teste a protecao seria so intencao.
+    """
+    assert detectar_contextos("editor que ajusta cada pixel da imagem") == ()

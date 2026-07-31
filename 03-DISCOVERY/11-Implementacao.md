@@ -4,12 +4,12 @@ volume_nome: DISCOVERY
 tipo: PROCESSO
 secao: 11-Implementacao
 status: PRONTO
-atualizado_em: 2026-07-30
+atualizado_em: 2026-07-31
 ---
 
 # Implementação
 
-O motor são quatro arquivos de biblioteca padrão, sem dependência externa, com sessenta e nove
+O motor são quatro arquivos de biblioteca padrão, sem dependência externa, com setenta e três
 testes ao lado. A ordem de leitura é a ordem de dependência: catálogo, detecção, entrevista,
 especificação. Ler na ordem inversa funciona e custa mais, porque cada módulo é escrito assumindo
 que o anterior já é conhecido.

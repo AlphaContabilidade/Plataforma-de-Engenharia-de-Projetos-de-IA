@@ -4,7 +4,7 @@ volume_nome: DISCOVERY
 tipo: PROCESSO
 secao: 15-Checklist
 status: PRONTO
-atualizado_em: 2026-07-30
+atualizado_em: 2026-07-31
 ---
 
 # Checklist
@@ -26,12 +26,14 @@ entusiasmo, a segunda por prazo.
 - As opções, quando existem, oferecem caminho sem restringir a resposta livre?
 - A suíte continua verde depois de acrescentar? `validar_catalogo` reprova id duplicado e peso
   fora da faixa, então erro de forma cai no gate.
-- **As contagens escritas em `12-Exemplos.md` foram remedidas?** Aqui há uma lacuna real de
-  cobertura, e vale declará-la em vez de fingir que o gate cobre: nenhum teste da suíte confere
-  os números que a prosa daquela seção afirma — quantas lacunas o catálogo tem, quantas ficam
-  ativas em cada passo, quantas perguntas o caminho correto exige. Acrescentar uma lacuna ao
-  catálogo torna esses números falsos **sem que nada fique vermelho**. Enquanto essa verificação
-  não existir, remedir à mão é obrigação de quem mexe no catálogo, não zelo opcional.
+- **A prosa em volta dos blocos de `12-Exemplos.md` foi remedida?** Os *blocos de código* daquela
+  seção agora são executados por `test_passo_a_passo.py`: mexer no catálogo e quebrar um `assert`
+  deixa a suíte vermelha, e essa parte deixou de depender de disciplina. O que **continua
+  descoberto** é o texto ao redor — "trinta e sete lacunas", "catorze perguntas", "seis
+  universais". Nenhum teste lê número escrito por extenso. Acrescentar uma lacuna torna a frase
+  falsa **sem que nada fique vermelho**, e remedir à mão segue sendo obrigação de quem mexe, não
+  zelo opcional. Em relação à versão anterior deste item mudou o tamanho da obrigação, não a
+  existência dela.
 
 ## Antes de entregar uma especificação
 

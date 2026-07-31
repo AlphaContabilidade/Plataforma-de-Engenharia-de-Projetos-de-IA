@@ -4,7 +4,7 @@ volume_nome: DISCOVERY
 tipo: PROCESSO
 secao: 01-Introducao
 status: PRONTO
-atualizado_em: 2026-07-30
+atualizado_em: 2026-07-31
 ---
 
 # Introdução
@@ -51,6 +51,6 @@ aparelho de mão que não se aplicavam e deixado de fazer três de navegador: se
 perguntas erradas, sem que nada no processo apitasse.
 
 O que este volume entrega não é um roteiro de entrevista. É um motor executável em quatro
-módulos, com sessenta e nove testes, e a defesa de cinco princípios que o código obedece de
+módulos, com setenta e três testes, e a defesa de cinco princípios que o código obedece de
 forma verificável — porque princípio que o código não obedece é preferência declarada, e
 preferência declarada não sobrevive ao primeiro prazo apertado.

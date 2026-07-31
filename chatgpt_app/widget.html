@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-ENGINEERING-OS</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f8; --paper: #fff; --line: #d7dae4; --text: #171b2c;
+  --muted: #596078; --accent: #3545a8; --soft: #eceefe; --ok: #147563;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#11141c;--paper:#191d28;--line:#313747;--text:#f2f4fb;--muted:#a8afc3;--accent:#a7b1ff;--soft:#252b43;--ok:#6bd5bb; }
+}
+* { box-sizing: border-box; }
+body { margin:0; padding:14px; background:var(--bg); color:var(--text); font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:760px; margin:auto; background:var(--paper); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+header { padding:18px 20px 14px; border-bottom:1px solid var(--line); }
+.eyebrow { font:700 11px/1.2 ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+h1,h2,h3 { margin:0; line-height:1.2; }
+h1 { margin-top:6px; font-size:21px; }
+h2 { font-size:18px; }
+h3 { font-size:14px; }
+p { margin:6px 0 0; color:var(--muted); }
+#form-view,#result-view { padding:18px 20px 20px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.wide { grid-column:1/-1; }
+label { display:block; font-weight:650; margin-bottom:5px; }
+.field-kind { display:inline-block; margin-left:6px; border-radius:999px; padding:2px 6px; font:700 10px/1.2 ui-monospace,monospace; letter-spacing:.03em; vertical-align:1px; }
+.required { color:#fff; background:var(--accent); }
+.optional { color:var(--muted); border:1px solid var(--line); }
+.engine { margin-top:12px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--soft); color:var(--text); font-size:12px; }
+.engine strong { display:block; margin-bottom:2px; }
+input,textarea,select {
+  width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 11px;
+  background:var(--bg); color:var(--text); font:inherit;
+}
+textarea { min-height:82px; resize:vertical; }
+input:focus,textarea:focus,select:focus { outline:2px solid var(--accent); outline-offset:1px; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:15px; }
+button { border:1px solid var(--accent); border-radius:8px; padding:9px 14px; background:var(--accent); color:var(--paper); font:650 13px/1.2 inherit; cursor:pointer; }
+button.secondary { background:transparent; color:var(--accent); }
+button:disabled { opacity:.55; cursor:wait; }
+.status { color:var(--muted); font-size:12px; }
+.summary { margin-top:12px; padding:12px 14px; background:var(--soft); border-left:4px solid var(--accent); color:var(--text); }
+.cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.card { border:1px solid var(--line); border-radius:9px; padding:12px; }
+.card ul { margin:7px 0 0; padding-left:18px; }
+.card li { margin:0 0 5px; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.chip { border:1px solid var(--accent); color:var(--accent); border-radius:999px; padding:3px 8px; font:700 11px/1.2 ui-monospace,monospace; }
+.upload { border:1px dashed var(--accent); border-radius:10px; padding:13px; background:var(--soft); }
+.upload input { background:var(--paper); margin-top:7px; }
+.upload-note { font-size:12px; }
+.files { display:grid; gap:6px; margin-top:8px; }
+.file { display:flex; justify-content:space-between; gap:10px; align-items:center; padding:7px 9px; border:1px solid var(--line); border-radius:7px; background:var(--paper); }
+.file span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.file button { padding:5px 8px; background:transparent; color:var(--accent); }
+.intro { padding:18px 20px 20px; }
+.intro textarea { min-height:120px; }
+.platforms { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:8px; margin-top:12px; }
+.modes { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:0 0 15px; }
+.platform { background:transparent; color:var(--text); border-color:var(--line); text-align:left; padding:11px; }
+.platform.selected { border-color:var(--accent); background:var(--soft); color:var(--accent); }
+.guided { padding:18px 20px 20px; }
+.question-meta { display:flex; justify-content:space-between; gap:10px; color:var(--muted); font-size:12px; margin-bottom:10px; }
+.answer-options { display:grid; gap:8px; margin-top:14px; }
+.answer-option { background:transparent; color:var(--text); border-color:var(--line); text-align:left; }
+.answer-option.selected { border-color:var(--accent); background:var(--soft); color:var(--accent); }
+.review-title { margin-bottom:14px; }
+.workspace-tabs { display:flex; gap:6px; margin:14px 0 12px; padding:4px; border:1px solid var(--line); border-radius:9px; background:var(--bg); }
+.workspace-tab { flex:1; background:transparent; border-color:transparent; color:var(--muted); }
+.workspace-tab.active { background:var(--paper); border-color:var(--line); color:var(--accent); }
+.workspace-grid { display:grid; grid-template-columns:minmax(210px,.75fr) minmax(0,1.7fr); gap:10px; }
+.agent-console,.preview-shell,.manage-block { border:1px solid var(--line); border-radius:10px; background:var(--paper); overflow:hidden; }
+.panel-head { padding:10px 12px; border-bottom:1px solid var(--line); font-weight:750; }
+.agent-log { min-height:250px; max-height:390px; overflow:auto; padding:11px; background:var(--bg); }
+.agent-message { margin-bottom:8px; padding:8px 9px; border-radius:8px; background:var(--paper); border:1px solid var(--line); font-size:12px; }
+.agent-message.user { background:var(--soft); border-color:var(--accent); }
+.agent-compose { padding:10px; border-top:1px solid var(--line); }
+.agent-compose textarea { min-height:66px; }
+.prototype { --prototype-accent:#3545a8; min-height:390px; padding:22px; color:#172033; background:linear-gradient(145deg,#f6f8ff,#fff); }
+.prototype-nav { display:flex; justify-content:space-between; align-items:center; gap:12px; font-weight:800; }
+.prototype-badge { padding:4px 8px; border-radius:999px; color:var(--prototype-accent); background:#fff; border:1px solid currentColor; font-size:11px; }
+.prototype h2 { max-width:520px; margin-top:45px; font-size:32px; }
+.prototype p { max-width:590px; color:#566078; }
+.prototype-cta { display:inline-block; margin-top:16px; padding:9px 13px; border-radius:8px; color:#fff; background:var(--prototype-accent); font-weight:750; }
+.prototype-features { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:28px; }
+.prototype-feature { padding:11px; border:1px solid #dce1ee; border-radius:8px; background:#fff; font-size:12px; }
+.manage-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.manage-block { padding:13px; }
+.manage-block h3 { margin-bottom:7px; }
+.hidden { display:none!important; }
+.error { color:#b53d3d; margin-top:10px; }
+@media(max-width:600px){ .grid,.cards,.workspace-grid,.manage-grid{grid-template-columns:1fr}.platforms{grid-template-columns:1fr 1fr}.prototype-features{grid-template-columns:1fr}.wide{grid-column:auto} body{padding:0} main{border-radius:0;border-left:0;border-right:0} }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">AI-ENGINEERING-OS · compatível com qualquer IA</div>
+    <h1>Transforme uma ideia em projeto de software</h1>
+    <p>Consolide objetivos, referências e restrições em um Plano de Solução pronto para orientar a engenharia.</p>
+    <div class="engine">
+      <strong>Motor de elaboração: Planejador AI-ENGINEERING-OS v1</strong>
+      Geração local por regras verificáveis, sem modelo de IA no servidor. Na construção, você escolhe Claude, Codex, ChatGPT, Gemini ou outra IA.
+    </div>
+  </header>
+
+  <section id="intro-view" class="intro">
+    <label>O que você deseja fazer?</label>
+    <div class="modes" id="project-modes">
+      <button class="platform selected" type="button" data-mode="novo">Criar projeto novo</button>
+      <button class="platform" type="button" data-mode="existente">Analisar projeto existente</button>
+    </div>
+    <label for="initial-idea"><span id="idea-label">O que você quer criar?</span> <span class="field-kind required">Obrigatório</span></label>
+    <textarea id="initial-idea" minlength="20" required
+      placeholder="Ex.: Quero um aplicativo para técnicos registrarem visitas, fotos e assinaturas mesmo sem internet."></textarea>
+    <label style="margin-top:13px">Onde o produto será usado? <span class="field-kind optional">Podemos recomendar</span></label>
+    <div class="platforms" id="platforms">
+      <button class="platform selected" type="button" data-type="auto">Recomendar</button>
+      <button class="platform" type="button" data-type="mobile">Celular</button>
+      <button class="platform" type="button" data-type="desktop">Computador</button>
+      <button class="platform" type="button" data-type="web">Navegador</button>
+      <button class="platform" type="button" data-type="extensao">Suplemento</button>
+    </div>
+    <div class="actions">
+      <button id="start-guided" type="button">Começar diagnóstico</button>
+      <span class="status">As próximas perguntas serão escolhidas a partir da sua ideia.</span>
+    </div>
+    <p id="intro-error" class="error hidden" role="alert"></p>
+  </section>
+
+  <section id="guided-view" class="guided hidden">
+    <div class="question-meta">
+      <span id="question-progress">Pergunta 1</span>
+      <span id="question-kind">Obrigatória</span>
+    </div>
+    <h2 id="question-title"></h2>
+    <p id="question-help"></p>
+    <div id="answer-options" class="answer-options"></div>
+    <textarea id="answer-text" class="hidden" placeholder="Responda em linguagem simples."></textarea>
+    <div class="actions">
+      <button id="question-back" class="secondary" type="button">Voltar</button>
+      <button id="question-next" type="button">Continuar</button>
+    </div>
+    <p id="question-error" class="error hidden" role="alert"></p>
+  </section>
+
+  <section id="form-view" class="hidden">
+    <div class="review-title">
+      <h2>Revise o diagnóstico</h2>
+      <p>As respostas principais já foram preenchidas. Complete apenas o que fizer sentido.</p>
+    </div>
+    <form id="project-form">
+      <div class="grid">
+        <div>
+          <label for="name">Nome provisório <span class="field-kind optional">Opcional</span></label>
+          <input id="name" name="nome" placeholder="Ex.: Agenda Fácil">
+        </div>
+        <div>
+          <label for="type">Formato principal <span class="field-kind optional">Opcional</span></label>
+          <select id="type" name="tipo">
+            <option value="web">Sistema web</option>
+            <option value="mobile">Aplicativo móvel</option>
+            <option value="automacao">Automação</option>
+            <option value="api">API ou integração</option>
+            <option value="desktop">Programa desktop</option>
+            <option value="extensao">Suplemento ou extensão</option>
+          </select>
+        </div>
+        <div class="wide">
+          <label for="idea">O que o software deve fazer? <span class="field-kind required">Obrigatório</span></label>
+          <textarea id="idea" name="ideia" required minlength="20" placeholder="Explique como contaria a ideia para uma pessoa de confiança."></textarea>
+        </div>
+        <div>
+          <label for="audience">Quem vai usar? <span class="field-kind required">Obrigatório</span></label>
+          <textarea id="audience" name="publico" required placeholder="Ex.: recepcionistas de clínicas pequenas"></textarea>
+        </div>
+        <div>
+          <label for="problem">O que hoje é difícil ou arriscado? <span class="field-kind required">Obrigatório</span></label>
+          <textarea id="problem" name="problema" required placeholder="Ex.: horários em planilhas e confirmações manuais"></textarea>
+        </div>
+        <div>
+          <label for="priority">Maior prioridade agora <span class="field-kind optional">Opcional</span></label>
+          <select id="priority" name="prioridade">
+            <option value="qualidade">Qualidade e menos retrabalho</option>
+            <option value="velocidade">Primeira versão rapidamente</option>
+            <option value="custo">Custo baixo</option>
+            <option value="escala">Preparar grande crescimento</option>
+          </select>
+        </div>
+        <div>
+          <label for="users">Usuários esperados <span class="field-kind optional">Opcional</span></label>
+          <select id="users" name="usuarios">
+            <option value="">Ainda não sei</option>
+            <option value="ate 10 usuarios internos">Até 10, uso interno</option>
+            <option value="de 10 a 100 usuarios">De 10 a 100</option>
+            <option value="de 100 a 10 mil usuarios">De 100 a 10 mil</option>
+            <option value="mais de 10 mil usuarios">Mais de 10 mil</option>
+          </select>
+        </div>
+        <div>
+          <label for="integrations">Integrações <span class="field-kind optional">Opcional</span></label>
+          <input id="integrations" name="integracoes" placeholder="WhatsApp, Omie, Google Agenda">
+        </div>
+        <div>
+          <label for="deadline">Prazo importante <span class="field-kind optional">Opcional</span></label>
+          <input id="deadline" name="prazo" placeholder="Ex.: piloto em 60 dias">
+        </div>
+        <div>
+          <label for="sensitive">Há dados sensíveis? <span class="field-kind optional">Opcional</span></label>
+          <select id="sensitive" name="dados_sensiveis">
+            <option value="false">Não ou ainda não sei</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        <div>
+          <label for="constraints">Limites conhecidos <span class="field-kind optional">Opcional</span></label>
+          <input id="constraints" name="restricoes" placeholder="Equipe, orçamento, hospedagem...">
+        </div>
+        <div class="wide upload">
+          <label for="documents">Documentos de referência <span class="field-kind optional">Opcional</span></label>
+          <p class="upload-note">Anexe requisitos, propostas, planilhas e arquivos de código do projeto. Até 30 arquivos, com 5 MB cada.</p>
+          <input id="documents" type="file" multiple
+            accept=".txt,.md,.csv,.json,.yaml,.yml,.sql,.py,.js,.ts,.tsx,.jsx,.html,.css,.java,.cs,.php,.go,.rs,.xml,.env,.pdf,.doc,.docx,.xls,.xlsx,.pbix,.zip">
+          <div id="file-list" class="files" aria-live="polite"></div>
+          <p class="upload-note">Arquivos textuais e de código terão o conteúdo incorporado à análise. PDF, Word, Excel, PBIX e ZIP ficam registrados para aprofundamento.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="generate" type="submit">Elaborar Plano de Solução</button>
+        <span class="status" id="status">Seus dados são usados somente para elaborar este plano.</span>
+      </div>
+      <p id="error" class="error hidden" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="result-view" class="hidden">
+    <div class="actions" style="justify-content:space-between;margin-top:0">
+      <h2 id="result-name">Plano de Solução</h2>
+      <button id="edit" class="secondary" type="button">Editar respostas</button>
+    </div>
+    <nav class="workspace-tabs" aria-label="Áreas do projeto">
+      <button class="workspace-tab active" type="button" data-panel="plan-panel">Plano</button>
+      <button class="workspace-tab" type="button" data-panel="preview-panel">Prévia</button>
+      <button class="workspace-tab" type="button" data-panel="manage-panel">Gerenciar</button>
+    </nav>
+
+    <div id="plan-panel" class="workspace-panel">
+      <div class="summary" id="summary"></div>
+      <div class="cards">
+        <article class="card"><h3>MVP inicial</h3><ul id="mvp"></ul></article>
+        <article class="card"><h3>Direção de arquitetura</h3><ul id="architecture"></ul></article>
+        <article class="card"><h3>Riscos</h3><ul id="risks"></ul></article>
+        <article class="card"><h3>Perguntas abertas</h3><ul id="questions"></ul></article>
+      </div>
+      <article class="card" style="margin-top:10px">
+        <h3>Conhecimento recomendado</h3>
+        <div id="volumes" class="chips"></div>
+      </article>
+      <article id="documents-card" class="card hidden" style="margin-top:10px">
+        <h3>Documentos considerados</h3>
+        <ul id="result-documents"></ul>
+      </article>
+      <article id="evolution-card" class="card hidden" style="margin-top:10px">
+        <h3>Caminhos de evolução recomendados</h3>
+        <ul id="evolution-paths"></ul>
+      </article>
+      <div class="actions">
+        <button id="continue" type="button">Continuar a construção no chat</button>
+        <button id="copy" class="secondary" type="button">Copiar Plano de Solução</button>
+        <span class="status" id="continue-status">O ChatGPT receberá o plano e fará as próximas perguntas.</span>
+      </div>
+    </div>
+
+    <div id="preview-panel" class="workspace-panel hidden">
+      <div class="workspace-grid">
+        <section class="agent-console">
+          <div class="panel-head">Agente de produto</div>
+          <div id="agent-log" class="agent-log"></div>
+          <div class="agent-compose">
+            <label for="refinement">Peça um ajuste na prévia</label>
+            <textarea id="refinement" placeholder="Ex.: deixe mais corporativo, use azul e destaque os relatórios."></textarea>
+            <button id="apply-refinement" type="button" style="margin-top:7px">Aplicar ajuste</button>
+          </div>
+        </section>
+        <section class="preview-shell">
+          <div class="panel-head">Prévia navegável · rascunho</div>
+          <div id="prototype" class="prototype">
+            <div class="prototype-nav">
+              <span id="prototype-brand">Novo produto</span>
+              <span class="prototype-badge">Prévia local</span>
+            </div>
+            <h2 id="prototype-title">Uma solução desenhada para o seu fluxo principal.</h2>
+            <p id="prototype-summary"></p>
+            <span class="prototype-cta">Começar agora</span>
+            <div id="prototype-features" class="prototype-features"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="manage-panel" class="workspace-panel hidden">
+      <div class="manage-grid">
+        <article class="manage-block">
+          <h3>Status do projeto</h3>
+          <p><strong>Rascunho validado.</strong> Plano e prévia foram gerados localmente.</p>
+          <p>Publicação real exige geração de código, testes e ambiente de hospedagem.</p>
+        </article>
+        <article class="manage-block">
+          <h3>Artefatos preparados</h3>
+          <ul>
+            <li>Plano de Solução em Markdown</li>
+            <li>Decisões da descoberta</li>
+            <li>Prévia visual editável</li>
+            <li>Backlog inicial e riscos</li>
+          </ul>
+        </article>
+        <article class="manage-block">
+          <h3>Próximas ações</h3>
+          <button id="download-plan" type="button">Baixar plano (.md)</button>
+          <button id="copy-build-prompt" class="secondary" type="button">Copiar instruções de construção</button>
+        </article>
+        <article class="manage-block">
+          <h3>Publicação</h3>
+          <p>A publicação está bloqueada até existir uma versão executável aprovada pelos testes.</p>
+          <button type="button" disabled>Publicar versão</button>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+const $ = (selector) => document.querySelector(selector);
+let blueprint = null;
+let attachedFiles = [];
+let rpcId = 0;
+const pending = new Map();
+let selectedType = "auto";
+let projectMode = "novo";
+let guidedQuestions = [];
+let guidedIndex = 0;
+let guidedAnswers = {};
+
+const notify = (method, params) => {
+  window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*");
+};
+const request = (method, params) => new Promise((resolve, reject) => {
+  const id = ++rpcId;
+  pending.set(id, { resolve, reject });
+  window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+});
+
+function localDiscovery(idea, requestedType, mode = "novo") {
+  const normalized = idea.toLocaleLowerCase("pt-BR");
+  let type = requestedType;
+  if (type === "auto") {
+    if (/excel|office|suplemento|add-in|extensão|extensao/.test(normalized)) type = "extensao";
+    else if (/celular|android|iphone|mobile|aplicativo/.test(normalized)) type = "mobile";
+    else if (/windows|desktop|computador|\\bpc\\b|offline/.test(normalized)) type = "desktop";
+    else if (/automat|robô|robo|processo repetitivo/.test(normalized)) type = "automacao";
+    else type = "web";
+  }
+  if (mode === "existente") {
+    return {
+      tipo_inferido:type,
+      modo_projeto:mode,
+      perguntas:[
+        { id:"estado_atual", titulo:"O que já funciona no projeto atual?", ajuda:"Liste as partes usadas hoje, mesmo que sejam planilhas, páginas ou processos manuais.", tipo:"texto", obrigatoria:true },
+        { id:"publico", titulo:"Quem utiliza ou depende deste projeto?", ajuda:"Inclua usuários diretos e quem recebe relatórios ou resultados.", tipo:"texto", obrigatoria:true },
+        { id:"problema", titulo:"Qual é a principal limitação atual?", ajuda:"Ex.: retrabalho, dados divergentes, lentidão, aparência antiga ou falta de integração.", tipo:"texto", obrigatoria:true },
+        { id:"objetivo_transformacao", titulo:"Qual transformação você deseja primeiro?", ajuda:"A análise pode recomendar mais de um caminho, mas precisamos definir uma prioridade.", tipo:"opcao", obrigatoria:true, opcoes:["Melhorar o sistema atual","Transformar dados em BI ou dashboard","Criar páginas, portal ou área do cliente","Adicionar integrações e automações","Modernizar ou migrar a tecnologia","Auditar segurança, desempenho e qualidade"] },
+        { id:"tecnologia_atual", titulo:"Você sabe quais tecnologias são usadas hoje?", ajuda:"Informe linguagem, banco, planilhas, Power BI, ERP ou responda “não sei”.", tipo:"texto", obrigatoria:false },
+        { id:"fontes_dados", titulo:"Onde estão os dados importantes?", ajuda:"Ex.: Excel, banco SQL, ERP, API, arquivos locais ou terceiros.", tipo:"texto", obrigatoria:false },
+        { id:"prioridade", titulo:"O que mais importa nessa evolução?", ajuda:"A resposta orienta a ordem das recomendações.", tipo:"opcao", obrigatoria:true, opcoes:["Qualidade e menos retrabalho","Primeira versão rapidamente","Custo inicial baixo","Preparar grande crescimento"] },
+      ],
+    };
+  }
+  const questions = [
+    { id:"publico", titulo:"Quem usará este produto no dia a dia?", ajuda:"Descreva o perfil principal, não apenas “todos”.", tipo:"texto", obrigatoria:true },
+    { id:"problema", titulo:"Qual dificuldade deve desaparecer primeiro?", ajuda:"Conte como isso é resolvido hoje e onde ocorre perda de tempo, dinheiro ou qualidade.", tipo:"texto", obrigatoria:true },
+  ];
+  const platformQuestions = {
+    mobile: {
+      titulo:"Qual recurso do celular é mais importante?",
+      ajuda:"Isso muda permissões, testes e arquitetura do aplicativo.",
+      opcoes:["Câmera ou leitura de código","Localização e mapas","Notificações","Uso offline","Nenhum recurso especial"],
+    },
+    desktop: {
+      titulo:"Como o programa para PC deverá funcionar?",
+      ajuda:"Escolha o cenário mais próximo da operação real.",
+      opcoes:["Instalado e funcionando offline","Instalado, mas conectado à nuvem","Em rede dentro da empresa","Ainda não sei"],
+    },
+    automacao: {
+      titulo:"Quando a automação encontrar uma exceção, o que deve acontecer?",
+      ajuda:"Automação profissional precisa de um caminho de decisão humana.",
+      opcoes:["Pausar e pedir aprovação","Registrar e continuar os demais casos","Tentar novamente automaticamente","Ainda precisa ser definido"],
+    },
+    web: {
+      titulo:"Como as pessoas acessarão o sistema?",
+      ajuda:"Isso orienta autenticação, permissões e distribuição.",
+      opcoes:["Conta individual com login","Acesso interno da empresa","Acesso público sem login","Ainda não sei"],
+    },
+    extensao: {
+      titulo:"Em qual aplicativo a solução deverá funcionar?",
+      ajuda:"O aplicativo hospedeiro define manifesto, permissões e interface disponíveis.",
+      opcoes:["Microsoft Excel","Microsoft Word","Microsoft Outlook","Navegador como extensão","ERP ou sistema de terceiros"],
+    },
+  };
+  questions.push({ id:"recurso_plataforma", tipo:"opcao", obrigatoria:true, ...platformQuestions[type] });
+  if (type === "extensao") {
+    questions.push({
+      id:"decisao_especifica", titulo:"Que nível de acesso a extensão precisa?",
+      ajuda:"Solicite somente o necessário para reduzir risco e facilitar aprovação.",
+      tipo:"opcao", obrigatoria:true,
+      opcoes:["Somente ler contexto","Ler e inserir conteúdo","Alterar o documento completo","Executar ações após confirmação","Ainda precisa ser definido"],
+    });
+  }
+  if (/loja|venda|e-?commerce|pedido|checkout|marketplace|pagamento|finance|banco|fatura/.test(normalized)) {
+    questions.push({
+      id:"decisao_especifica", titulo:"Como pagamentos ou cobranças deverão funcionar?",
+      ajuda:"Escolha uma direção inicial; provedores podem ser definidos depois.", tipo:"opcao", obrigatoria:true,
+      opcoes:["Pix e cartão","Assinatura recorrente","Pagamento fora do sistema","Sem pagamento nesta primeira versão"],
+    });
+  } else if (/saúde|saude|clínica|clinica|paciente|médico|medico/.test(normalized)) {
+    questions.push({
+      id:"decisao_especifica", titulo:"Que tipo de informação de saúde será armazenada?",
+      ajuda:"Dados clínicos exigem controles diferentes de simples dados de contato.", tipo:"opcao", obrigatoria:true,
+      opcoes:["Prontuário ou informação clínica","Agenda e dados de contato","Somente indicadores sem identificação","Ainda precisa ser definido"],
+    });
+  }
+  questions.push(
+    { id:"estilo_visual", titulo:"Qual direção visual combina com o produto?", ajuda:"A escolha orienta o primeiro protótipo.", tipo:"opcao", obrigatoria:false, opcoes:["Profissional e discreta","Moderna e tecnológica","Simples e acolhedora","Visual forte e marcante","Prefiro receber uma recomendação"] },
+    { id:"prioridade", titulo:"O que é mais importante na primeira entrega?", ajuda:"Prazo, qualidade, custo e escala geram decisões diferentes.", tipo:"opcao", obrigatoria:true, opcoes:["Qualidade e menos retrabalho","Primeira versão rapidamente","Custo inicial baixo","Preparar grande crescimento"] }
+  );
+  return { tipo_inferido:type, perguntas:questions };
+}
+
+function renderGuidedQuestion() {
+  const question = guidedQuestions[guidedIndex];
+  $("#question-progress").textContent = "Pergunta " + (guidedIndex + 1) + " de " + guidedQuestions.length;
+  $("#question-kind").textContent = question.obrigatoria ? "Obrigatória" : "Opcional";
+  $("#question-title").textContent = question.titulo;
+  $("#question-help").textContent = question.ajuda;
+  $("#question-error").classList.add("hidden");
+  $("#question-back").disabled = guidedIndex === 0;
+  $("#question-next").textContent = guidedIndex === guidedQuestions.length - 1 ? "Revisar projeto" : "Continuar";
+  const options = $("#answer-options");
+  const text = $("#answer-text");
+  options.textContent = "";
+  options.classList.toggle("hidden", question.tipo !== "opcao");
+  text.classList.toggle("hidden", question.tipo !== "texto");
+  text.value = question.tipo === "texto" ? (guidedAnswers[question.id] || "") : "";
+  (question.opcoes || []).forEach((label) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "answer-option" + (guidedAnswers[question.id] === label ? " selected" : "");
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      guidedAnswers[question.id] = label;
+      renderGuidedQuestion();
+    });
+    options.appendChild(button);
+  });
+}
+
+function finishDiscovery() {
+  $("#idea").value = $("#initial-idea").value.trim();
+  $("#audience").value = guidedAnswers.publico || "";
+  $("#problem").value = guidedAnswers.problema || "";
+  $("#type").value = selectedType === "auto" ? (guidedAnswers.tipo_inferido || "web") : selectedType;
+  const priorities = {
+    "Qualidade e menos retrabalho":"qualidade",
+    "Primeira versão rapidamente":"velocidade",
+    "Custo inicial baixo":"custo",
+    "Preparar grande crescimento":"escala",
+  };
+  $("#priority").value = priorities[guidedAnswers.prioridade] || "qualidade";
+  $("#guided-view").classList.add("hidden");
+  $("#form-view").classList.remove("hidden");
+  $("#form-view").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+document.querySelectorAll("#platforms .platform").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedType = button.dataset.type;
+    document.querySelectorAll("#platforms .platform").forEach((item) =>
+      item.classList.toggle("selected", item === button)
+    );
+  });
+});
+
+document.querySelectorAll("#project-modes .platform").forEach((button) => {
+  button.addEventListener("click", () => {
+    projectMode = button.dataset.mode;
+    document.querySelectorAll("#project-modes .platform").forEach((item) =>
+      item.classList.toggle("selected", item === button)
+    );
+    const existing = projectMode === "existente";
+    $("#idea-label").textContent = existing
+      ? "Descreva o projeto que já existe"
+      : "O que você quer criar?";
+    $("#initial-idea").placeholder = existing
+      ? "Ex.: Temos planilhas e um sistema antigo de vendas; queremos analisar o que pode virar BI, portal e integrações."
+      : "Ex.: Quero um aplicativo para técnicos registrarem visitas, fotos e assinaturas mesmo sem internet.";
+    $("#start-guided").textContent = existing ? "Iniciar análise" : "Começar diagnóstico";
+  });
+});
+
+$("#start-guided").addEventListener("click", async () => {
+  const idea = $("#initial-idea").value.trim();
+  if (idea.length < 20) {
+    $("#intro-error").textContent = "Descreva a ideia com pelo menos 20 caracteres.";
+    $("#intro-error").classList.remove("hidden");
+    return;
+  }
+  $("#intro-error").classList.add("hidden");
+  let discovery = null;
+  if (window.parent !== window) {
+    try {
+      await bridgeReady;
+      const response = await request("tools/call", {
+        name:"personalizar_descoberta",
+        arguments:{ ideia:idea, tipo:selectedType, modo:projectMode },
+      });
+      discovery = response?.structuredContent;
+    } catch (_) { discovery = null; }
+  } else {
+    try {
+      const response = await fetch("/api/perguntas", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ ideia:idea, tipo:selectedType, modo:projectMode }),
+      });
+      discovery = await response.json();
+    } catch (_) { discovery = null; }
+  }
+  if (!discovery || discovery.modo === "erro") discovery = localDiscovery(idea, selectedType, projectMode);
+  guidedQuestions = discovery.perguntas;
+  guidedAnswers = { tipo_inferido:discovery.tipo_inferido };
+  guidedIndex = 0;
+  $("#intro-view").classList.add("hidden");
+  $("#guided-view").classList.remove("hidden");
+  renderGuidedQuestion();
+});
+
+$("#question-back").addEventListener("click", () => {
+  if (guidedIndex > 0) {
+    const current = guidedQuestions[guidedIndex];
+    if (current.tipo === "texto") guidedAnswers[current.id] = $("#answer-text").value.trim();
+    guidedIndex -= 1;
+    renderGuidedQuestion();
+  }
+});
+
+$("#question-next").addEventListener("click", () => {
+  const question = guidedQuestions[guidedIndex];
+  if (question.tipo === "texto") guidedAnswers[question.id] = $("#answer-text").value.trim();
+  if (question.obrigatoria && !guidedAnswers[question.id]) {
+    $("#question-error").textContent = "Esta resposta é necessária para personalizar o projeto.";
+    $("#question-error").classList.remove("hidden");
+    return;
+  }
+  if (guidedIndex < guidedQuestions.length - 1) {
+    guidedIndex += 1;
+    renderGuidedQuestion();
+  } else {
+    finishDiscovery();
+  }
+});
+
+function list(target, items) {
+  const node = $(target);
+  node.textContent = "";
+  (items || []).forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    node.appendChild(li);
+  });
+}
+
+function constructionPrompt() {
+  if (!blueprint) return "";
+  return "Vamos continuar a construção deste software. Use o Plano de Solução abaixo como contrato inicial, faça uma pergunta simples por vez e não escreva código antes de confirmar as perguntas abertas.\n\n" + blueprint.markdown;
+}
+
+function safeFileName(value) {
+  return String(value || "plano-de-solucao")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase() || "plano-de-solucao";
+}
+
+function addAgentMessage(text, role = "agent") {
+  const message = document.createElement("div");
+  message.className = "agent-message" + (role === "user" ? " user" : "");
+  message.textContent = text;
+  $("#agent-log").appendChild(message);
+  $("#agent-log").scrollTop = $("#agent-log").scrollHeight;
+}
+
+function initializeWorkspace() {
+  document.querySelectorAll(".workspace-tab").forEach((tab) => {
+    const active = tab.dataset.panel === "plan-panel";
+    tab.classList.toggle("active", active);
+    $("#" + tab.dataset.panel).classList.toggle("hidden", !active);
+  });
+
+  $("#prototype-brand").textContent = blueprint.nome;
+  $("#prototype-title").textContent = blueprint.modo_projeto === "existente"
+    ? "Uma evolução clara para o que sua operação já utiliza."
+    : "Uma solução desenhada para o seu fluxo principal.";
+  $("#prototype-summary").textContent = blueprint.resumo;
+  $("#prototype").style.setProperty("--prototype-accent", "#3545a8");
+  const features = $("#prototype-features");
+  features.textContent = "";
+  (blueprint.mvp || []).slice(0, 3).forEach((item) => {
+    const feature = document.createElement("div");
+    feature.className = "prototype-feature";
+    feature.textContent = item;
+    features.appendChild(feature);
+  });
+
+  $("#agent-log").textContent = "";
+  addAgentMessage("Analisei as respostas e montei esta primeira prévia. Você pode pedir ajustes de cor, tom ou título sem perder o Plano de Solução.");
+  addAgentMessage("Esta é uma prévia local para validar a direção do produto; ela ainda não representa o software final publicado.");
+  $("#refinement").value = "";
+}
+
+function render(data) {
+  if (!data || data.modo !== "blueprint" || !data.blueprint) return;
+  blueprint = data.blueprint;
+  $("#intro-view").classList.add("hidden");
+  $("#guided-view").classList.add("hidden");
+  $("#form-view").classList.add("hidden");
+  $("#result-view").classList.remove("hidden");
+  $("#result-name").textContent = "Plano de Solução — " + blueprint.nome;
+  $("#summary").textContent = blueprint.resumo;
+  list("#mvp", blueprint.mvp);
+  list("#architecture", blueprint.arquitetura);
+  list("#risks", blueprint.riscos);
+  list("#questions", blueprint.perguntas_pendentes);
+  const volumes = $("#volumes");
+  volumes.textContent = "";
+  (blueprint.volumes_recomendados || []).forEach((volume) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = volume.id + "-" + volume.nome;
+    chip.title = volume.motivo;
+    volumes.appendChild(chip);
+  });
+  const documents = blueprint.documentos_referencia || [];
+  $("#documents-card").classList.toggle("hidden", documents.length === 0);
+  list("#result-documents", documents.map((document) =>
+    document.nome + (document.conteudo_disponivel ? " · texto analisável" : " · referência registrada")
+  ));
+  const evolution = blueprint.caminhos_evolucao || [];
+  $("#evolution-card").classList.toggle("hidden", evolution.length === 0);
+  list("#evolution-paths", evolution);
+  initializeWorkspace();
+  window.openai?.setWidgetState?.({ blueprint, tela: "resultado" });
+}
+
+const TEXT_EXTENSIONS = new Set([
+  "txt","md","csv","json","yaml","yml","sql","py","js","ts","tsx","jsx",
+  "html","css","java","cs","php","go","rs","xml","env",
+]);
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function renderFiles() {
+  const target = $("#file-list");
+  target.textContent = "";
+  attachedFiles.forEach((file, index) => {
+    const row = document.createElement("div");
+    row.className = "file";
+    const name = document.createElement("span");
+    name.textContent = file.name + " · " + formatBytes(file.size);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "Remover";
+    remove.setAttribute("aria-label", "Remover " + file.name);
+    remove.addEventListener("click", () => {
+      attachedFiles.splice(index, 1);
+      renderFiles();
+    });
+    row.append(name, remove);
+    target.appendChild(row);
+  });
+}
+
+$("#documents").addEventListener("change", (event) => {
+  const incoming = Array.from(event.target.files || []);
+  const oversized = incoming.find((file) => file.size > 5 * 1024 * 1024);
+  if (oversized) {
+    $("#error").textContent = oversized.name + " excede o limite de 5 MB.";
+    $("#error").classList.remove("hidden");
+    event.target.value = "";
+    return;
+  }
+  attachedFiles = attachedFiles.concat(incoming).slice(0, 30);
+  event.target.value = "";
+  $("#error").classList.add("hidden");
+  renderFiles();
+});
+
+async function documentsPayload() {
+  return Promise.all(attachedFiles.map(async (file) => {
+    const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "";
+    const conteudo = TEXT_EXTENSIONS.has(extension)
+      ? (await file.text()).slice(0, 20000)
+      : "";
+    return { nome: file.name, tipo: file.type, tamanho: file.size, conteudo };
+  }));
+}
+
+window.addEventListener("message", (event) => {
+  if (event.source !== window.parent) return;
+  const message = event.data;
+  if (!message || message.jsonrpc !== "2.0") return;
+  if (typeof message.id === "number") {
+    const waiting = pending.get(message.id);
+    if (!waiting) return;
+    pending.delete(message.id);
+    message.error ? waiting.reject(message.error) : waiting.resolve(message.result);
+    return;
+  }
+  if (message.method === "ui/notifications/tool-result") {
+    render(message.params?.structuredContent);
+  }
+}, { passive: true });
+
+const bridgeReady = window.parent === window
+  ? Promise.resolve(null)
+  : request("ui/initialize", {
+      appInfo: { name: "ai-engineering-os-builder", version: "0.2.0" },
+      appCapabilities: {},
+      protocolVersion: "2026-01-26",
+    }).then(() => notify("ui/notifications/initialized", {})).catch(() => null);
+
+$("#project-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!event.currentTarget.reportValidity()) return;
+  const form = new FormData(event.currentTarget);
+  const payload = Object.fromEntries(form.entries());
+  delete payload.documentos;
+  payload.integracoes = String(payload.integracoes || "").split(",").map((x) => x.trim()).filter(Boolean);
+  payload.dados_sensiveis = payload.dados_sensiveis === "true";
+  payload.documentos = await documentsPayload();
+  payload.respostas_descoberta = guidedAnswers;
+  payload.modo_projeto = projectMode;
+  const button = $("#generate");
+  button.disabled = true;
+  button.textContent = "Organizando...";
+  $("#error").classList.add("hidden");
+  try {
+    if (window.parent === window) {
+      const response = await fetch("/api/planejar", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.erro || "Falha ao elaborar o plano.");
+      render(data);
+    } else {
+      await bridgeReady;
+      const response = await request("tools/call", { name: "planejar_software", arguments: payload });
+      render(response?.structuredContent);
+    }
+  } catch (error) {
+    $("#error").textContent = error?.message || "Não foi possível elaborar o Plano de Solução.";
+    $("#error").classList.remove("hidden");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Elaborar Plano de Solução";
+  }
+});
+
+$("#edit").addEventListener("click", () => {
+  $("#result-view").classList.add("hidden");
+  $("#form-view").classList.remove("hidden");
+});
+
+document.querySelectorAll(".workspace-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".workspace-tab").forEach((item) => {
+      const active = item === tab;
+      item.classList.toggle("active", active);
+      $("#" + item.dataset.panel).classList.toggle("hidden", !active);
+    });
+  });
+});
+
+$("#apply-refinement").addEventListener("click", () => {
+  const instruction = $("#refinement").value.trim();
+  if (!instruction) return;
+  addAgentMessage(instruction, "user");
+  const normalized = instruction.toLocaleLowerCase("pt-BR");
+  const colors = [
+    ["azul", "#1769e0"],
+    ["verde", "#07865c"],
+    ["roxo", "#7652c7"],
+    ["laranja", "#d76516"],
+    ["vermelho", "#c83e4d"],
+  ];
+  const selectedColor = colors.find(([name]) => normalized.includes(name));
+  if (selectedColor) $("#prototype").style.setProperty("--prototype-accent", selectedColor[1]);
+
+  const titleMatch = instruction.match(/t[íi]tulo\s*:\s*(.+)/i);
+  if (titleMatch) {
+    $("#prototype-title").textContent = titleMatch[1].trim();
+  } else if (normalized.includes("corporativ")) {
+    $("#prototype-title").textContent = "Controle, clareza e resultado para a sua operação.";
+  } else if (normalized.includes("modern") || normalized.includes("tecnológ")) {
+    $("#prototype-title").textContent = "Tecnologia simples para transformar o trabalho diário.";
+  } else if (normalized.includes("acolhedor") || normalized.includes("simples")) {
+    $("#prototype-title").textContent = "Tudo o que sua equipe precisa, sem complicação.";
+  }
+
+  const changes = [];
+  if (selectedColor) changes.push("cor " + selectedColor[0]);
+  if (titleMatch || /corporativ|modern|tecnológ|acolhedor|simples/.test(normalized)) changes.push("tom e título");
+  addAgentMessage(
+    changes.length
+      ? "Ajustei " + changes.join(" e ") + " nesta prévia. O Plano de Solução original continua preservado."
+      : "Registrei a solicitação. Para esta prévia, indique uma cor, peça um tom corporativo/moderno ou escreva “título: ...”."
+  );
+  $("#refinement").value = "";
+});
+
+$("#copy").addEventListener("click", async () => {
+  if (!blueprint) return;
+  try {
+    await navigator.clipboard.writeText(blueprint.markdown);
+    $("#copy").textContent = "Copiado";
+    setTimeout(() => { $("#copy").textContent = "Copiar Plano de Solução"; }, 1500);
+  } catch (_) {
+    $("#copy").textContent = "Selecione e copie no chat";
+  }
+});
+
+$("#continue").addEventListener("click", async () => {
+  if (!blueprint) return;
+  const prompt = constructionPrompt();
+  if (window.parent === window) {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      $("#continue").textContent = "Instruções copiadas";
+      $("#continue-status").textContent = "Cole as instruções em uma conversa com o Codex ou ChatGPT para continuar.";
+    } catch (_) {
+      $("#continue").textContent = "Use “Copiar Plano de Solução”";
+    }
+    return;
+  }
+  try {
+    await bridgeReady;
+    await request("ui/message", {
+      role: "user",
+      content: [{ type: "text", text: prompt }],
+    });
+  } catch (_) {
+    if (window.openai?.sendFollowUpMessage) {
+      await window.openai.sendFollowUpMessage({ prompt });
+    }
+  }
+});
+
+$("#download-plan").addEventListener("click", () => {
+  if (!blueprint) return;
+  const blob = new Blob([blueprint.markdown], { type:"text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = safeFileName(blueprint.nome) + "-plano-de-solucao.md";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+$("#copy-build-prompt").addEventListener("click", async () => {
+  if (!blueprint) return;
+  try {
+    await navigator.clipboard.writeText(constructionPrompt());
+    $("#copy-build-prompt").textContent = "Instruções copiadas";
+    setTimeout(() => { $("#copy-build-prompt").textContent = "Copiar instruções de construção"; }, 1500);
+  } catch (_) {
+    $("#copy-build-prompt").textContent = "Não foi possível copiar";
+  }
+});
+
+const initial = window.openai?.toolOutput;
+if (initial) render(initial);
+const saved = window.openai?.widgetState;
+if (saved?.blueprint) render({ modo: "blueprint", blueprint: saved.blueprint });
+</script>
+</body>
+</html>

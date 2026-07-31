@@ -84,8 +84,15 @@ def test_confirmar_mobile_destrava_lacunas_novas():
 def test_recusar_remove_da_pendencia_sem_aplicar_nada():
     e = Entrevista(IDEIA_MOBILE)
     palpite = next(p for p in e.palpites_pendentes() if p.valor == Plataforma.MOBILE)
+    restantes = tuple(p for p in e.palpites_pendentes() if p != palpite)
     e.recusar(palpite)
-    assert e.palpites_pendentes() == ()
+    # A assercao e sobre O palpite recusado, e nao sobre a lista ficar vazia: a
+    # frase fala de celular E de loja, entao ha mais de um palpite. A versao
+    # anterior exigia lista vazia e passava por acidente, porque a tabela de
+    # termos ainda nao conhecia "loja" - acrescentar o termo derrubou o teste
+    # sem que nada tivesse quebrado no comportamento que ele nomeia.
+    assert palpite not in e.palpites_pendentes()
+    assert e.palpites_pendentes() == restantes
     assert e.plataformas() == ()
     assert "mobile_offline" not in _ids(e.pendentes())
     assert e.respostas() == ()

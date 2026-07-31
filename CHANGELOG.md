@@ -4,6 +4,58 @@ Registro de estado do acervo. Toda mudança de status de volume passa por aqui c
 critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Datas em ISO
 `YYYY-MM-DD`, mais recente no topo.
 
+## 2026-07-31
+
+### Duas linhas de trabalho paralelas integradas num acervo só
+
+Duas sessões trabalharam no mesmo repositório sem se ver, e as duas construíram, cada uma do seu
+jeito, a mesma ideia: conduzir alguém de uma frase até um software. Uma entregou o **construtor
+guiado** universal (`ferramentas/projetos.py`, `ferramentas/construtor_web.py`, `chatgpt_app/`,
+`iniciar.py`, protocolo comum em `AGENTS.md`); a outra entregou a **tela de descoberta** ligada ao
+motor do volume 03. Nada disso foi descartado — as duas famílias de rota convivem no mesmo servidor.
+
+A colisão real era em dois arquivos, `CHANGELOG.md` e `ferramentas/web.py`, com nove blocos de
+conflito. Oito eram aditivos e viraram união. **O único que exigiu decisão foi o teto de corpo de
+POST:** 64 KiB de um lado, 256 KiB do outro. Ficou o maior, e a razão está no código — a descoberta
+cabia folgada em 64 KiB, mas `/api/projeto/planejar` recebe ideia, respostas e anexos num JSON só, e
+apertar ali transformaria um projeto grande num `413` que ninguém entenderia. A checagem **antes de
+alocar** foi mantida, porque `Content-Length` é alegação do cliente.
+
+Verificado por execução, não por relato: **411 testes**, gate estrutural dos volumes 03, 07 e 12 com
+`exit 0`, gate de referências cruzadas com `exit 0`. E o servidor no ar em socket real — `GET /` e
+`GET /descoberta` em 200, as duas famílias de POST respondendo, plataforma inválida em 400.
+
+### Um defeito achado rodando, que nenhum teste apontava
+
+A tabela de termos de `deteccao.py` não conhecia **`pix`**, **`boleto`**, **`loja`** nem
+**`e-commerce`**. "Loja online que vende tênis e aceita pix" — o caso de comércio mais comum do país
+— saía com contexto nenhum, e a suíte inteira continuava verde, porque nenhum teste usava uma frase
+brasileira de pagamento. Cinco termos acrescentados, com peso de confiança justificado: meio de
+pagamento vale ALTA, nome de negócio vale MÉDIA, porque uma "loja de ferramentas" pode nunca cobrar
+nada dentro do software.
+
+O termo novo derrubou um teste, e o teste estava certo em cair: ele exigia lista de palpites
+**vazia** depois de recusar um palpite, o que só passava porque a frase-fixture falava em "loja" e o
+motor ainda não sabia o que era loja. A asserção foi tornada precisa — sobre o palpite recusado, não
+sobre a lista — em vez de afrouxada. E `pix` ganhou teste próprio de fronteira de palavra, porque
+termo de três letras casa dentro de `pixel`.
+
+### A prosa do volume 03 passou a ser executada
+
+`exemplos/03-discovery/tests/test_passo_a_passo.py` extrai os blocos de código de
+[`03-DISCOVERY/12-Exemplos.md`](03-DISCOVERY/12-Exemplos.md) e os roda em sequência, no mesmo escopo.
+Aqueles blocos sempre foram cheios de `assert` e **nada os executava** — eram prosa com aparência de
+verificação. A lacuna estava declarada no próprio `15-Checklist.md`, e declarar não é cobrir.
+
+Que o teste não é decoração foi provado por mutação: trocar `assert len(CATALOGO) == 37` por `== 99`
+no Markdown deixa a suíte vermelha. O item do checklist não foi apagado, foi **encolhido** para o que
+sobrou descoberto — os números escritos por extenso na prosa em volta dos blocos, que nenhum teste lê.
+
+Volume 03 passou de 69 para **73 testes** (19+18+22+12+2), e as quatro seções que citavam a contagem
+antiga foram remedidas. `13-Testes.md` também deixou de afirmar que a suíte roda em menos de dois
+décimos de segundo: era verdade sobre os corpos de teste (0,02 s medidos), mas lia como mentira para
+quem rodava o comando e via dezessete segundos de partida do interpretador na tela.
+
 ## 2026-07-30
 
 ### Volume `03-DISCOVERY` auditado e promovido a `PRONTO`
@@ -68,6 +120,24 @@ aba adivinhar entrevista alheia. Teto de 32 sessões com descarte da mais antiga
 de ideia e de resposta; `lacuna_id` conferido contra o catálogo antes de qualquer uso; e a
 especificação em `GET .../especificacao/<sessao>` e não em query string, porque credencial em
 query termina em log, histórico e `Referer`.
+### Construtor universal e independente de fornecedor
+
+O construtor passou a funcionar imediatamente após o clone com Python 3.11+, sem chave de
+API e sem exigir ChatGPT, Claude, Codex ou outro modelo. `python iniciar.py verificar`
+audita o ambiente; `python iniciar.py interface` abre a mesma jornada guiada por um servidor
+local de biblioteca padrão.
+
+`AGENTS.md` e `PROTOCOLO-UNIVERSAL-DA-IA.md` definem o contrato comum para agentes.
+`CLAUDE.md`, `CODEX.md`, `GEMINI.md` e as instruções do GitHub Copilot encaminham ao mesmo
+protocolo, sem fixar versões de modelos. `GUIA-DE-USO.md` documenta download, instalação,
+anexos, descoberta, Plano de Solução, continuidade com qualquer IA, atualização e problemas
+comuns.
+
+A interface ganhou descoberta personalizada para projetos novos e existentes, anexos,
+suporte a sistemas, BI, páginas, integrações, automações e extensões, além da área de
+trabalho com Plano, Prévia e Gerenciar. Publicação continua bloqueada até existir uma versão
+executável aprovada por testes. Verificação: 214 testes da plataforma e 39 testes do
+exemplo do volume 07 aprovados; gate estrutural do volume 07 e referências cruzadas verdes.
 
 ### Volume `12-MEMORY` auditado e promovido a `PRONTO`
 
