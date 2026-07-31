@@ -3,5 +3,9 @@ nome: REQUIREMENTS
 tipo: PROCESSO
 status: RASCUNHO
 perecivel: false
-depende_de: []
+# Aponta para 01 (vocabulario de procedencia: as seis origens, a lacuna
+# preenchida em silencio) e para 03 (a entrada deste processo e literalmente
+# a saida daquele motor). Os dois tem as secoes escritas, entao o
+# pre-requisito de leitura pode de fato ser lido.
+depende_de: ["01", "03"]
 escopo:

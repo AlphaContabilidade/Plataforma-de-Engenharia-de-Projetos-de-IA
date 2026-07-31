@@ -6,6 +6,30 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-31
 
+### Volume `04-REQUIREMENTS` escrito — 17 seções, gates verdes, **ainda `RASCUNHO`**
+
+O sucessor direto do `03-DISCOVERY`: recebe a especificação e produz requisitos rastreáveis. 17
+seções e não 18 porque o tipo `PROCESSO` dispensa `08-Modelos` — ali o fluxo importa mais que o
+modelo de dados. 4.514 palavras. Gate estrutural `exit 0`, cross-refs `exit 0`.
+
+Tese: **um requisito é um enunciado que pode ser falso.** "Rápido", "intuitivo", "confiável" e
+"escalável" não são requisitos, porque não existe observação que os torne falsos — são desejos, e
+viram perigosos quando anotados numa lista chamada "requisitos", porque ninguém percebe a troca. O
+instrumento é o teste do contraexemplo: quem escreve descreve também o que veria se o requisito
+estivesse sendo descumprido; não conseguir descrever é a reprovação.
+
+A segunda regra é a que mais custa ignorar: **lacuna sem resposta vira pendência, nunca requisito com
+valor assumido.** A métrica correspondente tem leitura invertida — zero decisão aberta declarada, num
+projeto de tamanho real, é sinal de que alguém preencheu em silêncio, não de que alguém descobriu
+tudo.
+
+O volume também separa três coisas que costumam entrar na mesma lista e não deveriam: **restrição**
+(o projeto não escolhe), **decisão de projeto** (a equipe escolhe, mas não é combinado com o cliente)
+e **desejo declarado** (não converteu, fica registrado fora da contagem de escopo).
+
+`depende_de` aponta para `01` e `03`, os dois com seções escritas — pré-requisito de leitura que pode
+de fato ser lido.
+
 ### Volume `02-CORE` escrito — 18 seções, gates verdes, **ainda `RASCUNHO`**
 
 A anatomia mínima de um sistema de IA e a decisão de arquitetura que governa todas as outras: **onde
