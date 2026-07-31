@@ -16,11 +16,19 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from ferramentas.gerador_scaffold import gerar_scaffold
 from ferramentas.projetos import (
     ProjetoInvalido,
     gerar_blueprint,
     gerar_perguntas_personalizadas,
 )
+
+try:
+    from codigo_generators.llm_filler import preencher_com_claude
+    from codigo_generators.refinador_iterativo import refinar_iterativo
+except ImportError:
+    preencher_com_claude = None
+    refinar_iterativo = None
 
 
 HOST = "127.0.0.1"
@@ -113,6 +121,107 @@ class ConstrutorHandler(BaseHTTPRequestHandler):
                     200,
                     {"modo": "blueprint", "blueprint": blueprint, "stateVersion": 1},
                 )
+                return
+            if caminho == "/api/gerar-codigo":
+                blueprint = entrada.get("blueprint", {})
+                destino = Path(entrada.get("destino", RAIZ / "saidas"))
+                scaffold = gerar_scaffold(blueprint, destino)
+                self._json(
+                    200,
+                    {
+                        "modo": "scaffold",
+                        "nome_projeto": scaffold.nome_projeto,
+                        "diretorio": str(scaffold.diretorio_raiz),
+                        "arquivos": [str(a) for a in scaffold.arquivos_criados],
+                        "status": scaffold.status,
+                        "package_json_frontend": scaffold.pacote_json_frontend,
+                        "package_json_backend": scaffold.pacote_json_backend,
+                    },
+                )
+                return
+            if caminho == "/api/preencher-codigo":
+                if preencher_com_claude is None:
+                    self._json(
+                        400,
+                        {
+                            "modo": "erro",
+                            "erro": "LLM Filler não disponível. Instale: pip install anthropic",
+                        },
+                    )
+                    return
+
+                blueprint = entrada.get("blueprint", {})
+                diretorio_scaffold = Path(entrada.get("diretorio"))
+                api_key = entrada.get("api_key")
+
+                try:
+                    resultado = preencher_com_claude(
+                        diretorio_scaffold,
+                        blueprint,
+                        api_key=api_key,
+                    )
+
+                    self._json(
+                        200,
+                        {
+                            "modo": "codigo_preenchido",
+                            "diretorio": str(resultado.diretorio_raiz),
+                            "status": resultado.status,
+                            "resumo": resultado.resumo,
+                            "arquivos_preenchidos": len(
+                                resultado.arquivos_preenchidos
+                            ),
+                            "detalhes": [
+                                {
+                                    "caminho": str(a.caminho),
+                                    "status": a.status,
+                                    "tokens_input": a.tokens_input,
+                                    "tokens_output": a.tokens_output,
+                                    "erro": a.mensagem_erro,
+                                }
+                                for a in resultado.arquivos_preenchidos
+                            ],
+                        },
+                    )
+                except ValueError as e:
+                    self._json(400, {"modo": "erro", "erro": str(e)})
+                return
+            if caminho == "/api/refinar-codigo":
+                if refinar_iterativo is None:
+                    self._json(
+                        400,
+                        {
+                            "modo": "erro",
+                            "erro": "Refinador não disponível. Instale: pip install anthropic",
+                        },
+                    )
+                    return
+
+                caminho_arquivo = Path(entrada.get("arquivo"))
+                descricao_mudanca = entrada.get("descricao", "")
+                api_key = entrada.get("api_key")
+
+                try:
+                    resultado = refinar_iterativo(
+                        caminho_arquivo,
+                        descricao_mudanca,
+                        api_key=api_key,
+                    )
+
+                    self._json(
+                        200,
+                        {
+                            "modo": "codigo_refinado",
+                            "arquivo": str(resultado.caminho_arquivo),
+                            "status": resultado.status,
+                            "descricao": resultado.descricao_mudanca,
+                            "tokens_input": resultado.tokens_input,
+                            "tokens_output": resultado.tokens_output,
+                            "erro": resultado.mensagem_erro,
+                        },
+                    )
+                except (ValueError, FileNotFoundError) as e:
+                    self._json(400, {"modo": "erro", "erro": str(e)})
                 return
             self._json(404, {"modo": "erro", "erro": "rota não encontrada"})
         except (AttributeError, TypeError, ValueError, ProjetoInvalido) as erro:
