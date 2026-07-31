@@ -3,5 +3,8 @@ nome: TESTING
 tipo: PROCESSO
 status: RASCUNHO
 perecivel: false
-depende_de: []
+# Aponta para 01 (a regra T6 e a forma operacional da R2 da fundacao) e para
+# 04 (este volume ensina a escrever a verificacao que aquele exige como
+# rastro para frente). Os dois tem secoes escritas.
+depende_de: ["01", "04"]
 escopo:

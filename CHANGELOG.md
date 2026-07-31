@@ -6,6 +6,31 @@ critério 4 da Definição de PRONTO é exatamente a entrada neste arquivo. Data
 
 ## 2026-07-31
 
+### Volume `31-TESTING` escrito — 17 seções, gates verdes, **ainda `RASCUNHO`**
+
+Fecha o rastro para frente que o `04-REQUIREMENTS` exige: aquele volume manda existir verificação,
+este trata de como escrevê-la de modo que ela verifique alguma coisa. Gate estrutural `exit 0`,
+cross-refs `exit 0`.
+
+Tese: **um teste que nunca ficou vermelho é uma hipótese.** O instrumento é a mutação manual — quebrar
+de propósito o que o teste deveria pegar, conferir o vermelho, desfazer, conferir o verde. Menos de
+um minuto por teste crítico, sem ferramenta.
+
+Segunda tese, que contraria o instrumento em que mais se confia: **suíte verde não é cobertura.**
+Cobertura mede linhas alcançadas, e alcançar não é verificar. O uso legítimo dela é o inverso do
+usual — como detector de região não visitada, e não como meta.
+
+Os quatro exemplos são casos vividos neste acervo nas últimas horas, não ilustrações construídas: a
+mutação que provou o teste de prosa (`1 failed, 1 passed`, com o segundo teste sendo o guarda contra
+o modo de falha do próprio teste); a asserção de lista vazia que passava por acidente; os dezesseis
+testes verdes que não cobriam o dado; e a asserção negativa do `pixel`, que impede um termo de três
+letras de casar dentro de outra palavra.
+
+A distinção operacional que o volume defende com mais força: **precisar não é afrouxar.** Quando um
+teste cai porque o sistema cresceu, tornar a asserção precisa a faz sobreviver; afrouxá-la a
+transforma em mais um teste que aceita qualquer coisa, e ninguém nota a diferença no relatório verde
+da manhã seguinte.
+
 ### Volume `04-REQUIREMENTS` escrito — 17 seções, gates verdes, **ainda `RASCUNHO`**
 
 O sucessor direto do `03-DISCOVERY`: recebe a especificação e produz requisitos rastreáveis. 17
